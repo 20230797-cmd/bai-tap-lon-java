@@ -10,30 +10,20 @@ public class CoVanHocTap {
     public CoVanHocTap() {}
 
     public CoVanHocTap(String maCvht, String hoTen, String email, String soDienThoai, String khoa) {
-        this.maCvht = maCvht;
-        this.hoTen = hoTen;
-        this.email = email;
-        this.soDienThoai = soDienThoai;
-        this.khoa = khoa;
+        this.maCvht = maCvht; this.hoTen = hoTen; this.email = email;
+        this.soDienThoai = soDienThoai; this.khoa = khoa;
     }
 
-    public String getMaCvht() { return maCvht; }
-    public void setMaCvht(String maCvht) { this.maCvht = maCvht; }
+    public String getMaCvht()             { return maCvht; }
+    public void   setMaCvht(String s)     { this.maCvht = s; }
+    public String getHoTen()              { return hoTen; }
+    public void   setHoTen(String s)      { this.hoTen = s; }
+    public String getEmail()              { return email; }
+    public void   setEmail(String s)      { this.email = s; }
+    public String getSoDienThoai()        { return soDienThoai; }
+    public void   setSoDienThoai(String s){ this.soDienThoai = s; }
+    public String getKhoa()              { return khoa; }
+    public void   setKhoa(String s)       { this.khoa = s; }
 
-    public String getHoTen() { return hoTen; }
-    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getSoDienThoai() { return soDienThoai; }
-    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
-
-    public String getKhoa() { return khoa; }
-    public void setKhoa(String khoa) { this.khoa = khoa; }
-
-    @Override
-    public String toString() {
-        return hoTen + " (" + maCvht + ")";
-    }
+    @Override public String toString()    { return hoTen + " (" + maCvht + ")"; }
 }

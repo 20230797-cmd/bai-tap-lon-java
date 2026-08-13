@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: qlcvht_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: ql_canhbao_hocvu
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Tự động nạp file database.sql vào MySQL khi khởi tạo
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+
+volumes:
+  mysql_data:

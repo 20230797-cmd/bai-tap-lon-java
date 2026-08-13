@@ -6,38 +6,27 @@ public class LopHoc {
     private String khoa;
     private int khoaHoc;
     private String maCvht;
-    private String tenCvht; // Transient attribute for UI convenience
+    private String tenCvht;
 
     public LopHoc() {}
 
     public LopHoc(String maLop, String tenLop, String khoa, int khoaHoc, String maCvht) {
-        this.maLop = maLop;
-        this.tenLop = tenLop;
-        this.khoa = khoa;
-        this.khoaHoc = khoaHoc;
-        this.maCvht = maCvht;
+        this.maLop = maLop; this.tenLop = tenLop; this.khoa = khoa;
+        this.khoaHoc = khoaHoc; this.maCvht = maCvht;
     }
 
-    public String getMaLop() { return maLop; }
-    public void setMaLop(String maLop) { this.maLop = maLop; }
+    public String getMaLop()              { return maLop; }
+    public void   setMaLop(String s)      { this.maLop = s; }
+    public String getTenLop()             { return tenLop; }
+    public void   setTenLop(String s)     { this.tenLop = s; }
+    public String getKhoa()               { return khoa; }
+    public void   setKhoa(String s)       { this.khoa = s; }
+    public int    getKhoaHoc()            { return khoaHoc; }
+    public void   setKhoaHoc(int i)       { this.khoaHoc = i; }
+    public String getMaCvht()             { return maCvht; }
+    public void   setMaCvht(String s)     { this.maCvht = s; }
+    public String getTenCvht()            { return tenCvht; }
+    public void   setTenCvht(String s)    { this.tenCvht = s; }
 
-    public String getTenLop() { return tenLop; }
-    public void setTenLop(String tenLop) { this.tenLop = tenLop; }
-
-    public String getKhoa() { return khoa; }
-    public void setKhoa(String khoa) { this.khoa = khoa; }
-
-    public int getKhoaHoc() { return khoaHoc; }
-    public void setKhoaHoc(int khoaHoc) { this.khoaHoc = khoaHoc; }
-
-    public String getMaCvht() { return maCvht; }
-    public void setMaCvht(String maCvht) { this.maCvht = maCvht; }
-
-    public String getTenCvht() { return tenCvht; }
-    public void setTenCvht(String tenCvht) { this.tenCvht = tenCvht; }
-
-    @Override
-    public String toString() {
-        return tenLop;
-    }
+    @Override public String toString()    { return tenLop; }
 }

@@ -5,9 +5,11 @@ import com.qlcvht.model.CanhBaoHocVu;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.service.CanhBaoService;
 import com.qlcvht.util.ExcelExporter;
+import com.qlcvht.util.UITheme;
 import com.qlcvht.view.dialog.LapNhatKyDialog;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -26,117 +28,122 @@ public class QuanLyCanhBaoPanel extends JPanel {
     private JTextField txtSearch;
     private List<CanhBaoHocVu> currentList;
 
-    public QuanLyCanhBaoPanel(TaiKhoan currentUser) {
-        this.currentUser = currentUser;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private static final String[] COLUMNS = {"ID", "Ma Canh Bao", "Ma SV", "Ho va Ten", "Lop", "Hoc Ky", "Nam Hoc", "Muc Canh Bao", "GPA Xet", "Trang Thai Tu Van", "Ngay QD"};
 
-        initTopToolbar();
+    public QuanLyCanhBaoPanel(TaiKhoan user) {
+        this.currentUser = user;
+        setLayout(new BorderLayout(0, 10));
+        setBackground(UITheme.BG_MAIN);
+        setBorder(new EmptyBorder(12, 14, 12, 14));
+        initHeader();
+        initToolbar();
         initTable();
         loadData();
     }
 
-    private void initTopToolbar() {
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
+    private void initHeader() {
+        JPanel h = new JPanel(new BorderLayout());
+        h.setOpaque(false);
+        JLabel title = new JLabel("Quan ly Canh bao Hoc vu");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.TEXT_PRIMARY);
+        h.add(title, BorderLayout.WEST);
+        add(h, BorderLayout.NORTH);
+    }
 
-        // Nút Quét tự động (Tính năng chính)
-        JButton btnScan = new JButton("⚡ Quét tự động Cảnh báo");
-        btnScan.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnScan.setBackground(new Color(220, 53, 69)); // Đỏ nổi bật
-        btnScan.setForeground(Color.WHITE);
+    private void initToolbar() {
+        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
+        bar.setBackground(UITheme.BG_WHITE);
+        bar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER_LIGHT),
+            new EmptyBorder(6, 10, 6, 10)
+        ));
+
+        // Quet tu dong
+        JButton btnScan = createBtn("Quet tu dong Canh bao", UITheme.DANGER, Color.WHITE);
         btnScan.addActionListener(e -> onScanCanhBao());
-        toolbar.add(btnScan);
+        bar.add(btnScan);
 
-        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        // Lọc mức cảnh báo
-        toolbar.add(new JLabel("Mức cảnh báo:"));
-        cbFilterMuc = new JComboBox<>(new String[]{"--- Tất cả ---", "MUC_1", "MUC_2", "BUOC_THOI_HOC"});
+        bar.add(new JLabel("Muc:"));
+        cbFilterMuc = new JComboBox<>(new String[]{"--- Tat ca ---", "MUC_1", "MUC_2", "BUOC_THOI_HOC"});
         cbFilterMuc.addActionListener(e -> filterData());
-        toolbar.add(cbFilterMuc);
+        bar.add(cbFilterMuc);
 
-        // Lọc trạng thái tư vấn
-        toolbar.add(new JLabel("Tư vấn:"));
-        cbFilterTuVan = new JComboBox<>(new String[]{"--- Tất cả ---", "CHUA_TU_VAN", "DA_TU_VAN", "DANG_THEO_DOI"});
+        bar.add(new JLabel("Tu van:"));
+        cbFilterTuVan = new JComboBox<>(new String[]{"--- Tat ca ---", "CHUA_TU_VAN", "DA_TU_VAN", "DANG_THEO_DOI"});
         cbFilterTuVan.addActionListener(e -> filterData());
-        toolbar.add(cbFilterTuVan);
+        bar.add(cbFilterTuVan);
 
-        // Từ khóa
+        bar.add(new JLabel("Tim:"));
         txtSearch = new JTextField(12);
-        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        toolbar.add(txtSearch);
+        txtSearch.addActionListener(e -> filterData());
+        bar.add(txtSearch);
 
-        JButton btnSearch = new JButton("Tìm");
+        JButton btnSearch = createBtn("Tim", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
-        toolbar.add(btnSearch);
+        bar.add(btnSearch);
 
-        JButton btnLapNhatKy = new JButton("📝 Lập Nhật ký Tư vấn");
-        btnLapNhatKy.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnLapNhatKy.setBackground(new Color(24, 119, 242));
-        btnLapNhatKy.setForeground(Color.WHITE);
-        btnLapNhatKy.addActionListener(e -> onLapNhatKy());
-        toolbar.add(btnLapNhatKy);
+        JButton btnReset = createBtn("Lam moi", UITheme.BORDER_MEDIUM, UITheme.TEXT_PRIMARY);
+        btnReset.addActionListener(e -> { cbFilterMuc.setSelectedIndex(0); cbFilterTuVan.setSelectedIndex(0); txtSearch.setText(""); loadData(); });
+        bar.add(btnReset);
 
-        JButton btnExport = new JButton("📊 Xuất Excel");
+        bar.add(new JSeparator(SwingConstants.VERTICAL));
+
+        JButton btnNhatKy = createBtn("Lap Nhat ky Tu van", UITheme.INFO, Color.WHITE);
+        btnNhatKy.addActionListener(e -> onLapNhatKy());
+        bar.add(btnNhatKy);
+
+        JButton btnExport = createBtn("Xuat Excel", new Color(60, 140, 60), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableCanhBao, "Danh_Sach_Canh_Bao_Hoc_Vu"));
-        toolbar.add(btnExport);
+        bar.add(btnExport);
 
-        add(toolbar, BorderLayout.NORTH);
+        add(bar, BorderLayout.NORTH);
     }
 
     private void initTable() {
-        String[] columns = {"ID", "Mã Cảnh Báo", "Mã SV", "Họ và Tên", "Lớp", "Học Kỳ", "Năm Học", "Mức Cảnh Báo", "GPA Xét", "Trạng Thái Tư Vấn", "Ngày QĐ"};
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+        tableModel = new DefaultTableModel(COLUMNS, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-
         tableCanhBao = new JTable(tableModel);
-        tableCanhBao.setRowHeight(30);
-        tableCanhBao.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tableCanhBao.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tableCanhBao.getTableHeader().setBackground(new Color(235, 238, 245));
+        UITheme.styleTable(tableCanhBao);
+        tableCanhBao.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Format màu cho Mức Cảnh Báo
+        // Muc canh bao renderer (col 7)
         tableCanhBao.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (value != null) {
-                    String str = value.toString();
-                    if (str.contains("Mức 1")) {
-                        c.setForeground(new Color(230, 124, 11));
-                        setFont(getFont().deriveFont(Font.BOLD));
-                    } else if (str.contains("Mức 2")) {
-                        c.setForeground(new Color(217, 83, 79));
-                        setFont(getFont().deriveFont(Font.BOLD));
-                    } else if (str.contains("Buộc thôi học")) {
-                        c.setForeground(new Color(180, 0, 0));
-                        setFont(getFont().deriveFont(Font.BOLD));
-                    }
+            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
+                Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
+                if (v != null && !sel) {
+                    String s = v.toString();
+                    if (s.contains("Muc 1"))      { comp.setForeground(UITheme.WARNING);     setFont(getFont().deriveFont(Font.BOLD)); }
+                    else if (s.contains("Muc 2")) { comp.setForeground(UITheme.DANGER);      setFont(getFont().deriveFont(Font.BOLD)); }
+                    else if (s.contains("thoi"))  { comp.setForeground(UITheme.DANGER_DARK); setFont(getFont().deriveFont(Font.BOLD)); }
                 }
-                return c;
+                return comp;
             }
         });
 
-        // Format màu cho Trạng thái tư vấn
+        // Trang thai tu van renderer (col 9)
         tableCanhBao.getColumnModel().getColumn(9).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (value != null) {
-                    String str = value.toString();
-                    if ("Đã tư vấn".equals(str)) {
-                        c.setForeground(new Color(40, 167, 69));
-                    } else {
-                        c.setForeground(new Color(220, 53, 69));
-                    }
+            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
+                Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
+                if (v != null && !sel) {
+                    String s = v.toString();
+                    if (s.contains("Da tu van"))    comp.setForeground(UITheme.SUCCESS);
+                    else if (s.contains("theo doi")) comp.setForeground(UITheme.WARNING);
+                    else                             comp.setForeground(UITheme.DANGER);
                 }
-                return c;
+                return comp;
             }
         });
 
-        add(new JScrollPane(tableCanhBao), BorderLayout.CENTER);
+        int[] widths = {40, 130, 80, 150, 70, 70, 90, 130, 70, 120, 100};
+        for (int i = 0; i < widths.length; i++) tableCanhBao.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+
+        JScrollPane scroll = new JScrollPane(tableCanhBao);
+        scroll.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT));
+        add(scroll, BorderLayout.CENTER);
     }
 
     private void loadData() {
@@ -150,11 +157,9 @@ public class QuanLyCanhBaoPanel extends JPanel {
 
     private void filterData() {
         String muc = (String) cbFilterMuc.getSelectedItem();
-        if ("--- Tất cả ---".equals(muc)) muc = "ALL";
-
+        if ("--- Tat ca ---".equals(muc)) muc = "ALL";
         String tv = (String) cbFilterTuVan.getSelectedItem();
-        if ("--- Tất cả ---".equals(tv)) tv = "ALL";
-
+        if ("--- Tat ca ---".equals(tv)) tv = "ALL";
         String kw = txtSearch.getText().trim();
         currentList = canhBaoDAO.filterCanhBao(muc, tv, "ALL", kw);
         renderTable(currentList);
@@ -164,13 +169,8 @@ public class QuanLyCanhBaoPanel extends JPanel {
         tableModel.setRowCount(0);
         for (CanhBaoHocVu cb : list) {
             tableModel.addRow(new Object[]{
-                cb.getId(),
-                cb.getMaCanhBao(),
-                cb.getMaSv(),
-                cb.getHoTenSv(),
-                cb.getMaLop(),
-                "Học kỳ " + cb.getHocKy(),
-                cb.getNamHoc(),
+                cb.getId(), cb.getMaCanhBao(), cb.getMaSv(), cb.getHoTenSv(),
+                cb.getMaLop(), "HK " + cb.getHocKy(), cb.getNamHoc(),
                 cb.getMucCanhBaoHienThi(),
                 String.format("%.2f", cb.getGpaXetDuyet()),
                 cb.getTrangThaiTuVanHienThi(),
@@ -180,39 +180,43 @@ public class QuanLyCanhBaoPanel extends JPanel {
     }
 
     private void onScanCanhBao() {
-        int choice = JOptionPane.showConfirmDialog(
-            this,
-            "Bạn có muốn thực hiện quét tự động Cảnh báo Học vụ cho Học kỳ 2 Năm học 2023-2024 dựa trên dữ liệu GPA mới nhất không?",
-            "Xác nhận quét tự động",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
-        );
+        String namHoc = JOptionPane.showInputDialog(this, "Nhap nam hoc can quet (VD: 2023-2024):", "2023-2024");
+        if (namHoc == null || namHoc.trim().isEmpty()) return;
+        String hocKyStr = JOptionPane.showInputDialog(this, "Nhap hoc ky (1, 2 hoac 3):", "2");
+        if (hocKyStr == null) return;
+        int hocKy;
+        try { hocKy = Integer.parseInt(hocKyStr.trim()); }
+        catch (NumberFormatException e) { JOptionPane.showMessageDialog(this, "Hoc ky phai la so!", "Loi", JOptionPane.ERROR_MESSAGE); return; }
 
+        int choice = JOptionPane.showConfirmDialog(this,
+            "Quet tu dong Canh bao Hoc vu cho Hoc ky " + hocKy + " - " + namHoc + "?",
+            "Xac nhan quet", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
-            int countNew = canhBaoService.quetCanhBaoHocVu(2, "2023-2024");
-            JOptionPane.showMessageDialog(
-                this,
-                "Hoàn thành quét dữ liệu!\nPhát hiện và tự động tạo: " + countNew + " bản ghi cảnh báo mới.",
-                "Kết quả quét Cảnh báo",
-                JOptionPane.INFORMATION_MESSAGE
-            );
+            int count = canhBaoService.quetCanhBaoHocVu(hocKy, namHoc.trim());
+            JOptionPane.showMessageDialog(this,
+                "Hoan thanh quet!\nPhat hien va tao: " + count + " ban ghi canh bao moi.",
+                "Ket qua quet", JOptionPane.INFORMATION_MESSAGE);
             loadData();
         }
     }
 
     private void onLapNhatKy() {
-        int selectedRow = tableCanhBao.getSelectedRow();
-        if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 bản ghi cảnh báo học vụ để lập nhật ký tư vấn!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+        int row = tableCanhBao.getSelectedRow();
+        if (row < 0) { JOptionPane.showMessageDialog(this, "Vui long chon 1 ban ghi canh bao!", "Thong bao", JOptionPane.WARNING_MESSAGE); return; }
+        CanhBaoHocVu cb = currentList.get(row);
+        LapNhatKyDialog dlg = new LapNhatKyDialog((Frame) SwingUtilities.getWindowAncestor(this), cb, currentUser);
+        dlg.setVisible(true);
+        if (dlg.isSavedSuccess()) loadData();
+    }
 
-        CanhBaoHocVu selectedCB = currentList.get(selectedRow);
-        LapNhatKyDialog dialog = new LapNhatKyDialog((Frame) SwingUtilities.getWindowAncestor(this), selectedCB, currentUser);
-        dialog.setVisible(true);
-
-        if (dialog.isSavedSuccess()) {
-            loadData();
-        }
+    private JButton createBtn(String text, Color bg, Color fg) {
+        JButton btn = new JButton(text);
+        btn.setFont(UITheme.FONT_BTN);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 }

@@ -1,7 +1,8 @@
 package com.qlcvht;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.qlcvht.config.DatabaseConnection;
+import com.qlcvht.util.UITheme;
 import com.qlcvht.view.LoginFrame;
 
 import javax.swing.*;
@@ -9,28 +10,25 @@ import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Thiết lập FlatLaf Look & Feel hiện đại cho Java Swing
+        // Apply FlatLaf Look & Feel
         try {
-            FlatIntelliJLaf.setup();
+            FlatLightLaf.setup();
             UIManager.put("Button.arc", 8);
             UIManager.put("Component.arc", 8);
-            UIManager.put("ProgressBar.arc", 8);
-            UIManager.put("TextComponent.arc", 8);
+            UIManager.put("TextComponent.arc", 6);
+            UIManager.put("defaultFont", UITheme.FONT_BODY);
         } catch (Exception ex) {
-            System.err.println("Không thể áp dụng FlatLaf Look & Feel: " + ex.getMessage());
+            System.err.println("Khong the ap dung FlatLaf: " + ex.getMessage());
         }
 
-        // Chạy giao diện Swing trên Event Dispatch Thread (EDT)
         SwingUtilities.invokeLater(() -> {
-            boolean isConnected = DatabaseConnection.testConnection();
+            boolean connected = DatabaseConnection.testConnection();
             if (DatabaseConnection.isUsingSQLite()) {
-                System.out.println("ℹ️ Đang sử dụng CSDL nhúng SQLite dự phòng tự động.");
+                System.out.println("[INFO] Dang su dung CSDL nhung SQLite (du phong).");
             } else {
-                System.out.println("✅ Kết nối CSDL MySQL thành công!");
+                System.out.println("[INFO] Ket noi CSDL MySQL thanh cong!");
             }
-
-            LoginFrame loginFrame = new LoginFrame();
-            loginFrame.setVisible(true);
+            new LoginFrame().setVisible(true);
         });
     }
 }

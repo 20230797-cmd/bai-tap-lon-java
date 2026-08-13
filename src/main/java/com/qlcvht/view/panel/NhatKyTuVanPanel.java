@@ -4,8 +4,10 @@ import com.qlcvht.dao.NhatKyTuVanDAO;
 import com.qlcvht.model.NhatKyTuVan;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.ExcelExporter;
+import com.qlcvht.util.UITheme;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -17,49 +19,73 @@ public class NhatKyTuVanPanel extends JPanel {
 
     private JTable tableNhatKy;
     private DefaultTableModel tableModel;
+    private JTextField txtSearch;
 
-    public NhatKyTuVanPanel(TaiKhoan currentUser) {
-        this.currentUser = currentUser;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private static final String[] COLUMNS = {"ID", "Ngay Tu Van", "Ma SV", "Ten Sinh Vien", "Co Van Hoc Tap", "Hinh Thuc", "Noi Dung Trao Doi", "Giai Phap Khac Phuc", "Cam Ket SV"};
 
-        initTopToolbar();
+    public NhatKyTuVanPanel(TaiKhoan user) {
+        this.currentUser = user;
+        setLayout(new BorderLayout(0, 10));
+        setBackground(UITheme.BG_MAIN);
+        setBorder(new EmptyBorder(12, 14, 12, 14));
+        initHeader();
+        initToolbar();
         initTable();
         loadData();
     }
 
-    private void initTopToolbar() {
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    private void initHeader() {
+        JPanel h = new JPanel(new BorderLayout());
+        h.setOpaque(false);
+        JLabel title = new JLabel("Nhat ky Tu van - Co van Hoc tap");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.TEXT_PRIMARY);
+        h.add(title, BorderLayout.WEST);
+        add(h, BorderLayout.NORTH);
+    }
 
-        JLabel lblTitle = new JLabel("📋 NHẬT KÝ TƯ VẤN CỦA CỐ VẤN HỌC TẬP");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        toolbar.add(lblTitle);
+    private void initToolbar() {
+        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
+        bar.setBackground(UITheme.BG_WHITE);
+        bar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER_LIGHT),
+            new EmptyBorder(6, 10, 6, 10)
+        ));
 
-        JButton btnReload = new JButton("Tải lại");
-        btnReload.addActionListener(e -> loadData());
-        toolbar.add(btnReload);
+        bar.add(new JLabel("Tim kiem (Ma SV, Ten SV, Ten CVHT):"));
+        txtSearch = new JTextField(18);
+        txtSearch.addActionListener(e -> filterData());
+        bar.add(txtSearch);
 
-        JButton btnExport = new JButton("📊 Xuất Excel");
-        btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableNhatKy, "Nhat_Ky_Tu_Van_Sinh_Vien"));
-        toolbar.add(btnExport);
+        JButton btnSearch = createBtn("Tim kiem", UITheme.PRIMARY, Color.WHITE);
+        btnSearch.addActionListener(e -> filterData());
+        bar.add(btnSearch);
 
-        add(toolbar, BorderLayout.NORTH);
+        JButton btnReset = createBtn("Lam moi", UITheme.BORDER_MEDIUM, UITheme.TEXT_PRIMARY);
+        btnReset.addActionListener(e -> { txtSearch.setText(""); loadData(); });
+        bar.add(btnReset);
+
+        JButton btnExport = createBtn("Xuat Excel", new Color(60, 140, 60), Color.WHITE);
+        btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableNhatKy, "Nhat_Ky_Tu_Van"));
+        bar.add(btnExport);
+
+        add(bar, BorderLayout.NORTH);
     }
 
     private void initTable() {
-        String[] columns = {"ID", "Ngày Tư Vấn", "Mã SV", "Tên Sinh Viên", "Cố Vấn Học Tập", "Hình Thức", "Nội Dung Trao Đổi", "Giải Pháp Khắc Phục", "Cam Kết Sinh Viên"};
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+        tableModel = new DefaultTableModel(COLUMNS, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-
         tableNhatKy = new JTable(tableModel);
-        tableNhatKy.setRowHeight(32);
-        tableNhatKy.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tableNhatKy.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tableNhatKy.getTableHeader().setBackground(new Color(235, 238, 245));
+        UITheme.styleTable(tableNhatKy);
+        tableNhatKy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        add(new JScrollPane(tableNhatKy), BorderLayout.CENTER);
+        int[] widths = {40, 100, 80, 150, 150, 100, 200, 180, 180};
+        for (int i = 0; i < widths.length; i++) tableNhatKy.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+
+        JScrollPane scroll = new JScrollPane(tableNhatKy);
+        scroll.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT));
+        add(scroll, BorderLayout.CENTER);
     }
 
     private void loadData() {
@@ -70,19 +96,48 @@ public class NhatKyTuVanPanel extends JPanel {
         } else {
             list = nhatKyDAO.getAllNhatKy();
         }
+        renderTable(list);
+    }
 
-        for (NhatKyTuVan nk : list) {
-            tableModel.addRow(new Object[]{
-                nk.getId(),
-                nk.getNgayTuVan(),
-                nk.getMaSv(),
-                nk.getHoTenSv(),
-                nk.getHoTenCvht(),
-                nk.getHinhThuc(),
-                nk.getNoiDung(),
-                nk.getGiaiPhap(),
-                nk.getCamKetSinhVien()
-            });
+    private void filterData() {
+        String kw = txtSearch.getText().trim().toLowerCase();
+        tableModel.setRowCount(0);
+        List<NhatKyTuVan> all;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null) {
+            all = nhatKyDAO.getNhatKyByCoVan(currentUser.getMaRef());
+        } else {
+            all = nhatKyDAO.getAllNhatKy();
         }
+        for (NhatKyTuVan nk : all) {
+            boolean match = kw.isEmpty()
+                || nk.getMaSv().toLowerCase().contains(kw)
+                || (nk.getHoTenSv() != null && nk.getHoTenSv().toLowerCase().contains(kw))
+                || (nk.getHoTenCvht() != null && nk.getHoTenCvht().toLowerCase().contains(kw));
+            if (match) addRow(nk);
+        }
+    }
+
+    private void renderTable(List<NhatKyTuVan> list) {
+        tableModel.setRowCount(0);
+        for (NhatKyTuVan nk : list) addRow(nk);
+    }
+
+    private void addRow(NhatKyTuVan nk) {
+        tableModel.addRow(new Object[]{
+            nk.getId(), nk.getNgayTuVan(), nk.getMaSv(),
+            nk.getHoTenSv(), nk.getHoTenCvht(), nk.getHinhThuc(),
+            nk.getNoiDung(), nk.getGiaiPhap(), nk.getCamKetSinhVien()
+        });
+    }
+
+    private JButton createBtn(String text, Color bg, Color fg) {
+        JButton btn = new JButton(text);
+        btn.setFont(UITheme.FONT_BTN);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 }
