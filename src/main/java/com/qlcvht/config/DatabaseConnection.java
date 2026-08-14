@@ -17,6 +17,11 @@ public class DatabaseConnection {
     public static boolean isUsingSQLite() { return usingSQLite; }
 
     public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException ignored) {}
+
         if (usingSQLite) {
             return DriverManager.getConnection(SQLITE_URL);
         }
