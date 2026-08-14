@@ -21,6 +21,7 @@ public class MainFrame extends JFrame {
     private JButton btnKetQua;
     private JButton btnCanhBao;
     private JButton btnNhatKy;
+    private JButton btnThongBao;
     private JButton btnThongKe;
     private JButton btnLopHoc;
 
@@ -101,6 +102,7 @@ public class MainFrame extends JFrame {
         btnKetQua    = createNavBtn("  Ket qua Hoc tap", "KET_QUA");
         btnCanhBao   = createNavBtn("  Canh bao Hoc vu", "CANH_BAO");
         btnNhatKy    = createNavBtn("  Nhat ky Tu van", "NHAT_KY");
+        btnThongBao  = createNavBtn("  Thong bao & Tier", "THONG_BAO");
         btnThongKe   = createNavBtn("  Bao cao & Thong ke", "THONG_KE");
 
         sideBar.add(btnDashboard);
@@ -108,6 +110,7 @@ public class MainFrame extends JFrame {
         sideBar.add(btnKetQua);
         sideBar.add(btnCanhBao);
         sideBar.add(btnNhatKy);
+        sideBar.add(btnThongBao);
         sideBar.add(btnThongKe);
 
         // Admin-only panels
@@ -131,6 +134,7 @@ public class MainFrame extends JFrame {
         cardPanel.add(new QuanLyKetQuaHocTapPanel(currentUser), "KET_QUA");
         cardPanel.add(new QuanLyCanhBaoPanel(currentUser), "CANH_BAO");
         cardPanel.add(new NhatKyTuVanPanel(currentUser), "NHAT_KY");
+        cardPanel.add(new QuanLyThongBaoPanel(currentUser), "THONG_BAO");
         cardPanel.add(new BaoCaoThongKePanel(), "THONG_KE");
 
         if (isAdminOrQL) {
@@ -186,7 +190,7 @@ public class MainFrame extends JFrame {
         cardLayout.show(cardPanel, cardName);
         sideBar.repaint();
         // Update text color
-        JButton[] allBtns = {btnDashboard, btnSinhVien, btnKetQua, btnCanhBao, btnNhatKy, btnThongKe};
+        JButton[] allBtns = {btnDashboard, btnSinhVien, btnKetQua, btnCanhBao, btnNhatKy, btnThongBao, btnThongKe};
         for (JButton b : allBtns) {
             if (b == null) continue;
             b.setForeground(b == btn ? Color.WHITE : UITheme.TEXT_SIDEBAR);

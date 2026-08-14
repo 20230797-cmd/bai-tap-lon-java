@@ -126,6 +126,20 @@ public class DatabaseConnection {
                 "ngay_tao TEXT" +
             ");");
 
+            stmt.execute("CREATE TABLE IF NOT EXISTS thong_bao (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "ma_thong_bao TEXT UNIQUE NOT NULL," +
+                "tieu_de TEXT NOT NULL," +
+                "noi_dung TEXT NOT NULL," +
+                "nhom_rui_ro TEXT DEFAULT 'ALL'," +
+                "ma_lop TEXT," +
+                "ma_sv TEXT," +
+                "ngay_gui TEXT," +
+                "nguoi_gui TEXT," +
+                "so_luong_nhan INTEGER DEFAULT 0," +
+                "trang_thai TEXT DEFAULT 'DA_GUI'" +
+            ");");
+
             // === SEED DATA Co van ===
             stmt.execute("INSERT OR IGNORE INTO co_van_hoc_tap VALUES ('CV001','TS. Nguyen Van An','an.nv@huce.edu.vn','0912345678','Cong nghe thong tin');");
             stmt.execute("INSERT OR IGNORE INTO co_van_hoc_tap VALUES ('CV002','ThS. Tran Thi Binh','binh.tt@huce.edu.vn','0923456789','Cong nghe thong tin');");
@@ -364,6 +378,11 @@ public class DatabaseConnection {
             stmt.execute("INSERT OR IGNORE INTO tai_khoan VALUES (2,'cv_nguynvanan','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','TS. Nguyen Van An','an.nv@huce.edu.vn','CO_VAN','CV001','2024-01-01 00:00:00');");
             stmt.execute("INSERT OR IGNORE INTO tai_khoan VALUES (3,'cv_tranthibinh','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','ThS. Tran Thi Binh','binh.tt@huce.edu.vn','CO_VAN','CV002','2024-01-01 00:00:00');");
             stmt.execute("INSERT OR IGNORE INTO tai_khoan VALUES (4,'quanly','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','Truong khoa CNTT','khoacntt@huce.edu.vn','QUAN_LY',NULL,'2024-01-01 00:00:00');");
+
+            // === SEED DATA Thong bao ===
+            stmt.execute("INSERT OR IGNORE INTO thong_bao VALUES (1,'TB-T1-1001','THONG BAO BIEU DUONG HOC TAP XUAT SAC (TIER 1)','Tuyen duong cac sinh vien thuoc nhom Tier 1 co GPA >= 3.2. Du dieu kien dang ky hoc bong hoc ky nay.','TIER_1',NULL,NULL,'2026-08-01 09:00:00','TS. Nguyen Van An',28,'DA_GUI');");
+            stmt.execute("INSERT OR IGNORE INTO thong_bao VALUES (2,'TB-T2-1002','THONG BAO DUY TRI PHONG DO HOC TAP (TIER 2)','Nhac nho sinh vien Tier 2 dang ky bo sung cac mon cai thien diem so va theo doi lich thi.','TIER_2',NULL,NULL,'2026-08-05 10:30:00','TS. Nguyen Van An',35,'DA_GUI');");
+            stmt.execute("INSERT OR IGNORE INTO thong_bao VALUES (3,'TB-T3-1003','CANH BAO HOC VU KHAN CAP & YEU CAU TU VAN (TIER 3)','Yeu cau tat ca sinh vien nhom Tier 3 (GPA < 2.0 / Canh bao hoc vu) lien he CVHT lap ke hoach tu van.','TIER_3',NULL,NULL,'2026-08-10 14:00:00','TS. Nguyen Van An',27,'DA_GUI');");
 
         } catch (SQLException e) {
             e.printStackTrace();

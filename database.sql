@@ -10,6 +10,7 @@ USE `ql_canhbao_hocvu`;
 DROP TABLE IF EXISTS `nhat_ky_tu_van`;
 DROP TABLE IF EXISTS `canh_bao_hoc_vu`;
 DROP TABLE IF EXISTS `ket_qua_hoc_tap`;
+DROP TABLE IF EXISTS `thong_bao`;
 DROP TABLE IF EXISTS `sinh_vien`;
 DROP TABLE IF EXISTS `lop_hoc`;
 DROP TABLE IF EXISTS `co_van_hoc_tap`;
@@ -104,6 +105,21 @@ CREATE TABLE `tai_khoan` (
     `vai_tro` ENUM('ADMIN', 'CO_VAN', 'QUAN_LY') DEFAULT 'CO_VAN',
     `ma_ref` VARCHAR(20),
     `ngay_tao` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Bảng Thông báo sinh viên
+CREATE TABLE `thong_bao` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `ma_thong_bao` VARCHAR(50) UNIQUE NOT NULL,
+    `tieu_de` VARCHAR(255) NOT NULL,
+    `noi_dung` TEXT NOT NULL,
+    `nhom_rui_ro` VARCHAR(30) DEFAULT 'ALL',
+    `ma_lop` VARCHAR(20),
+    `ma_sv` VARCHAR(20),
+    `ngay_gui` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `nguoi_gui` VARCHAR(100) DEFAULT 'Cố vấn học tập',
+    `so_luong_nhan` INT DEFAULT 0,
+    `trang_thai` VARCHAR(20) DEFAULT 'DA_GUI'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -350,3 +366,8 @@ INSERT INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tr
 ('cv_nguynvanan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'TS. Nguyễn Văn An', 'an.nv@huce.edu.vn', 'CO_VAN', 'CV001'),
 ('cv_tranthibinh', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThS. Trần Thị Bình', 'binh.tt@huce.edu.vn', 'CO_VAN', 'CV002'),
 ('quanly', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Trưởng khoa CNTT', 'khoacntt@huce.edu.vn', 'QUAN_LY', NULL);
+
+INSERT INTO `thong_bao` (`ma_thong_bao`, `tieu_de`, `noi_dung`, `nhom_rui_ro`, `ma_lop`, `ma_sv`, `ngay_gui`, `nguoi_gui`, `so_luong_nhan`, `trang_thai`) VALUES
+('TB-T1-1001', 'THÔNG BÁO BIỂU DƯƠNG HỌC TẬP XUẤT SẮC (TIER 1)', 'Tuyên dương các sinh viên thuộc nhóm Tier 1 có GPA >= 3.2. Đủ điều kiện đăng ký học bổng học kỳ này.', 'TIER_1', NULL, NULL, '2026-08-01 09:00:00', 'TS. Nguyễn Văn An', 28, 'DA_GUI'),
+('TB-T2-1002', 'THÔNG BÁO DUY TRÌ PHONG ĐỘ HỌC TẬP (TIER 2)', 'Nhắc nhở sinh viên Tier 2 đăng ký bổ sung các môn cải thiện điểm số và theo dõi lịch thi.', 'TIER_2', NULL, NULL, '2026-08-05 10:30:00', 'TS. Nguyễn Văn An', 35, 'DA_GUI'),
+('TB-T3-1003', 'CẢNH BÁO HỌC VỤ KHẨN CẤP & YÊU CẦU TƯ VẤN (TIER 3)', 'Yêu cầu tất cả sinh viên nhóm Tier 3 (GPA < 2.0 / Cảnh báo học vụ) liên hệ CVHT lập kế hoạch tư vấn.', 'TIER_3', NULL, NULL, '2026-08-10 14:00:00', 'TS. Nguyễn Văn An', 27, 'DA_GUI');
