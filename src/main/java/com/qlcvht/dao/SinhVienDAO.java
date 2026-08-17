@@ -176,6 +176,44 @@ public class SinhVienDAO {
         }
     }
 
+    public List<SinhVien> filterSinhVienMulti(String maLop, String trangThai, String gpaFilter, String keyword, String maCvht) {
+        List<SinhVien> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT s.*, l.ten_lop FROM sinh_vien s " +
+                "LEFT JOIN lop_hoc l ON s.ma_lop = l.ma_lop " +
+                "LEFT JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                "WHERE 1=1 ");
+        if (maCvht != null && !maCvht.isBlank()) sql.append("AND l.ma_cvht = ? ");
+        if (maLop != null && !maLop.isBlank() && !maLop.equals("ALL")) sql.append("AND s.ma_lop = ? ");
+        if (trangThai != null && !trangThai.isBlank() && !trangThai.equals("ALL")) sql.append("AND s.trang_thai = ? ");
+        if (keyword != null && !keyword.isBlank()) sql.append("AND (s.ma_sv LIKE ? OR s.ho_ten LIKE ? OR s.email LIKE ?) ");
+        if (gpaFilter != null && !gpaFilter.isBlank()) {
+            switch (gpaFilter) {
+                case "<1.0"       -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) < 1.0 ");
+                case "1.0-1.5"    -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) BETWEEN 1.0 AND 1.499 ");
+                case "1.5-2.0"    -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) BETWEEN 1.5 AND 1.999 ");
+                case ">=2.0"      -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) >= 2.0 ");
+                case "NO_TC_GE_8" -> sql.append("AND (SELECT COALESCE(SUM(so_tin_chi_no), 0) FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv) >= 8 ");
+            }
+        }
+        sql.append("GROUP BY s.ma_sv ORDER BY s.ma_sv");
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            if (maCvht != null && !maCvht.isBlank()) ps.setString(idx++, maCvht);
+            if (maLop != null && !maLop.isBlank() && !maLop.equals("ALL")) ps.setString(idx++, maLop);
+            if (trangThai != null && !trangThai.isBlank() && !trangThai.equals("ALL")) ps.setString(idx++, trangThai);
+            if (keyword != null && !keyword.isBlank()) {
+                String k = "%" + keyword.trim() + "%";
+                ps.setString(idx++, k); ps.setString(idx++, k); ps.setString(idx++, k);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToSinhVien(rs));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
     private SinhVien mapResultSetToSinhVien(ResultSet rs) throws SQLException {
         Date ngaySinh = parseDateSafely(rs.getString("ngay_sinh"));
         SinhVien sv = new SinhVien(
