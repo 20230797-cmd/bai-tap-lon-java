@@ -32,8 +32,7 @@ public class QuanLySinhVienPanel extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<Object> cbFilterLop;
-    private JComboBox<String> cbFilterTran
-    gThai;
+    private JComboBox<String> cbFilterTrangThai;
     private JComboBox<String> cbFilterGpa;
 
     private List<SinhVien> currentList;
