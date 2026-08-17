@@ -42,6 +42,22 @@ public class ThongKeService {
             query(stmt, stats, "chua_tu_van",    "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "trang_thai_tu_van='CHUA_TU_VAN'");
             query(stmt, stats, "dang_theo_doi",  "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "trang_thai_tu_van='DANG_THEO_DOI'");
 
+            // Thống kê Phân tầng Tier
+            String whereSvBase = condSv.isEmpty() ? "" : condSv;
+            query(stmt, stats, "tier_1", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                (whereSvBase.isEmpty() ? "WHERE" : whereSvBase + " AND") + " k.gpa_tich_luy >= 3.2");
+            query(stmt, stats, "tier_2", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                (whereSvBase.isEmpty() ? "WHERE" : whereSvBase + " AND") + " k.gpa_tich_luy >= 2.0 AND k.gpa_tich_luy < 3.2");
+            query(stmt, stats, "tier_3", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                (whereSvBase.isEmpty() ? "WHERE" : whereSvBase + " AND") + " (k.gpa_tich_luy < 2.0 OR s.trang_thai LIKE 'CANH_BAO%' OR s.trang_thai = 'BUOC_THOI_HOC')");
+
+            // Thống kê Học lực
+            query(stmt, stats, "hl_xuat_sac", "SELECT COUNT(DISTINCT ma_sv) FROM ket_qua_hoc_tap WHERE gpa_tich_luy >= 3.6" + condCb);
+            query(stmt, stats, "hl_gioi",     "SELECT COUNT(DISTINCT ma_sv) FROM ket_qua_hoc_tap WHERE gpa_tich_luy >= 3.2 AND gpa_tich_luy < 3.6" + condCb);
+            query(stmt, stats, "hl_kha",      "SELECT COUNT(DISTINCT ma_sv) FROM ket_qua_hoc_tap WHERE gpa_tich_luy >= 2.5 AND gpa_tich_luy < 3.2" + condCb);
+            query(stmt, stats, "hl_trung_binh","SELECT COUNT(DISTINCT ma_sv) FROM ket_qua_hoc_tap WHERE gpa_tich_luy >= 2.0 AND gpa_tich_luy < 2.5" + condCb);
+            query(stmt, stats, "hl_yeu_kem",  "SELECT COUNT(DISTINCT ma_sv) FROM ket_qua_hoc_tap WHERE gpa_tich_luy < 2.0" + condCb);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

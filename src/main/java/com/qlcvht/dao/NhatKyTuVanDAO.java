@@ -100,6 +100,36 @@ public class NhatKyTuVanDAO {
         }
     }
 
+    public boolean updateNhatKy(NhatKyTuVan nk) {
+        String sql = "UPDATE nhat_ky_tu_van SET ngay_tu_van = ?, hinh_thuc = ?, noi_dung = ?, nguyen_nhan = ?, giai_phap = ?, cam_ket_sinh_vien = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, nk.getNgayTuVan());
+            ps.setString(2, nk.getHinhThuc());
+            ps.setString(3, nk.getNoiDung());
+            ps.setString(4, nk.getNguyenNhan());
+            ps.setString(5, nk.getGiaiPhap());
+            ps.setString(6, nk.getCamKetSinhVien());
+            ps.setInt(7, nk.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteNhatKy(int id) {
+        String sql = "DELETE FROM nhat_ky_tu_van WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private NhatKyTuVan mapResultSetToNhatKy(ResultSet rs) throws SQLException {
         Date ngayTv = parseDateSafely(rs.getString("ngay_tu_van"));
         NhatKyTuVan nk = new NhatKyTuVan(

@@ -1,5 +1,6 @@
 package com.qlcvht.view;
 
+import com.qlcvht.config.DatabaseConnection;
 import com.qlcvht.dao.TaiKhoanDAO;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
@@ -7,7 +8,6 @@ import com.qlcvht.util.UITheme;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
 
 public class LoginFrame extends JFrame {
 
@@ -16,18 +16,18 @@ public class LoginFrame extends JFrame {
     private JButton btnLogin;
     private JLabel lblStatus;
     private JCheckBox chkShowPass;
+    private JComboBox<String> cbQuickLogin;
 
     public LoginFrame() {
-        setTitle("Dang nhap - He thong Quan ly Co van Hoc tap");
+        setTitle("Đăng nhập Hệ thống - Quản lý Cố vấn Học tập & Cảnh báo Học vụ (CNJ09)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(440, 540);
+        setSize(480, 620);
         setResizable(false);
         setLocationRelativeTo(null);
         initUI();
     }
 
     private void initUI() {
-        // Root panel with gradient background
         JPanel root = new JPanel(new BorderLayout()) {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -40,50 +40,35 @@ public class LoginFrame extends JFrame {
         };
         root.setLayout(new BorderLayout());
 
-        // === TOP BANNER ===
+        // Top Banner
         JPanel topPanel = new JPanel();
         topPanel.setOpaque(false);
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBorder(new EmptyBorder(40, 30, 30, 30));
+        topPanel.setBorder(new EmptyBorder(30, 30, 20, 30));
 
-        // University initials badge
-        JLabel lblBadge = new JLabel("HUCE", SwingConstants.CENTER) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(255,255,255,40));
-                g2.fillOval(0, 0, getWidth(), getHeight());
-                g2.setColor(Color.WHITE);
-                g2.setFont(UITheme.fontBold(22));
-                FontMetrics fm = g2.getFontMetrics();
-                int x = (getWidth() - fm.stringWidth("HUCE")) / 2;
-                int y = (getHeight() + fm.getAscent()) / 2 - 3;
-                g2.drawString("HUCE", x, y);
-            }
-        };
-        lblBadge.setPreferredSize(new Dimension(80, 80));
-        lblBadge.setMaximumSize(new Dimension(80, 80));
+        JLabel lblBadge = new JLabel("🎓", SwingConstants.CENTER);
+        lblBadge.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 46));
         lblBadge.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblTitle = new JLabel("QUAN LY CO VAN HOC TAP", SwingConstants.CENTER);
-        lblTitle.setFont(UITheme.fontBold(17));
+        JLabel lblTitle = new JLabel("HỆ THỐNG CỐ VẤN HỌC TẬP", SwingConstants.CENTER);
+        lblTitle.setFont(UITheme.fontBold(18));
         lblTitle.setForeground(Color.WHITE);
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblSub = new JLabel("& CANH BAO HOC VU - HUCE", SwingConstants.CENTER);
-        lblSub.setFont(UITheme.fontPlain(13));
-        lblSub.setForeground(new Color(200, 220, 255));
+        JLabel lblSub = new JLabel("VÀ QUẢN LÝ CẢNH BÁO HỌC VỤ", SwingConstants.CENTER);
+        lblSub.setFont(UITheme.fontBold(13));
+        lblSub.setForeground(new Color(210, 230, 255));
         lblSub.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         topPanel.add(lblBadge);
-        topPanel.add(Box.createVerticalStrut(14));
+        topPanel.add(Box.createVerticalStrut(8));
         topPanel.add(lblTitle);
         topPanel.add(Box.createVerticalStrut(4));
         topPanel.add(lblSub);
 
         root.add(topPanel, BorderLayout.NORTH);
 
-        // === FORM CARD ===
+        // Form Card
         JPanel card = new JPanel(new GridBagLayout()) {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
@@ -93,49 +78,74 @@ public class LoginFrame extends JFrame {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(30, 35, 30, 35));
+        card.setBorder(new EmptyBorder(24, 30, 24, 30));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = 1;
         gbc.weightx = 1;
-        gbc.insets = new Insets(6, 0, 6, 0);
+        gbc.insets = new Insets(4, 0, 4, 0);
 
-        // Username label
+        // Quick login selector
         gbc.gridy = 0;
-        JLabel lblUser = new JLabel("Ten dang nhap");
+        JLabel lblQuick = new JLabel("Chọn tài khoản mẫu đăng nhập nhanh:");
+        lblQuick.setFont(UITheme.fontBold(11));
+        lblQuick.setForeground(UITheme.PRIMARY_DARK);
+        card.add(lblQuick, gbc);
+
+        gbc.gridy = 1;
+        cbQuickLogin = new JComboBox<>(new String[]{
+            "admin (Quản trị viên)",
+            "cv_nguynvanan (TS. Nguyễn Văn An - Cố vấn)",
+            "cv_tranthibinh (ThS. Trần Thị Bình - Cố vấn)",
+            "quanly (Trưởng khoa CNTT)"
+        });
+        cbQuickLogin.setFont(UITheme.FONT_BODY);
+        cbQuickLogin.addActionListener(e -> {
+            int idx = cbQuickLogin.getSelectedIndex();
+            if (idx == 0) txtUsername.setText("admin");
+            else if (idx == 1) txtUsername.setText("cv_nguynvanan");
+            else if (idx == 2) txtUsername.setText("cv_tranthibinh");
+            else if (idx == 3) txtUsername.setText("quanly");
+            txtPassword.setText("123456");
+        });
+        card.add(cbQuickLogin, gbc);
+
+        // Username
+        gbc.gridy = 2;
+        gbc.insets = new Insets(10, 0, 4, 0);
+        JLabel lblUser = new JLabel("Tên đăng nhập:");
         lblUser.setFont(UITheme.FONT_BODY_BOLD);
         lblUser.setForeground(UITheme.TEXT_SECONDARY);
         card.add(lblUser, gbc);
 
-        // Username field
-        gbc.gridy = 1;
+        gbc.gridy = 3;
+        gbc.insets = new Insets(2, 0, 4, 0);
         txtUsername = new JTextField("admin");
         txtUsername.setFont(UITheme.FONT_BODY);
-        txtUsername.setPreferredSize(new Dimension(330, 42));
+        txtUsername.setPreferredSize(new Dimension(340, 38));
         styleField(txtUsername);
         card.add(txtUsername, gbc);
 
-        // Password label
-        gbc.gridy = 2;
-        gbc.insets = new Insets(14, 0, 6, 0);
-        JLabel lblPass = new JLabel("Mat khau");
+        // Password
+        gbc.gridy = 4;
+        gbc.insets = new Insets(10, 0, 4, 0);
+        JLabel lblPass = new JLabel("Mật khẩu:");
         lblPass.setFont(UITheme.FONT_BODY_BOLD);
         lblPass.setForeground(UITheme.TEXT_SECONDARY);
         card.add(lblPass, gbc);
 
-        // Password field
-        gbc.gridy = 3;
-        gbc.insets = new Insets(6, 0, 6, 0);
+        gbc.gridy = 5;
+        gbc.insets = new Insets(2, 0, 4, 0);
         txtPassword = new JPasswordField("123456");
         txtPassword.setFont(UITheme.FONT_BODY);
-        txtPassword.setPreferredSize(new Dimension(330, 42));
+        txtPassword.setPreferredSize(new Dimension(340, 38));
         styleField(txtPassword);
         card.add(txtPassword, gbc);
 
         // Show password checkbox
-        gbc.gridy = 4;
-        chkShowPass = new JCheckBox("Hien mat khau");
+        gbc.gridy = 6;
+        chkShowPass = new JCheckBox("Hiển thị mật khẩu");
         chkShowPass.setFont(UITheme.FONT_SMALL);
         chkShowPass.setOpaque(false);
         chkShowPass.setForeground(UITheme.TEXT_SECONDARY);
@@ -149,37 +159,32 @@ public class LoginFrame extends JFrame {
         card.add(chkShowPass, gbc);
 
         // Status label
-        gbc.gridy = 5;
+        gbc.gridy = 7;
         lblStatus = new JLabel(" ", SwingConstants.CENTER);
         lblStatus.setFont(UITheme.FONT_SMALL);
         lblStatus.setForeground(UITheme.DANGER);
         card.add(lblStatus, gbc);
 
         // Login button
-        gbc.gridy = 6;
-        gbc.insets = new Insets(10, 0, 6, 0);
-        btnLogin = new JButton("DANG NHAP");
+        gbc.gridy = 8;
+        gbc.insets = new Insets(8, 0, 4, 0);
+        btnLogin = UITheme.createButton("ĐĂNG NHẬP HỆ THỐNG", UITheme.PRIMARY, Color.WHITE);
         btnLogin.setFont(UITheme.FONT_BTN_LARGE);
-        btnLogin.setBackground(UITheme.PRIMARY);
-        btnLogin.setForeground(Color.WHITE);
-        btnLogin.setPreferredSize(new Dimension(330, 46));
-        btnLogin.setFocusPainted(false);
-        btnLogin.setBorderPainted(false);
-        btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLogin.setPreferredSize(new Dimension(340, 44));
         btnLogin.addActionListener(e -> onLogin());
         card.add(btnLogin, gbc);
 
-        // Hint
-        gbc.gridy = 7;
-        gbc.insets = new Insets(14, 0, 0, 0);
-        JLabel hint = new JLabel("Tai khoan mau: admin / cv_nguynvanan / quanly (MK: 123456)", SwingConstants.CENTER);
+        // DB Status hint
+        gbc.gridy = 9;
+        gbc.insets = new Insets(10, 0, 0, 0);
+        JLabel hint = new JLabel("Trạng thái CSDL: " + DatabaseConnection.getDatabaseType(), SwingConstants.CENTER);
         hint.setFont(UITheme.FONT_SMALL);
-        hint.setForeground(new Color(160, 160, 160));
+        hint.setForeground(new Color(130, 140, 150));
         card.add(hint, gbc);
 
         JPanel cardWrapper = new JPanel(new BorderLayout());
         cardWrapper.setOpaque(false);
-        cardWrapper.setBorder(new EmptyBorder(0, 30, 40, 30));
+        cardWrapper.setBorder(new EmptyBorder(0, 30, 30, 30));
         cardWrapper.add(card, BorderLayout.CENTER);
 
         root.add(cardWrapper, BorderLayout.CENTER);
@@ -203,12 +208,12 @@ public class LoginFrame extends JFrame {
 
         if (username.isEmpty() || password.isEmpty()) {
             lblStatus.setForeground(UITheme.DANGER);
-            lblStatus.setText("Vui long nhap day du Ten dang nhap va Mat khau!");
+            lblStatus.setText("Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu!");
             return;
         }
 
         lblStatus.setForeground(UITheme.INFO);
-        lblStatus.setText("Dang kiem tra thong tin dang nhap...");
+        lblStatus.setText("Đang kiểm tra xác thực tài khoản...");
         btnLogin.setEnabled(false);
 
         SwingUtilities.invokeLater(() -> {
@@ -218,7 +223,7 @@ public class LoginFrame extends JFrame {
                 new MainFrame(user).setVisible(true);
             } else {
                 lblStatus.setForeground(UITheme.DANGER);
-                lblStatus.setText("Ten dang nhap hoac mat khau khong chinh xac!");
+                lblStatus.setText("Tên đăng nhập hoặc mật khẩu không chính xác!");
                 btnLogin.setEnabled(true);
                 txtPassword.selectAll();
                 txtPassword.requestFocus();

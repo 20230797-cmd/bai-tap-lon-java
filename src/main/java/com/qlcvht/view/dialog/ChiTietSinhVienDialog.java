@@ -1,7 +1,9 @@
 package com.qlcvht.view.dialog;
 
+import com.qlcvht.dao.CanhBaoDAO;
 import com.qlcvht.dao.KetQuaHocTapDAO;
 import com.qlcvht.dao.NhatKyTuVanDAO;
+import com.qlcvht.model.CanhBaoHocVu;
 import com.qlcvht.model.KetQuaHocTap;
 import com.qlcvht.model.NhatKyTuVan;
 import com.qlcvht.model.SinhVien;
@@ -14,61 +16,84 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Dialog Hồ sơ Học vụ 360 độ của sinh viên gồm 3 tab:
+ * 1. Bảng điểm & Kết quả học tập từng học kỳ.
+ * 2. Lịch sử cảnh báo học vụ.
+ * 3. Lịch sử các buổi tư vấn của CVHT.
+ */
 public class ChiTietSinhVienDialog extends JDialog {
 
     private final SinhVien sinhVien;
+    private final KetQuaHocTapDAO ketQuaDAO = new KetQuaHocTapDAO();
+    private final CanhBaoDAO canhBaoDAO = new CanhBaoDAO();
+    private final NhatKyTuVanDAO nhatKyDAO = new NhatKyTuVanDAO();
 
     public ChiTietSinhVienDialog(Frame parent, SinhVien sv) {
-        super(parent, "Chi tiet Ho so Sinh vien: " + sv.getHoTen(), true);
+        super(parent, "Hồ sơ Học vụ 360°: " + sv.getHoTen() + " (" + sv.getMaSv() + ")", true);
         this.sinhVien = sv;
         initUI();
-        setSize(740, 560);
+        setSize(900, 620);
         setLocationRelativeTo(parent);
     }
 
     private void initUI() {
         setLayout(new BorderLayout(0, 0));
 
-        // Header
+        // Top Banner
+        JPanel topBanner = new JPanel();
+        topBanner.setLayout(new BoxLayout(topBanner, BoxLayout.Y_AXIS));
+
+        // Header Panel
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UITheme.PRIMARY_DARK);
         header.setBorder(new EmptyBorder(16, 22, 16, 22));
 
-        JLabel lblName = new JLabel(sinhVien.getHoTen() + "  (" + sinhVien.getMaSv() + ")");
+        JLabel lblName = new JLabel("🎓 " + sinhVien.getHoTen() + "  -  MSSV: " + sinhVien.getMaSv());
         lblName.setFont(UITheme.fontBold(20));
         lblName.setForeground(Color.WHITE);
 
-        JLabel lblSub = new JLabel("Lop: " + (sinhVien.getTenLop() != null ? sinhVien.getTenLop() : sinhVien.getMaLop())
-            + "    |    Trang thai: " + sinhVien.getTrangThaiHienThi());
+        JLabel lblSub = new JLabel("Lớp: " + (sinhVien.getTenLop() != null ? sinhVien.getTenLop() : sinhVien.getMaLop())
+            + "    |    Trạng thái: " + UITheme.formatTrangThaiSinhVien(sinhVien.getTrangThai()));
         lblSub.setFont(UITheme.fontPlain(13));
-        lblSub.setForeground(new Color(200, 220, 255));
+        lblSub.setForeground(new Color(210, 230, 255));
 
         header.add(lblName, BorderLayout.NORTH);
         header.add(lblSub, BorderLayout.SOUTH);
-        add(header, BorderLayout.NORTH);
+        topBanner.add(header);
 
-        // Info panel (basic info row)
-        JPanel infoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        // Info chips row
+        JPanel infoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 10));
         infoRow.setBackground(UITheme.PRIMARY_LIGHT);
-        infoRow.setBorder(new EmptyBorder(2, 14, 2, 14));
-        addInfoChip(infoRow, "Gioi tinh", sinhVien.getGioiTinh());
-        addInfoChip(infoRow, "Ngay sinh", sinhVien.getNgaySinh() != null ? sinhVien.getNgaySinh().toString() : "---");
-        addInfoChip(infoRow, "Email", sinhVien.getEmail() != null ? sinhVien.getEmail() : "---");
-        addInfoChip(infoRow, "SDT", sinhVien.getSoDienThoai() != null ? sinhVien.getSoDienThoai() : "---");
-        add(infoRow, BorderLayout.NORTH);
+        infoRow.setBorder(new EmptyBorder(4, 16, 4, 16));
+        addInfoChip(infoRow, "GIỚI TÍNH", sinhVien.getGioiTinh() != null ? sinhVien.getGioiTinh() : "Nam");
+        addInfoChip(infoRow, "NGÀY SINH", sinhVien.getNgaySinh() != null ? sinhVien.getNgaySinh().toString() : "---");
+        addInfoChip(infoRow, "EMAIL", sinhVien.getEmail() != null ? sinhVien.getEmail() : "---");
+        addInfoChip(infoRow, "SỐ ĐIỆN THOẠI", sinhVien.getSoDienThoai() != null ? sinhVien.getSoDienThoai() : "---");
+        
+        // Tier badge
+        KetQuaHocTap latestKq = ketQuaDAO.getKetQuaHocKyMoiNhat(sinhVien.getMaSv());
+        double cpa = latestKq != null ? latestKq.getGpaTichLuy() : 0.0;
+        String tierText = (cpa >= 3.2) ? "Tier 1 (Học bổng / Khá Giỏi)" : (cpa >= 2.0 ? "Tier 2 (Trung bình / An toàn)" : "Tier 3 (Nguy cơ / Cảnh báo)");
+        addInfoChip(infoRow, "PHÂN TẦNG RỦI RO", tierText);
 
-        // TabPane
+        topBanner.add(infoRow);
+        add(topBanner, BorderLayout.NORTH);
+
+        // Center Tabs
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(UITheme.FONT_BODY_BOLD);
-        tabs.addTab("  Ket qua Hoc tap (GPA)  ", createKetQuaPanel());
-        tabs.addTab("  Lich su Tu van CVHT  ", createTuVanPanel());
+        tabs.addTab("  📊 Kết quả Học tập & GPA  ", createKetQuaPanel());
+        tabs.addTab("  ⚠️ Lịch sử Cảnh báo Học vụ  ", createCanhBaoPanel());
+        tabs.addTab("  📝 Lịch sử Tư vấn CVHT  ", createTuVanPanel());
         add(tabs, BorderLayout.CENTER);
 
-        // Close button
-        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 8));
+        // Bottom Actions
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 10));
+        bottom.setBackground(UITheme.BG_WHITE);
         bottom.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_LIGHT));
-        JButton btnClose = new JButton("Dong");
-        btnClose.setFont(UITheme.FONT_BTN);
+
+        JButton btnClose = UITheme.createButton("Đóng Hồ Sơ", UITheme.PRIMARY, Color.WHITE);
         btnClose.addActionListener(e -> dispose());
         bottom.add(btnClose);
         add(bottom, BorderLayout.SOUTH);
@@ -79,10 +104,10 @@ public class ChiTietSinhVienDialog extends JDialog {
         chip.setLayout(new BoxLayout(chip, BoxLayout.Y_AXIS));
         chip.setOpaque(false);
         JLabel lbl = new JLabel(label);
-        lbl.setFont(UITheme.fontPlain(10));
+        lbl.setFont(UITheme.fontBold(10));
         lbl.setForeground(UITheme.PRIMARY);
         JLabel val = new JLabel(value);
-        val.setFont(UITheme.fontBold(12));
+        val.setFont(UITheme.fontPlain(12));
         val.setForeground(UITheme.TEXT_PRIMARY);
         chip.add(lbl);
         chip.add(val);
@@ -90,93 +115,115 @@ public class ChiTietSinhVienDialog extends JDialog {
     }
 
     private JPanel createKetQuaPanel() {
-        JPanel p = new JPanel(new BorderLayout(0, 0));
-        p.setBorder(new EmptyBorder(10, 12, 10, 12));
+        JPanel p = new JPanel(new BorderLayout(0, 8));
+        p.setBorder(new EmptyBorder(12, 14, 12, 14));
         p.setBackground(Color.WHITE);
 
-        String[] cols = {"Hoc ky", "Nam hoc", "GPA Hoc ky", "GPA Tich luy", "Tin chi No"};
+        String[] cols = {"Học kỳ", "Năm học", "GPA Học kỳ", "GPA Tích lũy (CPA)", "Số tín chỉ nợ", "Xếp loại học lực"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        List<KetQuaHocTap> list = new KetQuaHocTapDAO().getKetQuaBySinhVien(sinhVien.getMaSv());
+        List<KetQuaHocTap> list = ketQuaDAO.getKetQuaBySinhVien(sinhVien.getMaSv());
         for (KetQuaHocTap kq : list) {
+            String xepLoai = "Xuất sắc";
+            if (kq.getGpaTichLuy() < 2.0) xepLoai = "Yếu / Kém";
+            else if (kq.getGpaTichLuy() < 2.5) xepLoai = "Trung bình";
+            else if (kq.getGpaTichLuy() < 3.2) xepLoai = "Khá";
+            else if (kq.getGpaTichLuy() < 3.6) xepLoai = "Giỏi";
+
             model.addRow(new Object[]{
-                "Hoc ky " + kq.getHocKy(), kq.getNamHoc(),
+                "Học kỳ " + kq.getHocKy(),
+                kq.getNamHoc(),
                 String.format("%.2f", kq.getGpaHocKy()),
                 String.format("%.2f", kq.getGpaTichLuy()),
-                kq.getSoTinChiNo()
+                kq.getSoTinChiNo() + " TC",
+                xepLoai
             });
         }
 
         JTable tbl = new JTable(model);
         UITheme.styleTable(tbl);
 
-        // GPA color renderer
-        DefaultTableCellRenderer gpaR = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
-                Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
-                if (v != null && !sel) {
-                    try {
-                        double g = Double.parseDouble(v.toString());
-                        if (g < 1.0) comp.setForeground(UITheme.DANGER_DARK);
-                        else if (g < 1.5) comp.setForeground(UITheme.DANGER);
-                        else if (g < 2.0) comp.setForeground(UITheme.WARNING);
-                        else comp.setForeground(UITheme.SUCCESS);
-                    } catch (NumberFormatException ignored) {}
-                }
-                return comp;
-            }
-        };
-        tbl.getColumnModel().getColumn(2).setCellRenderer(gpaR);
-        tbl.getColumnModel().getColumn(3).setCellRenderer(gpaR);
-
-        p.add(new JScrollPane(tbl), BorderLayout.CENTER);
-
-        if (!list.isEmpty()) {
-            KetQuaHocTap latest = list.get(0);
-            JLabel summary = new JLabel("  GPA tich luy moi nhat: " + String.format("%.2f", latest.getGpaTichLuy())
-                + "   |   Tin chi no: " + latest.getSoTinChiNo());
-            summary.setFont(UITheme.FONT_BODY_BOLD);
-            summary.setForeground(latest.getGpaTichLuy() >= 2.0 ? UITheme.SUCCESS : UITheme.DANGER);
-            summary.setBorder(new EmptyBorder(8, 0, 0, 0));
-            p.add(summary, BorderLayout.SOUTH);
+        DefaultTableCellRenderer center = UITheme.createCenterRenderer();
+        for (int i = 0; i < tbl.getColumnCount(); i++) {
+            tbl.getColumnModel().getColumn(i).setCellRenderer(center);
         }
 
+        p.add(new JScrollPane(tbl), BorderLayout.CENTER);
+        return p;
+    }
+
+    private JPanel createCanhBaoPanel() {
+        JPanel p = new JPanel(new BorderLayout(0, 8));
+        p.setBorder(new EmptyBorder(12, 14, 12, 14));
+        p.setBackground(Color.WHITE);
+
+        String[] cols = {"Mã quyết định", "Học kỳ", "Năm học", "Mức cảnh báo", "GPA xét", "Lý do", "Ngày QĐ", "Trạng thái tư vấn"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        List<CanhBaoHocVu> list = canhBaoDAO.getCanhBaoByMaSv(sinhVien.getMaSv());
+        for (CanhBaoHocVu cb : list) {
+            model.addRow(new Object[]{
+                cb.getMaCanhBao(),
+                "Học kỳ " + cb.getHocKy(),
+                cb.getNamHoc(),
+                UITheme.formatMucCanhBao(cb.getMucCanhBao()),
+                String.format("%.2f", cb.getGpaXetDuyet()),
+                cb.getLyDo(),
+                cb.getNgayQuyetDinh() != null ? cb.getNgayQuyetDinh().toString() : "---",
+                UITheme.formatTrangThaiTuVan(cb.getTrangThaiTuVan())
+            });
+        }
+
+        JTable tbl = new JTable(model);
+        UITheme.styleTable(tbl);
+
+        DefaultTableCellRenderer center = UITheme.createCenterRenderer();
+        tbl.getColumnModel().getColumn(0).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(1).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(2).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(4).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(6).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(7).setCellRenderer(center);
+
+        p.add(new JScrollPane(tbl), BorderLayout.CENTER);
         return p;
     }
 
     private JPanel createTuVanPanel() {
-        JPanel p = new JPanel(new BorderLayout(0, 0));
-        p.setBorder(new EmptyBorder(10, 12, 10, 12));
+        JPanel p = new JPanel(new BorderLayout(0, 8));
+        p.setBorder(new EmptyBorder(12, 14, 12, 14));
         p.setBackground(Color.WHITE);
 
-        String[] cols = {"Ngay tu van", "Hinh thuc", "Co van", "Noi dung trao doi", "Cam ket sinh vien"};
+        String[] cols = {"Ngày tư vấn", "CVHT phụ trách", "Hình thức", "Nội dung trao đổi", "Nguyên nhân", "Giải pháp", "Cam kết sinh viên"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        List<NhatKyTuVan> list = new NhatKyTuVanDAO().getNhatKyBySinhVien(sinhVien.getMaSv());
+        List<NhatKyTuVan> list = nhatKyDAO.getNhatKyBySinhVien(sinhVien.getMaSv());
         for (NhatKyTuVan nk : list) {
             model.addRow(new Object[]{
-                nk.getNgayTuVan(), nk.getHinhThuc(), nk.getHoTenCvht(),
-                nk.getNoiDung(), nk.getCamKetSinhVien()
+                nk.getNgayTuVan() != null ? nk.getNgayTuVan().toString() : "---",
+                nk.getHoTenCvht() != null ? nk.getHoTenCvht() : nk.getMaCvht(),
+                nk.getHinhThuc(),
+                nk.getNoiDung(),
+                nk.getNguyenNhan() != null ? nk.getNguyenNhan() : "---",
+                nk.getGiaiPhap() != null ? nk.getGiaiPhap() : "---",
+                nk.getCamKetSinhVien() != null ? nk.getCamKetSinhVien() : "---"
             });
         }
 
         JTable tbl = new JTable(model);
         UITheme.styleTable(tbl);
-        int[] widths = {100, 130, 150, 250, 200};
-        for (int i = 0; i < widths.length; i++) tbl.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+
+        DefaultTableCellRenderer center = UITheme.createCenterRenderer();
+        tbl.getColumnModel().getColumn(0).setCellRenderer(center);
+        tbl.getColumnModel().getColumn(2).setCellRenderer(center);
 
         p.add(new JScrollPane(tbl), BorderLayout.CENTER);
-
-        JLabel total = new JLabel("  Tong so lan tu van: " + list.size());
-        total.setFont(UITheme.FONT_BODY_BOLD);
-        total.setForeground(UITheme.INFO);
-        total.setBorder(new EmptyBorder(8, 0, 0, 0));
-        p.add(total, BorderLayout.SOUTH);
-
         return p;
     }
 }

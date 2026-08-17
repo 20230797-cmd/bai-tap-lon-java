@@ -147,6 +147,39 @@ public class CanhBaoDAO {
         }
     }
 
+    public List<CanhBaoHocVu> getCanhBaoByMaSv(String maSv) {
+        List<CanhBaoHocVu> list = new ArrayList<>();
+        String sql = "SELECT cb.*, s.ho_ten AS ho_ten_sv, s.ma_lop " +
+                     "FROM canh_bao_hoc_vu cb " +
+                     "JOIN sinh_vien s ON cb.ma_sv = s.ma_sv " +
+                     "WHERE cb.ma_sv = ? " +
+                     "ORDER BY cb.nam_hoc DESC, cb.hoc_ky DESC, cb.id DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maSv);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToCanhBao(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean deleteCanhBao(int id) {
+        String sql = "DELETE FROM canh_bao_hoc_vu WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private CanhBaoHocVu mapResultSetToCanhBao(ResultSet rs) throws SQLException {
         Date ngayQd = parseDateSafely(rs.getString("ngay_quyet_dinh"));
         CanhBaoHocVu cb = new CanhBaoHocVu(

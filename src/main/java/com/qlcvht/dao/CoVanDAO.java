@@ -78,4 +78,63 @@ public class CoVanDAO {
         }
         return list;
     }
+
+    public int getSoLuongSinhVienTrongLop(String maLop) {
+        String sql = "SELECT COUNT(*) FROM sinh_vien WHERE ma_lop = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maLop);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public boolean addLopHoc(LopHoc lop) {
+        String sql = "INSERT INTO lop_hoc (ma_lop, ten_lop, khoa, khoa_hoc, ma_cvht) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, lop.getMaLop());
+            ps.setString(2, lop.getTenLop());
+            ps.setString(3, lop.getKhoa());
+            ps.setInt(4, lop.getKhoaHoc());
+            ps.setString(5, lop.getMaCvht());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateLopHoc(LopHoc lop) {
+        String sql = "UPDATE lop_hoc SET ten_lop = ?, khoa = ?, khoa_hoc = ?, ma_cvht = ? WHERE ma_lop = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, lop.getTenLop());
+            ps.setString(2, lop.getKhoa());
+            ps.setInt(3, lop.getKhoaHoc());
+            ps.setString(4, lop.getMaCvht());
+            ps.setString(5, lop.getMaLop());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteLopHoc(String maLop) {
+        String sql = "DELETE FROM lop_hoc WHERE ma_lop = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maLop);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
+

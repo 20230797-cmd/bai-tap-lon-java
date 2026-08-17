@@ -4,17 +4,37 @@ import java.sql.*;
 
 public class DatabaseConnection {
 
-    // === MySQL config (chinh sua theo moi truong cua ban) ===
-    private static final String MYSQL_URL      = "jdbc:mysql://localhost:3306/ql_covan_hocvu?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
-    private static final String MYSQL_USER     = "root";
-    private static final String MYSQL_PASSWORD = "";
+    // Danh sách DB Name và Mật khẩu phổ biến để tự động kết nối nếu người dùng chưa sửa
+    private static final String[] MYSQL_DB_NAMES = {"ql_canhbao_hocvu", "ql_covan_hocvu"};
+    private static final String[] MYSQL_PASSWORDS = {"", "root", "123456", "admin", "12345678"};
+    private static final String MYSQL_HOST = "localhost:3306";
+    private static final String MYSQL_USER = "root";
 
-    // === SQLite fallback (tu dong tao neu khong co MySQL) ===
-    private static final String SQLITE_URL     = "jdbc:sqlite:ql_covan_hocvu.db";
+    private static String activeMysqlUrl = null;
+    private static String activeMysqlPassword = "";
+
+    // === SQLite fallback (tự động tạo nếu không có MySQL) ===
+    private static final String SQLITE_URL = "jdbc:sqlite:ql_covan_hocvu.db";
 
     private static boolean usingSQLite = false;
+    private static boolean initialized = false;
 
-    public static boolean isUsingSQLite() { return usingSQLite; }
+    public static boolean isUsingSQLite() { 
+        if (!initialized) {
+            testConnection();
+        }
+        return usingSQLite; 
+    }
+
+    public static String getDatabaseType() {
+        if (!initialized) {
+            testConnection();
+        }
+        if (usingSQLite) {
+            return "SQLite (Local DB)";
+        }
+        return "MySQL (" + (activeMysqlUrl != null && activeMysqlUrl.contains("ql_canhbao_hocvu") ? "ql_canhbao_hocvu" : "ql_covan_hocvu") + ")";
+    }
 
     public static Connection getConnection() throws SQLException {
         try {
@@ -22,11 +42,14 @@ public class DatabaseConnection {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException ignored) {}
 
+        if (!initialized) {
+            testConnection();
+        }
         if (usingSQLite) {
             return DriverManager.getConnection(SQLITE_URL);
         }
         try {
-            return DriverManager.getConnection(MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD);
+            return DriverManager.getConnection(activeMysqlUrl, MYSQL_USER, activeMysqlPassword);
         } catch (SQLException e) {
             usingSQLite = true;
             return DriverManager.getConnection(SQLITE_URL);
@@ -34,18 +57,28 @@ public class DatabaseConnection {
     }
 
     public static boolean testConnection() {
+        initialized = true;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection conn = DriverManager.getConnection(MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD)) {
-                usingSQLite = false;
-                initSQLite(); // van init de co fallback
-                return true;
+            for (String dbName : MYSQL_DB_NAMES) {
+                for (String pwd : MYSQL_PASSWORDS) {
+                    String url = "jdbc:mysql://" + MYSQL_HOST + "/" + dbName + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8";
+                    try (Connection conn = DriverManager.getConnection(url, MYSQL_USER, pwd)) {
+                        activeMysqlUrl = url;
+                        activeMysqlPassword = pwd;
+                        usingSQLite = false;
+                        initSQLite(); // Vẫn init sẵn SQLite đề phòng
+                        return true;
+                    } catch (SQLException ignored) {
+                        // Thử mật khẩu / DB tiếp theo
+                    }
+                }
             }
-        } catch (Exception e) {
-            usingSQLite = true;
-            initSQLite();
-            return false;
+        } catch (Exception ignored) {
         }
+        usingSQLite = true;
+        initSQLite();
+        return false;
     }
 
     private static void initSQLite() {

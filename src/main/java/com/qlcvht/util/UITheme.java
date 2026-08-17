@@ -1,15 +1,17 @@
 package com.qlcvht.util;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 /**
- * UITheme - Tap trung quan ly mau sac va font cho toan bo ung dung.
+ * UITheme - Quản lý màu sắc, font chữ và phong cách giao diện FlatLaf cho toàn bộ ứng dụng.
  */
 public class UITheme {
     public static final Color PRIMARY          = new Color(25, 118, 210);
     public static final Color PRIMARY_DARK     = new Color(13, 71, 161);
     public static final Color PRIMARY_LIGHT    = new Color(227, 242, 253);
-    public static final Color SECONDARY        = new Color(38, 50, 56);
+    public static final Color SECONDARY        = new Color(55, 71, 79);
     public static final Color SUCCESS          = new Color(46, 125, 50);
     public static final Color SUCCESS_LIGHT    = new Color(232, 245, 233);
     public static final Color WARNING          = new Color(230, 119, 0);
@@ -50,22 +52,89 @@ public class UITheme {
     public static final Font FONT_TABLE_HEADER = fontBold(13);
     public static final Font FONT_BTN          = fontBold(12);
     public static final Font FONT_BTN_LARGE    = fontBold(14);
-    public static final Insets BTN_INSETS      = new Insets(8, 16, 8, 16);
+    public static final Insets BTN_INSETS      = new Insets(7, 14, 7, 14);
     public static final int PAD_SMALL   = 5;
     public static final int PAD_MEDIUM  = 10;
     public static final int PAD_LARGE   = 15;
     public static final int PAD_XLARGE  = 20;
 
-    public static void styleTable(javax.swing.JTable table) {
+    public static void styleTable(JTable table) {
         table.setRowHeight(32);
         table.setFont(FONT_TABLE);
         table.getTableHeader().setFont(FONT_TABLE_HEADER);
         table.getTableHeader().setBackground(BG_TABLE_HEADER);
         table.getTableHeader().setForeground(TEXT_PRIMARY);
+        table.getTableHeader().setPreferredSize(new Dimension(100, 36));
         table.setSelectionBackground(PRIMARY_LIGHT);
         table.setSelectionForeground(TEXT_PRIMARY);
         table.setGridColor(BORDER_LIGHT);
         table.setShowGrid(true);
-        table.setIntercellSpacing(new java.awt.Dimension(1, 1));
+        table.setIntercellSpacing(new Dimension(1, 1));
     }
-}
+
+    public static JButton createButton(String text, Color bg, Color fg) {
+        JButton btn = new JButton(text);
+        btn.setFont(FONT_BTN);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setMargin(BTN_INSETS);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(bg.darker(), 1, true),
+            BorderFactory.createEmptyBorder(6, 12, 6, 12)
+        ));
+        return btn;
+    }
+
+    public static String formatTrangThaiSinhVien(String raw) {
+        if (raw == null) return "Đang học";
+        switch (raw) {
+            case "CANH_BAO_1": return "Cảnh báo mức 1";
+            case "CANH_BAO_2": return "Cảnh báo mức 2";
+            case "BUOC_THOI_HOC": return "Buộc thôi học";
+            case "DA_TOT_NGHIEP": return "Đã tốt nghiệp";
+            case "DANG_HOC":
+            default: return "Đang học";
+        }
+    }
+
+    public static String formatMucCanhBao(String raw) {
+        if (raw == null) return "-";
+        switch (raw) {
+            case "MUC_1": return "Mức 1 (GPA < 2.0)";
+            case "MUC_2": return "Mức 2 (GPA < 1.5)";
+            case "BUOC_THOI_HOC": return "Buộc thôi học (GPA < 1.0)";
+            default: return raw;
+        }
+    }
+
+    public static String formatTrangThaiTuVan(String raw) {
+        if (raw == null) return "Chưa tư vấn";
+        switch (raw) {
+            case "DA_TU_VAN": return "Đã tư vấn";
+            case "DANG_THEO_DOI": return "Đang theo dõi";
+            case "CHUA_TU_VAN":
+            default: return "Chưa tư vấn";
+        }
+    }
+
+    public static DefaultTableCellRenderer createCenterRenderer() {
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        return renderer;
+    }
+
+    public static JLabel createBadge(String text, Color bg, Color fg) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(fontBold(12));
+        lbl.setForeground(fg);
+        lbl.setBackground(bg);
+        lbl.setOpaque(true);
+        lbl.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(bg.darker(), 1, true),
+            BorderFactory.createEmptyBorder(4, 10, 4, 10)
+        ));
+        return lbl;
+    }
+}

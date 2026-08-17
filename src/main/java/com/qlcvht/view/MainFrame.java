@@ -1,7 +1,9 @@
 package com.qlcvht.view;
 
+import com.qlcvht.config.DatabaseConnection;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
+import com.qlcvht.view.dialog.DoiMatKhauDialog;
 import com.qlcvht.view.panel.*;
 
 import javax.swing.*;
@@ -29,10 +31,10 @@ public class MainFrame extends JFrame {
 
     public MainFrame(TaiKhoan user) {
         this.currentUser = user;
-        setTitle("He thong Quan ly Co van Hoc tap & Canh bao Hoc vu - HUCE");
+        setTitle("Hệ thống Quản lý Cố vấn Học tập & Cảnh báo Học vụ - HUCE");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1300, 800);
-        setMinimumSize(new Dimension(1100, 700));
+        setSize(1300, 780);
+        setMinimumSize(new Dimension(1080, 650));
         setLocationRelativeTo(null);
         initUI();
     }
@@ -51,59 +53,80 @@ public class MainFrame extends JFrame {
             }
         };
         topBar.setPreferredSize(new Dimension(1300, 58));
-        topBar.setBorder(new EmptyBorder(0, 20, 0, 20));
+        topBar.setBorder(new EmptyBorder(0, 18, 0, 18));
 
-        JLabel lblLogo = new JLabel("  \u2665  HE THONG CO VAN HOC TAP & CANH BAO HOC VU - HUCE");
+        // Logo & Title
+        JLabel lblLogo = new JLabel("🎓  HỆ THỐNG CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
         lblLogo.setFont(UITheme.fontBold(15));
         lblLogo.setForeground(Color.WHITE);
         topBar.add(lblLogo, BorderLayout.WEST);
 
         // User info panel (right)
-        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         userPanel.setOpaque(false);
+
+        // DB Status Pill
+        String dbType = DatabaseConnection.getDatabaseType();
+        JLabel lblDb = new JLabel("● " + dbType);
+        lblDb.setFont(UITheme.fontBold(11));
+        lblDb.setForeground(DatabaseConnection.isUsingSQLite() ? new Color(255, 235, 160) : new Color(170, 255, 190));
+        lblDb.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 1, true),
+            new EmptyBorder(4, 8, 4, 8)
+        ));
+        userPanel.add(lblDb);
 
         String roleTitle;
         switch (currentUser.getVaiTro() != null ? currentUser.getVaiTro() : "") {
-            case "ADMIN":    roleTitle = "Quan tri vien"; break;
-            case "QUAN_LY":  roleTitle = "Quan ly Khoa";  break;
-            case "CO_VAN":   roleTitle = "Co van Hoc tap"; break;
+            case "ADMIN":    roleTitle = "Quản trị viên"; break;
+            case "QUAN_LY":  roleTitle = "Quản lý Khoa";  break;
+            case "CO_VAN":   roleTitle = "Cố vấn Học tập"; break;
             default:         roleTitle = currentUser.getVaiTro();
         }
 
-        JLabel lblUser = new JLabel("Xin chao, " + currentUser.getHoTen() + "   |   " + roleTitle);
+        JLabel lblUser = new JLabel("Xin chào, " + currentUser.getHoTen() + " (" + roleTitle + ")");
         lblUser.setFont(UITheme.fontPlain(13));
-        lblUser.setForeground(new Color(210, 225, 255));
+        lblUser.setForeground(new Color(220, 235, 255));
         userPanel.add(lblUser);
 
-        JButton btnLogout = new JButton("Dang xuat");
-        btnLogout.setFont(UITheme.FONT_BTN);
-        btnLogout.setBackground(new Color(200, 50, 50));
-        btnLogout.setForeground(Color.WHITE);
-        btnLogout.setFocusPainted(false);
-        btnLogout.setBorderPainted(false);
-        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLogout.addActionListener(e -> { dispose(); new LoginFrame().setVisible(true); });
+        // Đổi mật khẩu button
+        JButton btnDoiPass = UITheme.createButton("Đổi MK", new Color(40, 90, 160), Color.WHITE);
+        btnDoiPass.setFont(UITheme.fontBold(11));
+        btnDoiPass.setToolTipText("Thay đổi mật khẩu tài khoản");
+        btnDoiPass.addActionListener(e -> new DoiMatKhauDialog(this, currentUser).setVisible(true));
+        userPanel.add(btnDoiPass);
+
+        // Đăng xuất button
+        JButton btnLogout = UITheme.createButton("Đăng Xuất", new Color(190, 40, 40), Color.WHITE);
+        btnLogout.setFont(UITheme.fontBold(11));
+        btnLogout.setToolTipText("Đăng xuất khỏi hệ thống");
+        btnLogout.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?", "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                dispose();
+                new LoginFrame().setVisible(true);
+            }
+        });
         userPanel.add(btnLogout);
 
         topBar.add(userPanel, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
-        // === LEFT SIDEBAR ===
+        // === LEFT SIDEBAR WITH SMOOTH SCROLLING ===
         sideBar = new JPanel();
         sideBar.setBackground(UITheme.BG_SIDEBAR);
-        sideBar.setPreferredSize(new Dimension(215, 800));
         sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
-        sideBar.setBorder(new EmptyBorder(12, 0, 12, 0));
+        sideBar.setBorder(new EmptyBorder(8, 0, 8, 0));
 
-        addSidebarSection("MENU CHINH");
+        addSidebarSection("CHỨC NĂNG CHÍNH");
 
-        btnDashboard = createNavBtn("  Dashboard", "DASHBOARD");
-        btnSinhVien  = createNavBtn("  Quan ly Sinh vien", "SINH_VIEN");
-        btnKetQua    = createNavBtn("  Ket qua Hoc tap", "KET_QUA");
-        btnCanhBao   = createNavBtn("  Canh bao Hoc vu", "CANH_BAO");
-        btnNhatKy    = createNavBtn("  Nhat ky Tu van", "NHAT_KY");
-        btnThongBao  = createNavBtn("  Thong bao & Tier", "THONG_BAO");
-        btnThongKe   = createNavBtn("  Bao cao & Thong ke", "THONG_KE");
+        btnDashboard = createNavBtn("  📊  Tổng Quan (Dashboard)", "DASHBOARD");
+        btnSinhVien  = createNavBtn("  👥  Hồ Sơ Sinh Viên", "SINH_VIEN");
+        btnKetQua    = createNavBtn("  📑  Bảng Điểm & Kết Quả", "KET_QUA");
+        btnCanhBao   = createNavBtn("  ⚠️  Cảnh Báo Học Vụ", "CANH_BAO");
+        btnNhatKy    = createNavBtn("  📝  Nhật Ký Tư Vấn CVHT", "NHAT_KY");
+        btnThongBao  = createNavBtn("  🔔  Thông Báo & Tiering", "THONG_BAO");
+        btnThongKe   = createNavBtn("  📈  Báo Cáo & Thống Kê", "THONG_KE");
 
         sideBar.add(btnDashboard);
         sideBar.add(btnSinhVien);
@@ -116,13 +139,20 @@ public class MainFrame extends JFrame {
         // Admin-only panels
         boolean isAdminOrQL = "ADMIN".equals(currentUser.getVaiTro()) || "QUAN_LY".equals(currentUser.getVaiTro());
         if (isAdminOrQL) {
-            addSidebarSection("QUAN TRI");
-            btnLopHoc = createNavBtn("  Quan ly Lop hoc", "LOP_HOC");
+            addSidebarSection("QUẢN TRỊ HỆ THỐNG");
+            btnLopHoc = createNavBtn("  🏫  Quản Lý Lớp & CVHT", "LOP_HOC");
             sideBar.add(btnLopHoc);
         }
 
         sideBar.add(Box.createVerticalGlue());
-        add(sideBar, BorderLayout.WEST);
+
+        JScrollPane sideBarScroll = new JScrollPane(sideBar);
+        sideBarScroll.setPreferredSize(new Dimension(235, 700));
+        sideBarScroll.setBorder(null);
+        sideBarScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        sideBarScroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        add(sideBarScroll, BorderLayout.WEST);
 
         // === CARD PANEL (CENTER) ===
         cardLayout = new CardLayout();
@@ -150,9 +180,9 @@ public class MainFrame extends JFrame {
     private void addSidebarSection(String title) {
         JLabel lbl = new JLabel("  " + title);
         lbl.setFont(UITheme.fontBold(10));
-        lbl.setForeground(new Color(120, 140, 160));
-        lbl.setBorder(new EmptyBorder(16, 10, 6, 10));
-        lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        lbl.setForeground(new Color(130, 150, 175));
+        lbl.setBorder(new EmptyBorder(12, 12, 4, 12));
+        lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         sideBar.add(lbl);
     }
 
@@ -179,8 +209,8 @@ public class MainFrame extends JFrame {
         btn.setBorderPainted(false);
         btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        btn.setPreferredSize(new Dimension(215, 44));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        btn.setPreferredSize(new Dimension(235, 42));
         btn.addActionListener(e -> switchCard(cardName, btn));
         return btn;
     }

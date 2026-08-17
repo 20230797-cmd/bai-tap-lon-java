@@ -1,8 +1,11 @@
 package com.qlcvht.view.dialog;
 
+import com.qlcvht.dao.CanhBaoDAO;
 import com.qlcvht.dao.NhatKyTuVanDAO;
+import com.qlcvht.dao.SinhVienDAO;
 import com.qlcvht.model.CanhBaoHocVu;
 import com.qlcvht.model.NhatKyTuVan;
+import com.qlcvht.model.SinhVien;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
@@ -11,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class LapNhatKyDialog extends JDialog {
 
@@ -18,18 +22,21 @@ public class LapNhatKyDialog extends JDialog {
     private final TaiKhoan currentUser;
     private boolean savedSuccess = false;
 
-    private JTextField txtMaSv, txtHoTenSv, txtNgayTuVan;
+    private JComboBox<String> cbSinhVien;
+    private JTextField txtNgayTuVan;
     private JComboBox<String> cbHinhThuc;
     private JTextArea txtNoiDung, txtNguyenNhan, txtGiaiPhap, txtCamKet;
 
+    private List<SinhVien> listSv;
+
     public LapNhatKyDialog(Frame parent, CanhBaoHocVu canhBao, TaiKhoan currentUser) {
-        super(parent, "Lap Nhat ky Tu van Sinh vien Bi canh bao", true);
+        super(parent, "Biên bản Tư vấn Cố vấn Học tập", true);
         this.canhBao = canhBao;
         this.currentUser = currentUser;
         initUI();
         pack();
         setLocationRelativeTo(parent);
-        setMinimumSize(new Dimension(560, 620));
+        setMinimumSize(new Dimension(600, 650));
     }
 
     private void initUI() {
@@ -38,7 +45,7 @@ public class LapNhatKyDialog extends JDialog {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UITheme.PRIMARY);
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
-        JLabel lbl = new JLabel("BIEN BAN TU VAN CANH BAO HOC VU");
+        JLabel lbl = new JLabel("BIÊN BẢN TƯ VẤN CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
         lbl.setFont(UITheme.FONT_SUBHEADER);
         lbl.setForeground(Color.WHITE);
         header.add(lbl, BorderLayout.WEST);
@@ -53,118 +60,161 @@ public class LapNhatKyDialog extends JDialog {
 
         int row = 0;
 
-        addLabel(form, gbc, row, "Ma Sinh vien:");
-        txtMaSv = new JTextField(canhBao != null ? canhBao.getMaSv() : "");
-        txtMaSv.setEditable(false); txtMaSv.setBackground(new Color(245, 245, 245));
-        addField(form, gbc, row, txtMaSv); row++;
+        // Chọn sinh viên
+        addLabel(form, gbc, row, "Sinh viên tư vấn (*):");
+        cbSinhVien = new JComboBox<>();
+        listSv = new SinhVienDAO().getAllSinhVien();
+        for (SinhVien sv : listSv) {
+            cbSinhVien.addItem(sv.getMaSv() + " - " + sv.getHoTen() + " (" + (sv.getTenLop() != null ? sv.getTenLop() : sv.getMaLop()) + ")");
+        }
+        if (canhBao != null) {
+            for (int i = 0; i < cbSinhVien.getItemCount(); i++) {
+                if (cbSinhVien.getItemAt(i).startsWith(canhBao.getMaSv())) {
+                    cbSinhVien.setSelectedIndex(i);
+                    cbSinhVien.setEnabled(false);
+                    break;
+                }
+            }
+        }
+        addField(form, gbc, row, cbSinhVien); row++;
 
-        addLabel(form, gbc, row, "Ho va Ten SV:");
-        txtHoTenSv = new JTextField(canhBao != null ? (canhBao.getHoTenSv() != null ? canhBao.getHoTenSv() : "") : "");
-        txtHoTenSv.setEditable(false); txtHoTenSv.setBackground(new Color(245, 245, 245));
-        addField(form, gbc, row, txtHoTenSv); row++;
-
-        addLabel(form, gbc, row, "Ngay tu van (YYYY-MM-DD):");
+        addLabel(form, gbc, row, "Ngày tư vấn (YYYY-MM-DD):");
         txtNgayTuVan = new JTextField(new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
         addField(form, gbc, row, txtNgayTuVan); row++;
 
-        addLabel(form, gbc, row, "Hinh thuc gap mat:");
-        cbHinhThuc = new JComboBox<>(new String[]{"Truc tiep", "Online (Teams/Zoom)", "Qua dien thoai"});
+        addLabel(form, gbc, row, "Hình thức gặp mặt:");
+        cbHinhThuc = new JComboBox<>(new String[]{
+            "Trực tiếp tại văn phòng bộ môn",
+            "Trực tuyến (MS Teams / Zoom)",
+            "Qua điện thoại",
+            "Gặp mặt cùng phụ huynh",
+            "Email trao đổi"
+        });
         addField(form, gbc, row, cbHinhThuc); row++;
 
-        addLabel(form, gbc, row, "Noi dung trao doi:");
+        addLabel(form, gbc, row, "Nội dung trao đổi (*):");
         gbc.gridy = row; gbc.gridx = 1; gbc.anchor = GridBagConstraints.NORTHWEST;
-        txtNoiDung = new JTextArea(3, 22);
-        txtNoiDung.setLineWrap(true); txtNoiDung.setWrapStyleWord(true);
+        txtNoiDung = new JTextArea(3, 24);
+        txtNoiDung.setLineWrap(true); 
+        txtNoiDung.setWrapStyleWord(true);
         txtNoiDung.setFont(UITheme.FONT_BODY);
-        if (canhBao != null) txtNoiDung.setText("Trao doi nguyen nhan bi canh bao hoc vu " + canhBao.getMucCanhBaoHienThi() + " (GPA: " + String.format("%.2f", canhBao.getGpaXetDuyet()) + ").");
+        if (canhBao != null) {
+            txtNoiDung.setText("Gặp mặt trao đổi và phân tích nguyên nhân bị " + UITheme.formatMucCanhBao(canhBao.getMucCanhBao()) 
+                + " (GPA xét duyệt: " + String.format("%.2f", canhBao.getGpaXetDuyet()) + "). Hướng dẫn kế hoạch học kỳ tới.");
+        } else {
+            txtNoiDung.setText("Tư vấn định hướng học tập, hỗ trợ đăng ký học phần và tháo gỡ khó khăn.");
+        }
         form.add(new JScrollPane(txtNoiDung), gbc); row++;
 
-        addLabel(form, gbc, row, "Nguyen nhan chinh:");
+        addLabel(form, gbc, row, "Nguyên nhân chính:");
         gbc.gridy = row; gbc.gridx = 1;
-        txtNguyenNhan = new JTextArea(2, 22);
-        txtNguyenNhan.setLineWrap(true); txtNguyenNhan.setWrapStyleWord(true);
+        txtNguyenNhan = new JTextArea(2, 24);
+        txtNguyenNhan.setLineWrap(true); 
+        txtNguyenNhan.setWrapStyleWord(true);
         txtNguyenNhan.setFont(UITheme.FONT_BODY);
+        txtNguyenNhan.setText("Chưa phân bổ thời gian hợp lý, đi làm thêm nhiều, gặp khó khăn với các môn đại cương/chuyên ngành.");
         form.add(new JScrollPane(txtNguyenNhan), gbc); row++;
 
-        addLabel(form, gbc, row, "Giai phap khac phuc:");
+        addLabel(form, gbc, row, "Giải pháp & Lộ trình:");
         gbc.gridy = row; gbc.gridx = 1;
-        txtGiaiPhap = new JTextArea(2, 22);
-        txtGiaiPhap.setLineWrap(true); txtGiaiPhap.setWrapStyleWord(true);
+        txtGiaiPhap = new JTextArea(2, 24);
+        txtGiaiPhap.setLineWrap(true); 
+        txtGiaiPhap.setWrapStyleWord(true);
         txtGiaiPhap.setFont(UITheme.FONT_BODY);
+        txtGiaiPhap.setText("Đăng ký học lại/học cải thiện vào kỳ phụ, giảm giờ làm thêm, tham gia nhóm học tập của lớp.");
         form.add(new JScrollPane(txtGiaiPhap), gbc); row++;
 
-        addLabel(form, gbc, row, "Cam ket cua Sinh vien:");
+        addLabel(form, gbc, row, "Cam kết của Sinh viên:");
         gbc.gridy = row; gbc.gridx = 1;
-        txtCamKet = new JTextArea(2, 22);
-        txtCamKet.setLineWrap(true); txtCamKet.setWrapStyleWord(true);
+        txtCamKet = new JTextArea(2, 24);
+        txtCamKet.setLineWrap(true); 
+        txtCamKet.setWrapStyleWord(true);
         txtCamKet.setFont(UITheme.FONT_BODY);
-        form.add(new JScrollPane(txtCamKet), gbc);
+        txtCamKet.setText("Cam kết đi học chuyên cần đầy đủ, nộp bài tập đúng hạn và đạt GPA >= 2.5 trong học kỳ tiếp theo.");
+        form.add(new JScrollPane(txtCamKet), gbc); row++;
 
-        add(form, BorderLayout.CENTER);
+        JScrollPane scrollForm = new JScrollPane(form);
+        scrollForm.setBorder(null);
+        scrollForm.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollForm, BorderLayout.CENTER);
 
-        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 10));
-        btns.setBackground(Color.WHITE);
-        btns.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_LIGHT));
-        JButton btnSave = createBtn("Luu Nhat ky", UITheme.PRIMARY, Color.WHITE);
+        // Buttons
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 12));
+        btnPanel.setBackground(Color.WHITE);
+        btnPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_LIGHT));
+
+        JButton btnSave = UITheme.createButton("Lưu Biên Bản Tư Vấn", UITheme.PRIMARY, Color.WHITE);
         btnSave.addActionListener(e -> onSave());
-        JButton btnCancel = createBtn("Huy", UITheme.BORDER_MEDIUM, UITheme.TEXT_PRIMARY);
+
+        JButton btnCancel = UITheme.createButton("Hủy Bỏ", new Color(200, 205, 215), UITheme.TEXT_PRIMARY);
         btnCancel.addActionListener(e -> dispose());
-        btns.add(btnSave);
-        btns.add(btnCancel);
-        add(btns, BorderLayout.SOUTH);
+
+        btnPanel.add(btnSave);
+        btnPanel.add(btnCancel);
+        add(btnPanel, BorderLayout.SOUTH);
     }
 
     private void addLabel(JPanel p, GridBagConstraints gbc, int row, String text) {
-        gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0.32; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0.0; gbc.gridwidth = 1;
         JLabel lbl = new JLabel(text);
         lbl.setFont(UITheme.FONT_BODY);
         p.add(lbl, gbc);
     }
 
     private void addField(JPanel p, GridBagConstraints gbc, int row, JComponent field) {
-        gbc.gridy = row; gbc.gridx = 1; gbc.weightx = 0.68;
+        gbc.gridy = row; gbc.gridx = 1; gbc.weightx = 1.0;
         field.setFont(UITheme.FONT_BODY);
         p.add(field, gbc);
     }
 
     private void onSave() {
+        String selSv = (String) cbSinhVien.getSelectedItem();
+        if (selSv == null) return;
+        String maSv = selSv.split(" - ")[0].trim();
+
         String ngayStr = txtNgayTuVan.getText().trim();
-        Date ngayTuVan;
-        try { ngayTuVan = Date.valueOf(ngayStr); }
-        catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Dinh dang ngay khong hop le! Dung YYYY-MM-DD", "Loi", JOptionPane.ERROR_MESSAGE);
+        String hinhThuc = (String) cbHinhThuc.getSelectedItem();
+        String noiDung = txtNoiDung.getText().trim();
+        String nguyenNhan = txtNguyenNhan.getText().trim();
+        String giaiPhap = txtGiaiPhap.getText().trim();
+        String camKet = txtCamKet.getText().trim();
+
+        if (noiDung.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập nội dung cuộc trao đổi tư vấn!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (txtNoiDung.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui long nhap noi dung trao doi!", "Canh bao", JOptionPane.WARNING_MESSAGE);
+
+        Date ngayTv;
+        try {
+            ngayTv = Date.valueOf(ngayStr);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Định dạng ngày tư vấn không đúng! Dùng chuẩn YYYY-MM-DD (VD: 2026-08-17)", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String maCvht = (currentUser != null && currentUser.getMaRef() != null) ? currentUser.getMaRef() : "CV001";
+
+        String maCvht = "CV001";
+        if (currentUser != null && currentUser.getMaRef() != null && !currentUser.getMaRef().isEmpty()) {
+            maCvht = currentUser.getMaRef();
+        }
+
+        Integer idCanhBao = (canhBao != null) ? canhBao.getId() : null;
+
         NhatKyTuVan nk = new NhatKyTuVan(
-            0, txtMaSv.getText().trim(), maCvht,
-            canhBao != null ? canhBao.getId() : null,
-            ngayTuVan, (String) cbHinhThuc.getSelectedItem(),
-            txtNoiDung.getText().trim(), txtNguyenNhan.getText().trim(),
-            txtGiaiPhap.getText().trim(), txtCamKet.getText().trim()
+            0, maSv, maCvht, idCanhBao, ngayTv, hinhThuc, noiDung, nguyenNhan, giaiPhap, camKet
         );
+
         boolean ok = new NhatKyTuVanDAO().addNhatKy(nk);
         if (ok) {
-            JOptionPane.showMessageDialog(this, "Luu nhat ky tu van thanh cong!", "Thong bao", JOptionPane.INFORMATION_MESSAGE);
+            if (idCanhBao != null) {
+                new CanhBaoDAO().updateTrangThaiTuVan(idCanhBao, "DA_TU_VAN");
+            }
+            JOptionPane.showMessageDialog(this, "Đã lưu biên bản tư vấn thành công và cập nhật trạng thái học vụ!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             savedSuccess = true;
             dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Luu that bai! Vui long thu lai.", "Loi CSDL", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lưu biên bản thất bại! Vui lòng kiểm tra kết nối CSDL.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public boolean isSavedSuccess() { return savedSuccess; }
-
-    private JButton createBtn(String text, Color bg, Color fg) {
-        JButton btn = new JButton(text);
-        btn.setFont(UITheme.FONT_BTN);
-        btn.setBackground(bg); btn.setForeground(fg);
-        btn.setFocusPainted(false); btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
 }

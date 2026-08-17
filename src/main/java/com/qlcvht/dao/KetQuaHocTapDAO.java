@@ -34,6 +34,20 @@ public class KetQuaHocTapDAO {
         return null;
     }
 
+    public KetQuaHocTap getKetQuaHocKy(String maSv, int hocKy, String namHoc) {
+        String sql = "SELECT * FROM ket_qua_hoc_tap WHERE ma_sv = ? AND hoc_ky = ? AND nam_hoc = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maSv);
+            ps.setInt(2, hocKy);
+            ps.setString(3, namHoc);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
     public List<KetQuaHocTap> getAllKetQua() {
         List<KetQuaHocTap> list = new ArrayList<>();
         String sql = "SELECT kq.*, s.ho_ten AS ho_ten_sv FROM ket_qua_hoc_tap kq " +

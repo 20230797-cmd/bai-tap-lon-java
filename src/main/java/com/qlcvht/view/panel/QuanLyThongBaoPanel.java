@@ -5,6 +5,7 @@ import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.model.ThongBao;
 import com.qlcvht.service.ThongBaoService;
 import com.qlcvht.util.UITheme;
+import com.qlcvht.util.WrapLayout;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -332,7 +333,7 @@ public class QuanLyThongBaoPanel extends JPanel {
         panel.setBorder(new EmptyBorder(12, 15, 12, 15));
 
         // Filter Bar (North)
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
+        JPanel filterPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 6));
         filterPanel.setOpaque(false);
         filterPanel.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT),
@@ -351,35 +352,26 @@ public class QuanLyThongBaoPanel extends JPanel {
         cbFilterClass = new JComboBox<>(new String[]{"Tất cả Lớp", "68IT1", "68IT2", "68KX1"});
         cbFilterClass.setFont(UITheme.fontPlain(12));
 
-        txtSearchKeyword = new JTextField(12);
+        txtSearchKeyword = new JTextField(11);
         txtSearchKeyword.setFont(UITheme.fontPlain(12));
 
-        JButton btnApplyFilter = new JButton("Lọc danh sách");
-        btnApplyFilter.setFont(UITheme.FONT_BTN);
-        btnApplyFilter.setBackground(UITheme.PRIMARY);
-        btnApplyFilter.setForeground(Color.WHITE);
+        JButton btnApplyFilter = UITheme.createButton("🔍 Lọc Danh Sách", UITheme.PRIMARY, Color.WHITE);
         btnApplyFilter.addActionListener(e -> applyStudentFilter());
 
-        JButton btnResetFilter = new JButton("Khôi phục");
-        btnResetFilter.setFont(UITheme.FONT_BTN);
+        JButton btnResetFilter = UITheme.createButton("🔄 Khôi Phục", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnResetFilter.addActionListener(e -> resetStudentFilter());
 
-        JButton btnSimulateGrade = new JButton("⚡ Giả Lập Điểm SV Được Chọn");
-        btnSimulateGrade.setFont(UITheme.fontBold(12));
-        btnSimulateGrade.setBackground(UITheme.PURPLE);
-        btnSimulateGrade.setForeground(Color.WHITE);
-        btnSimulateGrade.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnSimulateGrade = UITheme.createButton("⚡ Giả Lập Điểm", UITheme.PURPLE, Color.WHITE);
+        btnSimulateGrade.setToolTipText("Giả lập điểm thi học kỳ cho sinh viên được chọn");
         btnSimulateGrade.addActionListener(e -> handleGradeSimulation());
 
-        JButton btnClearSimulation = new JButton("Khôi Phục Điểm Gốc");
-        btnClearSimulation.setFont(UITheme.FONT_BTN);
-        btnClearSimulation.setBackground(new Color(245, 230, 230));
-        btnClearSimulation.setForeground(UITheme.DANGER);
+        JButton btnClearSimulation = UITheme.createButton("↩️ Điểm Gốc", new Color(245, 230, 230), UITheme.DANGER);
+        btnClearSimulation.setToolTipText("Khôi phục lại điểm gốc ban đầu");
         btnClearSimulation.addActionListener(e -> clearSimulation());
 
-        filterPanel.add(new JLabel("GPA từ:"));
+        filterPanel.add(new JLabel("GPA:"));
         filterPanel.add(txtMinGpa);
-        filterPanel.add(new JLabel("đến:"));
+        filterPanel.add(new JLabel("-"));
         filterPanel.add(txtMaxGpa);
         filterPanel.add(new JLabel("Tier:"));
         filterPanel.add(cbFilterTier);
@@ -389,6 +381,7 @@ public class QuanLyThongBaoPanel extends JPanel {
         filterPanel.add(txtSearchKeyword);
         filterPanel.add(btnApplyFilter);
         filterPanel.add(btnResetFilter);
+        filterPanel.add(new JSeparator(SwingConstants.VERTICAL));
         filterPanel.add(btnSimulateGrade);
         filterPanel.add(btnClearSimulation);
 
@@ -432,23 +425,16 @@ public class QuanLyThongBaoPanel extends JPanel {
         panel.setBorder(new EmptyBorder(12, 15, 12, 15));
 
         // Top ToolBar
-        JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        JPanel toolBar = new JPanel(new WrapLayout(FlowLayout.RIGHT, 10, 6));
         toolBar.setOpaque(false);
 
-        JButton btnViewDetail = new JButton("Xem chi tiết nội dung");
-        btnViewDetail.setFont(UITheme.FONT_BTN);
-        btnViewDetail.setBackground(UITheme.PRIMARY);
-        btnViewDetail.setForeground(Color.WHITE);
+        JButton btnViewDetail = UITheme.createButton("🔍 Xem Chi Tiết Nội Dung", UITheme.PRIMARY, Color.WHITE);
         btnViewDetail.addActionListener(e -> viewNotificationDetail());
 
-        JButton btnDeleteHistory = new JButton("Xóa thông báo");
-        btnDeleteHistory.setFont(UITheme.FONT_BTN);
-        btnDeleteHistory.setBackground(UITheme.DANGER);
-        btnDeleteHistory.setForeground(Color.WHITE);
+        JButton btnDeleteHistory = UITheme.createButton("🗑️ Xóa Thông Báo", UITheme.DANGER, Color.WHITE);
         btnDeleteHistory.addActionListener(e -> deleteNotificationHistory());
 
-        JButton btnRefreshHistory = new JButton("Tải lại lịch sử");
-        btnRefreshHistory.setFont(UITheme.FONT_BTN);
+        JButton btnRefreshHistory = UITheme.createButton("🔄 Tải Lại Lịch Sử", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnRefreshHistory.addActionListener(e -> loadHistoryData());
 
         toolBar.add(btnViewDetail);

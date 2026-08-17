@@ -1,5 +1,6 @@
 package com.qlcvht.util;
 
+import com.qlcvht.model.SinhVien;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -7,7 +8,12 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExcelExporter {
 
@@ -90,4 +96,51 @@ public class ExcelExporter {
             return false;
         }
     }
+
+    public static List<SinhVien> importSinhVienFromExcel(File file) throws Exception {
+        List<SinhVien> list = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        try (FileInputStream fis = new FileInputStream(file);
+             Workbook workbook = WorkbookFactory.create(fis)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+
+            // Bỏ qua dòng tiêu đề (row 0)
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                String maSv = formatter.formatCellValue(row.getCell(0)).trim();
+                String hoTen = formatter.formatCellValue(row.getCell(1)).trim();
+                String ngaySinhStr = formatter.formatCellValue(row.getCell(2)).trim();
+                String gioiTinh = formatter.formatCellValue(row.getCell(3)).trim();
+                String email = formatter.formatCellValue(row.getCell(4)).trim();
+                String sdt = formatter.formatCellValue(row.getCell(5)).trim();
+                String maLop = formatter.formatCellValue(row.getCell(6)).trim();
+                String trangThai = formatter.formatCellValue(row.getCell(7)).trim();
+
+                if (maSv.isEmpty() || hoTen.isEmpty()) continue;
+
+                Date ngaySinh = null;
+                try {
+                    if (!ngaySinhStr.isEmpty()) {
+                        ngaySinh = new Date(sdf.parse(ngaySinhStr).getTime());
+                    }
+                } catch (Exception ignored) {
+                    try {
+                        ngaySinh = Date.valueOf(ngaySinhStr);
+                    } catch (Exception ignored2) {}
+                }
+
+                if (trangThai.isEmpty()) trangThai = "DANG_HOC";
+                if (gioiTinh.isEmpty()) gioiTinh = "Nam";
+
+                SinhVien sv = new SinhVien(maSv, hoTen, ngaySinh, gioiTinh, email, sdt, maLop, trangThai);
+                list.add(sv);
+            }
+        }
+        return list;
+    }
 }
+
