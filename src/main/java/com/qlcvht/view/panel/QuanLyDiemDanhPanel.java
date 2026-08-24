@@ -11,11 +11,15 @@ import com.qlcvht.model.SinhVien;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
+import com.qlcvht.view.dialog.LichHocDiemDanhSinhVienDialog;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +38,7 @@ public class QuanLyDiemDanhPanel extends JPanel {
     private final CoVanDAO coVanDAO = new CoVanDAO();
 
     private JComboBox<String> cbLichHoc;
-    private JComboBox<String> cbFilterLop;
+    private JLabel lblGvInfo;
     private JTable tableDiemDanh;
     private DefaultTableModel modelDiemDanh;
 
@@ -67,7 +71,7 @@ public class QuanLyDiemDanhPanel extends JPanel {
         lblTitle.setFont(UITheme.FONT_HEADER);
         lblTitle.setForeground(UITheme.TEXT_PRIMARY);
 
-        JLabel lblSub = new JLabel("Điểm danh buổi học / buổi tư vấn học vụ, theo dõi tỷ lệ chuyên cần và phát hiện sinh viên vắng nhiều");
+        JLabel lblSub = new JLabel("Điểm danh buổi học / buổi tư vấn học vụ, tra cứu lịch học & điểm danh của từng sinh viên qua giảng viên");
         lblSub.setFont(UITheme.FONT_BODY);
         lblSub.setForeground(UITheme.TEXT_SECONDARY);
         titlePanel.add(lblTitle);
@@ -83,37 +87,64 @@ public class QuanLyDiemDanhPanel extends JPanel {
         lblVang = addStatCard(statRow, "VẮNG MẶT (ABSENT)", "0 SV", new Color(198, 40, 40));
         topPanel.add(statRow, BorderLayout.CENTER);
 
-        // Toolbar
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
-        toolbar.setBackground(UITheme.BG_WHITE);
-        toolbar.setBorder(BorderFactory.createCompoundBorder(
+        // Toolbar Container (2 rows: Row 1 Chọn lịch & GV, Row 2 Các nút thao tác)
+        JPanel toolbarBox = new JPanel(new GridLayout(2, 1, 0, 6));
+        toolbarBox.setBackground(UITheme.BG_WHITE);
+        toolbarBox.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
-            new EmptyBorder(6, 12, 6, 12)
+            new EmptyBorder(8, 12, 8, 12)
         ));
 
-        toolbar.add(new JLabel("Chọn Buổi Lịch:"));
+        // Toolbar Row 1: Session Selector & Lecturer Info
+        JPanel toolbarRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        toolbarRow1.setOpaque(false);
+        toolbarRow1.add(new JLabel("Chọn Buổi Lịch:"));
         cbLichHoc = new JComboBox<>();
-        cbLichHoc.setPreferredSize(new Dimension(320, 32));
+        cbLichHoc.setPreferredSize(new Dimension(380, 32));
         cbLichHoc.addActionListener(e -> loadDanhSachSinhVien());
-        toolbar.add(cbLichHoc);
+        toolbarRow1.add(cbLichHoc);
+
+        lblGvInfo = new JLabel("👨‍🏫 Giảng viên: ---");
+        lblGvInfo.setFont(UITheme.fontBold(12));
+        lblGvInfo.setForeground(UITheme.PRIMARY);
+        lblGvInfo.setBorder(new EmptyBorder(0, 10, 0, 0));
+        toolbarRow1.add(lblGvInfo);
+
+        toolbarBox.add(toolbarRow1);
+
+        // Toolbar Row 2: Action Buttons
+        JPanel toolbarRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        toolbarRow2.setOpaque(false);
+
+        JButton btnXemLichSv = UITheme.createButton("🔍 Xem Lịch Học & Điểm Danh SV", new Color(25, 118, 210), Color.WHITE);
+        btnXemLichSv.setToolTipText("Tra cứu toàn bộ lịch học và lịch sử điểm danh của sinh viên được chọn qua các giảng viên");
+        btnXemLichSv.addActionListener(e -> xemLichHocSinhVien());
+        toolbarRow2.add(btnXemLichSv);
 
         JButton btnTatCaCoMat = UITheme.createButton("⚡ Tất Cả Có Mặt", new Color(46, 125, 50), Color.WHITE);
         btnTatCaCoMat.addActionListener(e -> setAllStatus("ON_TIME"));
-        toolbar.add(btnTatCaCoMat);
+        toolbarRow2.add(btnTatCaCoMat);
 
-        JButton btnLuu = UITheme.createButton("💾 Lưu Bảng Điểm Danh", UITheme.PRIMARY, Color.WHITE);
+        JButton btnTaoDuLieuAo = UITheme.createButton("🎲 Tạo Dữ Liệu Ảo Đi Học", new Color(123, 31, 162), Color.WHITE);
+        btnTaoDuLieuAo.setToolTipText("Tự động sinh dữ liệu ảo điểm danh thực tế (đúng giờ, đi muộn, vắng) cho sinh viên đi học");
+        btnTaoDuLieuAo.addActionListener(e -> taoDuLieuAoDiemDanh());
+        toolbarRow2.add(btnTaoDuLieuAo);
+
+        JButton btnLuu = UITheme.createButton("💾 Lưu Điểm Danh", UITheme.PRIMARY, Color.WHITE);
         btnLuu.addActionListener(e -> luuDiemDanh());
-        toolbar.add(btnLuu);
+        toolbarRow2.add(btnLuu);
 
         JButton btnLocVang = UITheme.createButton("⚠️ Cảnh Báo Vắng Nhiều", new Color(198, 40, 40), Color.WHITE);
         btnLocVang.addActionListener(e -> canhBaoVangNhieu());
-        toolbar.add(btnLocVang);
+        toolbarRow2.add(btnLocVang);
 
-        topPanel.add(toolbar, BorderLayout.SOUTH);
+        toolbarBox.add(toolbarRow2);
+
+        topPanel.add(toolbarBox, BorderLayout.SOUTH);
         add(topPanel, BorderLayout.NORTH);
 
         // === TABLE ===
-        String[] headers = {"Mã SV", "Họ và Tên", "Lớp", "Giới Tính", "Trạng Thái Điểm Danh", "Ghi Chú"};
+        String[] headers = {"Mã SV", "Họ và Tên", "Lớp", "Giới Tính", "Trạng Thái Điểm Danh", "Ghi Chú Đánh Giá"};
         modelDiemDanh = new DefaultTableModel(headers, 0) {
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -131,6 +162,16 @@ public class QuanLyDiemDanhPanel extends JPanel {
         tableDiemDanh.getColumnModel().getColumn(3).setPreferredWidth(70);
         tableDiemDanh.getColumnModel().getColumn(4).setPreferredWidth(170);
         tableDiemDanh.getColumnModel().getColumn(5).setPreferredWidth(250);
+
+        // Double click mở Lịch Học & Điểm Danh Sinh Viên
+        tableDiemDanh.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && tableDiemDanh.getSelectedRow() >= 0) {
+                    xemLichHocSinhVien();
+                }
+            }
+        });
 
         // Editor ComboBox cho cột Trạng Thái
         JComboBox<String> cbStatusEditor = new JComboBox<>(new String[]{
@@ -206,10 +247,17 @@ public class QuanLyDiemDanhPanel extends JPanel {
 
     private void loadDanhSachSinhVien() {
         int idx = cbLichHoc.getSelectedIndex();
-        if (idx < 0 || dsLich == null || idx >= dsLich.size()) return;
+        if (idx < 0 || dsLich == null || idx >= dsLich.size()) {
+            lblGvInfo.setText("👨‍🏫 Giảng viên: ---");
+            return;
+        }
 
         LichGiangDay lich = dsLich.get(idx);
         String maLop = lich.getMaLop();
+        String gv = lich.getTenCvht() != null && !lich.getTenCvht().isEmpty() ? lich.getTenCvht() : (lich.getMaCvht() != null ? lich.getMaCvht() : "---");
+        String phong = lich.getDiaDiem() != null && !lich.getDiaDiem().isEmpty() ? lich.getDiaDiem() : "---";
+        String hinhThuc = "ONLINE".equals(lich.getHinhThuc()) ? "🌐 Online" : "🏫 Trực tiếp";
+        lblGvInfo.setText("👨‍🏫 GV: " + gv + "  |  " + hinhThuc + "  |  Địa điểm: " + phong + "  |  " + (lich.getGioBatDau() != null ? lich.getGioBatDau() : "") + " - " + (lich.getGioKetThuc() != null ? lich.getGioKetThuc() : ""));
 
         dsSinhVien = sinhVienDAO.getSinhVienByLop(maLop);
         List<DiemDanh> daDiemDanh = diemDanhDAO.getBySession(lich.getId());
@@ -248,6 +296,45 @@ public class QuanLyDiemDanhPanel extends JPanel {
         if (!dsSinhVien.isEmpty()) {
             double rate = (cntOnTime * 100.0) / dsSinhVien.size();
             lblTyLeChuyenCan.setText(String.format("%.1f%%", rate));
+        }
+    }
+
+    private void xemLichHocSinhVien() {
+        int row = tableDiemDanh.getSelectedRow();
+        if (row < 0 || dsSinhVien == null || row >= dsSinhVien.size()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một sinh viên trong bảng để xem lịch học & điểm danh!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        SinhVien sv = dsSinhVien.get(row);
+        LichHocDiemDanhSinhVienDialog dialog = new LichHocDiemDanhSinhVienDialog(SwingUtilities.getWindowAncestor(this), sv);
+        dialog.setVisible(true);
+        loadDanhSachSinhVien(); // reload sau khi đóng dialog phòng khi có sửa
+    }
+
+    private void taoDuLieuAoDiemDanh() {
+        String[] options = {"Chỉ buổi học hiện tại", "Tất cả các buổi học (Toàn bộ lớp)", "Hủy bỏ"};
+        int choice = JOptionPane.showOptionDialog(
+            this,
+            "Bạn muốn tạo dữ liệu ảo điểm danh thực tế (Có mặt đúng giờ, Đi muộn, Vắng có phép/không phép) cho sinh viên đi học ở phạm vi nào?",
+            "🎲 Tạo Dữ Liệu Ảo Đi Học",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+
+        if (choice == 0) { // Buổi hiện tại
+            int idx = cbLichHoc.getSelectedIndex();
+            if (idx < 0 || dsLich == null || idx >= dsLich.size()) return;
+            LichGiangDay lich = dsLich.get(idx);
+            int count = diemDanhDAO.generateMockAttendance(lich.getId());
+            JOptionPane.showMessageDialog(this, "Đã tạo thành công " + count + " bản ghi điểm danh ảo cho buổi học #" + lich.getId() + " (" + lich.getTieuDe() + ")!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            loadDanhSachSinhVien();
+        } else if (choice == 1) { // Tất cả các buổi học
+            int count = diemDanhDAO.generateMockAttendance(null);
+            JOptionPane.showMessageDialog(this, "Đã tạo thành công " + count + " bản ghi điểm danh ảo cho TẤT CẢ các buổi học trong hệ thống!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            loadDanhSachSinhVien();
         }
     }
 

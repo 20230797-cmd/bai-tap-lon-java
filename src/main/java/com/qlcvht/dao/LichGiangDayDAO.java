@@ -158,6 +158,17 @@ public class LichGiangDayDAO {
         return false;
     }
 
+    private LocalDate parseLocalDate(String str) {
+        if (str == null || str.trim().isEmpty()) return null;
+        try {
+            String s = str.trim();
+            if (s.length() >= 10) {
+                return LocalDate.parse(s.substring(0, 10));
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     private LichGiangDay mapResultSet(ResultSet rs) throws SQLException {
         LichGiangDay l = new LichGiangDay();
         l.setId(rs.getInt("id"));
@@ -166,10 +177,7 @@ public class LichGiangDayDAO {
         l.setMaLop(rs.getString("ma_lop"));
         l.setTenLop(rs.getString("ten_lop"));
         l.setTieuDe(rs.getString("tieu_de"));
-        Date d = rs.getDate("ngay");
-        if (d != null) {
-            l.setNgay(d.toLocalDate());
-        }
+        l.setNgay(parseLocalDate(rs.getString("ngay")));
         l.setGioBatDau(rs.getString("gio_bat_dau"));
         l.setGioKetThuc(rs.getString("gio_ket_thuc"));
         l.setDiaDiem(rs.getString("dia_diem"));

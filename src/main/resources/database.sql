@@ -440,12 +440,21 @@ CREATE TABLE `diem_danh` (
     CONSTRAINT `fk_diemdanh_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dữ liệu mẫu Lịch giảng dạy
+-- Dữ liệu mẫu Lịch giảng dạy & Thời khóa biểu
 INSERT INTO `lich_giang_day` (`ma_cvht`, `ten_cvht`, `ma_lop`, `ten_lop`, `tieu_de`, `ngay`, `gio_bat_dau`, `gio_ket_thuc`, `dia_diem`, `hinh_thuc`, `loai_buoi`, `trang_thai`, `ghi_chu`) VALUES
-('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Sinh hoạt Lớp & Tư vấn Học vụ Đầu kỳ', '2026-08-25', '08:00', '10:00', 'Phòng H1-302', 'TRUC_TIEP', 'TU_VAN_DINH_KY', 'SCHEDULED', 'Phổ biến quy chế đào tạo tín chỉ và kế hoạch học tập năm 2026-2027'),
-('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Tư vấn Cá nhân Nhóm Cảnh báo Học vụ (Tier 3)', '2026-08-26', '14:00', '16:30', 'Phòng Cố vấn Khoa CNTT', 'TRUC_TIEP', 'TU_VAN_CANH_BAO', 'SCHEDULED', 'Lập cam kết học tập và lộ trình trả nợ môn'),
-('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Chuyên đề: Công nghệ Java Nâng cao & Swing UI', '2026-08-28', '07:30', '11:00', 'Phòng Máy PM4-Lab2', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Thực hành xây dựng ứng dụng quản lý với FlatLaf'),
-('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Hội thảo Online: Định hướng Đồ án & Thực tập Doanh nghiệp', '2026-08-29', '19:30', '21:30', 'https://meet.google.com/abc-defg-hij', 'ONLINE', 'GIANG_DAY', 'SCHEDULED', 'Khách mời từ doanh nghiệp phần mềm');
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Sinh hoạt Lớp & Tư vấn Học vụ Đầu kỳ', '2026-08-25', '08:00', '10:00', 'Phòng H1-302', 'TRUC_TIEP', 'TU_VAN_DINH_KY', 'COMPLETED', 'Phổ biến quy chế đào tạo tín chỉ và kế hoạch học tập năm 2026-2027'),
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Tư vấn Cá nhân Nhóm Cảnh báo Học vụ (Tier 3)', '2026-08-26', '14:00', '16:30', 'Phòng Cố vấn Khoa CNTT', 'TRUC_TIEP', 'TU_VAN_CANH_BAO', 'COMPLETED', 'Lập cam kết học tập và lộ trình trả nợ môn'),
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Chuyên đề: Công nghệ Java Nâng cao & Swing UI', '2026-08-28', '07:30', '11:00', 'Phòng Máy PM4-Lab2', 'TRUC_TIEP', 'GIANG_DAY', 'COMPLETED', 'Thực hành xây dựng ứng dụng quản lý với FlatLaf'),
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Thực hành Lập trình Cơ sở dữ liệu JDBC & SQLite', '2026-09-02', '07:30', '11:00', 'Phòng Máy PM4-Lab2', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Xây dựng tầng DAO và kết nối cơ sở dữ liệu'),
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Kiểm tra Giữa kỳ & Đánh giá Điểm danh Chuyên cần', '2026-09-10', '08:00', '10:30', 'Phòng H1-302', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Làm bài kiểm tra đánh giá quá trình và tổng kết chuyên cần'),
+('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Báo cáo Tiến độ Bài tập lớn & Đồ án Cuối kỳ', '2026-09-25', '13:30', '17:00', 'Hội trường G3', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Trình bày demo sản phẩm ứng dụng quản lý cố vấn học tập'),
+('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Hội thảo Online: Định hướng Đồ án & Thực tập Doanh nghiệp', '2026-08-29', '19:30', '21:30', 'https://meet.google.com/abc-defg-hij', 'ONLINE', 'GIANG_DAY', 'COMPLETED', 'Khách mời từ doanh nghiệp phần mềm'),
+('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Chuyên đề: Thiết kế Kiến trúc MVC & Clean Code trong Java', '2026-09-01', '08:00', '11:30', 'Phòng H2-205', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Hướng dẫn phân tách các tầng View, Service, DAO'),
+('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Tư vấn Học tập & Hướng dẫn Đăng ký Môn Cải thiện Điểm', '2026-09-08', '14:00', '16:00', 'Phòng Cố vấn Khoa CNTT', 'TRUC_TIEP', 'TU_VAN_DINH_KY', 'SCHEDULED', 'Rà soát danh sách sinh viên nợ tín chỉ học kỳ trước'),
+('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Thực hành Lập trình Giao diện Java Swing & FlatLaf Theme', '2026-09-15', '07:30', '11:00', 'Phòng Máy PM2-Lab1', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Tùy biến bảng dữ liệu, form nhập liệu và dialog'),
+('CV003', 'PGS.TS. Lê Hoàng Cường', '68KX1', '68KX1 - Kinh tế xây dựng 1', 'Sinh hoạt Lớp & Định hướng Đào tạo Tín chỉ Ngành Kinh tế XD', '2026-08-27', '08:00', '10:00', 'Phòng H3-101', 'TRUC_TIEP', 'TU_VAN_DINH_KY', 'COMPLETED', 'Phổ biến chương trình khung đào tạo 2026-2027'),
+('CV003', 'PGS.TS. Lê Hoàng Cường', '68KX1', '68KX1 - Kinh tế xây dựng 1', 'Chuyên đề: Quản lý Dự án & Phần mềm Dự toán Xây dựng', '2026-09-03', '08:00', '11:30', 'Phòng H3-101', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Giới thiệu các công cụ tính toán chi phí và tiến độ'),
+('CV003', 'PGS.TS. Lê Hoàng Cường', '68KX1', '68KX1 - Kinh tế xây dựng 1', 'Tư vấn Cá nhân Sinh viên Nhóm Cảnh báo Học vụ HK2', '2026-09-12', '14:00', '16:30', 'Phòng Cố vấn Khoa KTXD', 'TRUC_TIEP', 'TU_VAN_CANH_BAO', 'SCHEDULED', 'Tìm hiểu nguyên nhân kết quả giảm sút và hỗ trợ');
 
 -- Dữ liệu mẫu Bài tập & Đánh giá
 INSERT INTO `bai_tap` (`ma_lop`, `tieu_de`, `loai_danh_gia`, `trong_so`, `han_nop`, `mo_ta`, `dinh_dang_cho_phep`, `trang_thai`) VALUES

@@ -15,6 +15,15 @@ public class DiemDanh {
     private String trangThai; // ON_TIME (Đúng giờ), LATE (Đi muộn), EXCUSED (Vắng có phép), ABSENT (Vắng không phép)
     private String ghiChu;
 
+    private String tieuDeBuoiHoc;
+    private String tenCvht;
+    private String maCvht;
+    private String gioBatDau;
+    private String gioKetThuc;
+    private String diaDiem;
+    private String hinhThuc;
+    private String loaiBuoi;
+
     public DiemDanh() {}
 
     public DiemDanh(int id, int idLich, String maSv, String hoTen, String maLop,
@@ -52,4 +61,28 @@ public class DiemDanh {
 
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+
+    public String getTieuDeBuoiHoc() { return tieuDeBuoiHoc; }
+    public void setTieuDeBuoiHoc(String tieuDeBuoiHoc) { this.tieuDeBuoiHoc = tieuDeBuoiHoc; }
+
+    public String getTenCvht() { return tenCvht; }
+    public void setTenCvht(String tenCvht) { this.tenCvht = tenCvht; }
+
+    public String getMaCvht() { return maCvht; }
+    public void setMaCvht(String maCvht) { this.maCvht = maCvht; }
+
+    public String getGioBatDau() { return gioBatDau; }
+    public void setGioBatDau(String gioBatDau) { this.gioBatDau = gioBatDau; }
+
+    public String getGioKetThuc() { return gioKetThuc; }
+    public void setGioKetThuc(String gioKetThuc) { this.gioKetThuc = gioKetThuc; }
+
+    public String getDiaDiem() { return diaDiem; }
+    public void setDiaDiem(String diaDiem) { this.diaDiem = diaDiem; }
+
+    public String getHinhThuc() { return hinhThuc; }
+    public void setHinhThuc(String hinhThuc) { this.hinhThuc = hinhThuc; }
+
+    public String getLoaiBuoi() { return loaiBuoi; }
+    public void setLoaiBuoi(String loaiBuoi) { this.loaiBuoi = loaiBuoi; }
 }

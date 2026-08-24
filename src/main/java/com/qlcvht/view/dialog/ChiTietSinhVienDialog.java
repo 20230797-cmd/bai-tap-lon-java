@@ -341,24 +341,109 @@ public class ChiTietSinhVienDialog extends JDialog {
         p.setBorder(new EmptyBorder(12, 14, 12, 14));
         p.setBackground(Color.WHITE);
 
-        String[] cols = {"ID Buổi", "Ngày Điểm Danh", "Trạng Thái", "Ghi Chú Đánh Giá"};
+        List<DiemDanh> list = diemDanhDAO.getLichHocVaDiemDanhBySinhVien(sinhVien.getMaSv());
+        int cntOnTime = 0, cntLate = 0, cntAbsent = 0, cntTotal = list.size();
+
+        String[] cols = {"ID Buổi", "Ngày Học", "Thời Gian", "Môn Học / Buổi Học", "Giảng Viên / CVHT", "Địa Điểm", "Hình Thức", "Trạng Thái", "Ghi Chú"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        List<DiemDanh> list = diemDanhDAO.getByStudent(sinhVien.getMaSv());
         for (DiemDanh d : list) {
-            String tt = "ON_TIME".equals(d.getTrangThai()) ? "✔ Có mặt đúng giờ" : ("LATE".equals(d.getTrangThai()) ? "⏳ Đi muộn" : "✖ Vắng mặt");
+            String tt;
+            if ("ON_TIME".equals(d.getTrangThai())) {
+                tt = "✔ Đúng giờ";
+                cntOnTime++;
+            } else if ("LATE".equals(d.getTrangThai())) {
+                tt = "⏳ Đi muộn";
+                cntLate++;
+            } else if ("EXCUSED".equals(d.getTrangThai())) {
+                tt = "✉ Có phép";
+                cntAbsent++;
+            } else if ("ABSENT".equals(d.getTrangThai())) {
+                tt = "✖ Vắng mặt";
+                cntAbsent++;
+            } else {
+                tt = "⚪ Chưa điểm danh";
+            }
+
+            String gv = d.getTenCvht() != null ? d.getTenCvht() : (d.getMaCvht() != null ? d.getMaCvht() : "---");
+            String hinhThuc = "ONLINE".equals(d.getHinhThuc()) ? "🌐 Online" : "🏫 Trực tiếp";
+
             model.addRow(new Object[]{
                 d.getIdLich(),
                 d.getNgayDiemDanh() != null ? d.getNgayDiemDanh().toString() : "---",
+                (d.getGioBatDau() != null ? d.getGioBatDau() : "") + " - " + (d.getGioKetThuc() != null ? d.getGioKetThuc() : ""),
+                d.getTieuDeBuoiHoc() != null ? d.getTieuDeBuoiHoc() : "---",
+                gv,
+                d.getDiaDiem() != null ? d.getDiaDiem() : "---",
+                hinhThuc,
                 tt,
                 d.getGhiChu() != null ? d.getGhiChu() : ""
             });
         }
 
+        // Summary bar
+        JPanel statBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 6));
+        statBar.setBackground(UITheme.PRIMARY_LIGHT);
+        statBar.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true));
+
+        double rate = cntTotal > 0 ? (cntOnTime * 100.0) / cntTotal : 100.0;
+        JLabel lblRate = new JLabel("📊 Tỷ lệ chuyên cần: " + String.format("%.1f%%", rate) + " (" + cntOnTime + "/" + cntTotal + " buổi)");
+        lblRate.setFont(UITheme.fontBold(12));
+        lblRate.setForeground(UITheme.PRIMARY);
+
+        JLabel lblLate = new JLabel("⏳ Đi muộn: " + cntLate + " buổi");
+        lblLate.setFont(UITheme.fontBold(12));
+        lblLate.setForeground(new Color(230, 119, 0));
+
+        JLabel lblAbs = new JLabel("✖ Vắng mặt: " + cntAbsent + " buổi");
+        lblAbs.setFont(UITheme.fontBold(12));
+        lblAbs.setForeground(new Color(198, 40, 40));
+
+        statBar.add(lblRate);
+        statBar.add(new JLabel("|"));
+        statBar.add(lblLate);
+        statBar.add(new JLabel("|"));
+        statBar.add(lblAbs);
+
+        p.add(statBar, BorderLayout.NORTH);
+
         JTable tbl = new JTable(model);
         UITheme.styleTable(tbl);
+        tbl.getColumnModel().getColumn(0).setMaxWidth(60);
+        tbl.getColumnModel().getColumn(1).setPreferredWidth(90);
+        tbl.getColumnModel().getColumn(2).setPreferredWidth(90);
+        tbl.getColumnModel().getColumn(3).setPreferredWidth(180);
+        tbl.getColumnModel().getColumn(4).setPreferredWidth(160);
+        tbl.getColumnModel().getColumn(5).setPreferredWidth(120);
+        tbl.getColumnModel().getColumn(6).setPreferredWidth(85);
+        tbl.getColumnModel().getColumn(7).setPreferredWidth(130);
+        tbl.getColumnModel().getColumn(8).setPreferredWidth(200);
+
+        // Custom Renderer cho Trạng thái
+        tbl.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                lbl.setFont(UITheme.fontBold(12));
+                String v = value != null ? value.toString() : "";
+                if (v.contains("Đúng giờ")) {
+                    lbl.setForeground(new Color(46, 125, 50));
+                } else if (v.contains("Đi muộn")) {
+                    lbl.setForeground(new Color(230, 119, 0));
+                } else if (v.contains("Có phép")) {
+                    lbl.setForeground(new Color(25, 118, 210));
+                } else if (v.contains("Vắng mặt")) {
+                    lbl.setForeground(new Color(198, 40, 40));
+                } else {
+                    lbl.setForeground(new Color(120, 130, 140));
+                }
+                return lbl;
+            }
+        });
+
         p.add(new JScrollPane(tbl), BorderLayout.CENTER);
         return p;
     }

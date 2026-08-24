@@ -87,6 +87,7 @@ public class DatabaseConnection {
 
         // 2. Nếu MySQL không khả dụng -> Chuyển sang SQLite
         if (!mysqlSuccess) {
+            isSQLiteMode = true;
             System.out.println("[INFO] ------------------------------------------------------------");
             System.out.println("[INFO] [DUAL-ENGINE] Tự động kích hoạt CSDL Tích Hợp SQLite (Zero-Config)");
             System.out.println("[INFO] Hệ thống sẽ tự tạo file database và nạp sẵn 100% dữ liệu mẫu.");
@@ -98,9 +99,13 @@ public class DatabaseConnection {
                     dataDir.mkdirs();
                 }
                 try (Connection conn = DriverManager.getConnection(SQLITE_JDBC_URL)) {
+                    try (Statement pragmaSt = conn.createStatement()) {
+                        try (ResultSet rs = pragmaSt.executeQuery("PRAGMA journal_mode = WAL")) {}
+                        try (ResultSet rs = pragmaSt.executeQuery("PRAGMA busy_timeout = 10000")) {}
+                        try (ResultSet rs = pragmaSt.executeQuery("PRAGMA synchronous = NORMAL")) {}
+                    }
                     ensureSQLiteSchema(conn);
                 }
-                isSQLiteMode = true;
                 System.out.println("[INFO] Sẵn sàng sử dụng CSDL SQLite: " + SQLITE_DB_PATH);
             } catch (Exception e) {
                 System.err.println("[ERROR] Lỗi nghiêm trọng khi khởi tạo SQLite Fallback: " + e.getMessage());
@@ -119,7 +124,11 @@ public class DatabaseConnection {
             initDatabase();
         }
         if (isSQLiteMode) {
-            return DriverManager.getConnection(SQLITE_JDBC_URL);
+            Connection conn = DriverManager.getConnection(SQLITE_JDBC_URL);
+            try (Statement pragmaSt = conn.createStatement()) {
+                try (ResultSet rs = pragmaSt.executeQuery("PRAGMA busy_timeout = 10000")) {}
+            } catch (Exception ignored) {}
+            return conn;
         } else {
             return DriverManager.getConnection(mysqlJdbcUrl, dbUser, dbPassword);
         }
@@ -204,6 +213,8 @@ public class DatabaseConnection {
                 System.err.println("[WARN] Không tìm thấy resource file SQL: " + resourceName);
                 return;
             }
+            boolean origAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
                  Statement st = conn.createStatement()) {
                 
@@ -233,6 +244,9 @@ public class DatabaseConnection {
                         sb.setLength(0);
                     }
                 }
+                conn.commit();
+            } finally {
+                conn.setAutoCommit(origAutoCommit);
             }
         } catch (Exception e) {
             System.err.println("[ERROR] Lỗi khi đọc script SQL: " + e.getMessage());
