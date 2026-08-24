@@ -23,10 +23,10 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             boolean connected = DatabaseConnection.testConnection();
-            if (DatabaseConnection.isUsingSQLite()) {
-                System.out.println("[INFO] Dang su dung CSDL nhung SQLite (du phong).");
+            if (connected) {
+                System.out.println("[INFO] Kết nối CSDL thành công: " + DatabaseConnection.getDatabaseType());
             } else {
-                System.out.println("[INFO] Ket noi CSDL MySQL thanh cong!");
+                System.err.println("[WARN] Không thể khởi tạo CSDL!");
             }
             new LoginFrame().setVisible(true);
         });

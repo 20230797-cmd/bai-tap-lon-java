@@ -3,10 +3,10 @@
 -- Đề tài Bài tập lớn môn Công nghệ Java (Java Swing + JDBC + MySQL)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS `ql_canhbao_hocvu` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `ql_canhbao_hocvu`;
 
-SET FOREIGN_KEY_CHECKS = 0;
+
+
+
 
 -- 1. Bảng Cố vấn học tập (CVHT)
 DROP TABLE IF EXISTS `diem_danh`;
@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS `lop_hoc`;
 DROP TABLE IF EXISTS `co_van_hoc_tap`;
 DROP TABLE IF EXISTS `tai_khoan`;
 
-SET FOREIGN_KEY_CHECKS = 1;
+
 
 CREATE TABLE `co_van_hoc_tap` (
     `ma_cvht` VARCHAR(20) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `co_van_hoc_tap` (
     `so_dien_thoai` VARCHAR(15),
     `khoa` VARCHAR(100) NOT NULL,
     PRIMARY KEY (`ma_cvht`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 2. Bảng Lớp học
 CREATE TABLE `lop_hoc` (
@@ -42,7 +42,7 @@ CREATE TABLE `lop_hoc` (
     `ma_cvht` VARCHAR(20),
     PRIMARY KEY (`ma_lop`),
     CONSTRAINT `fk_lophoc_cvht` FOREIGN KEY (`ma_cvht`) REFERENCES `co_van_hoc_tap` (`ma_cvht`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 3. Bảng Sinh viên
 CREATE TABLE `sinh_vien` (
@@ -53,42 +53,42 @@ CREATE TABLE `sinh_vien` (
     `email` VARCHAR(100),
     `so_dien_thoai` VARCHAR(15),
     `ma_lop` VARCHAR(20) NOT NULL,
-    `trang_thai` ENUM('DANG_HOC', 'CANH_BAO_1', 'CANH_BAO_2', 'BUOC_THOI_HOC', 'DA_TOT_NGHIEP') DEFAULT 'DANG_HOC',
+    `trang_thai` TEXT DEFAULT 'DANG_HOC',
     PRIMARY KEY (`ma_sv`),
     CONSTRAINT `fk_sinhvien_lop` FOREIGN KEY (`ma_lop`) REFERENCES `lop_hoc` (`ma_lop`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 4. Bảng Kết quả học tập
 CREATE TABLE `ket_qua_hoc_tap` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_sv` VARCHAR(20) NOT NULL,
     `hoc_ky` INT NOT NULL,
     `nam_hoc` VARCHAR(20) NOT NULL,
     `gpa_hoc_ky` DOUBLE NOT NULL DEFAULT 0.0,
     `gpa_tich_luy` DOUBLE NOT NULL DEFAULT 0.0,
     `so_tin_chi_no` INT DEFAULT 0,
-    UNIQUE KEY `uk_sv_hk_nh` (`ma_sv`, `hoc_ky`, `nam_hoc`),
+    UNIQUE(`ma_sv`, `hoc_ky`, `nam_hoc`),
     CONSTRAINT `fk_kqht_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 5. Bảng Cảnh báo học vụ
 CREATE TABLE `canh_bao_hoc_vu` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_canh_bao` VARCHAR(30) UNIQUE NOT NULL,
     `ma_sv` VARCHAR(20) NOT NULL,
     `hoc_ky` INT NOT NULL,
     `nam_hoc` VARCHAR(20) NOT NULL,
-    `muc_canh_bao` ENUM('MUC_1', 'MUC_2', 'BUOC_THOI_HOC') NOT NULL,
+    `muc_canh_bao` TEXT NOT NULL,
     `gpa_xet_duyet` DOUBLE NOT NULL,
     `ly_do` TEXT,
-    `ngay_quyet_dinh` DATE DEFAULT (CURRENT_DATE),
-    `trang_thai_tu_van` ENUM('CHUA_TU_VAN', 'DA_TU_VAN', 'DANG_THEO_DOI') DEFAULT 'CHUA_TU_VAN',
+    `ngay_quyet_dinh` DATE DEFAULT (date('now', 'localtime')),
+    `trang_thai_tu_van` TEXT DEFAULT 'CHUA_TU_VAN',
     CONSTRAINT `fk_cbhv_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 6. Bảng Nhật ký tư vấn
 CREATE TABLE `nhat_ky_tu_van` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_sv` VARCHAR(20) NOT NULL,
     `ma_cvht` VARCHAR(20) NOT NULL,
     `id_canh_bao` INT,
@@ -101,51 +101,51 @@ CREATE TABLE `nhat_ky_tu_van` (
     CONSTRAINT `fk_nktv_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_nktv_cvht` FOREIGN KEY (`ma_cvht`) REFERENCES `co_van_hoc_tap` (`ma_cvht`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_nktv_cbhv` FOREIGN KEY (`id_canh_bao`) REFERENCES `canh_bao_hoc_vu` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 7. Bảng Tài khoản hệ thống
 CREATE TABLE `tai_khoan` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ten_dang_nhap` VARCHAR(50) UNIQUE NOT NULL,
     `mat_khau` VARCHAR(255) NOT NULL,
     `ho_ten` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100),
-    `vai_tro` ENUM('ADMIN', 'CO_VAN', 'QUAN_LY') DEFAULT 'CO_VAN',
+    `vai_tro` TEXT DEFAULT 'CO_VAN',
     `ma_ref` VARCHAR(20),
-    `ngay_tao` DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `ngay_tao` DATETIME DEFAULT (datetime('now', 'localtime'))
+);
 
 -- 8. Bảng Thông báo sinh viên
 CREATE TABLE `thong_bao` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_thong_bao` VARCHAR(50) UNIQUE NOT NULL,
     `tieu_de` VARCHAR(255) NOT NULL,
     `noi_dung` TEXT NOT NULL,
     `nhom_rui_ro` VARCHAR(30) DEFAULT 'ALL',
     `ma_lop` VARCHAR(20),
     `ma_sv` VARCHAR(20),
-    `ngay_gui` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `ngay_gui` DATETIME DEFAULT (datetime('now', 'localtime')),
     `nguoi_gui` VARCHAR(100) DEFAULT 'Cố vấn học tập',
     `so_luong_nhan` INT DEFAULT 0,
     `trang_thai` VARCHAR(20) DEFAULT 'DA_GUI'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================
 -- DỮ LIỆU MẪU ĐẦY ĐỦ (15 SINH VIÊN + CẢNH BÁO + NHẬT KÝ TƯ VẤN)
 -- Mật khẩu mặc định: 123456
 -- ============================================================
 
-INSERT INTO `co_van_hoc_tap` (`ma_cvht`, `ho_ten`, `email`, `so_dien_thoai`, `khoa`) VALUES
+INSERT OR REPLACE INTO `co_van_hoc_tap` (`ma_cvht`, `ho_ten`, `email`, `so_dien_thoai`, `khoa`) VALUES
 ('CV001', 'TS. Nguyễn Văn An', 'an.nv@huce.edu.vn', '0912345678', 'Công nghệ thông tin'),
 ('CV002', 'ThS. Trần Thị Bình', 'binh.tt@huce.edu.vn', '0987654321', 'Công nghệ thông tin'),
 ('CV003', 'PGS.TS. Lê Hoàng Cường', 'cuong.lh@huce.edu.vn', '0905112233', 'Kinh tế xây dựng');
 
-INSERT INTO `lop_hoc` (`ma_lop`, `ten_lop`, `khoa`, `khoa_hoc`, `ma_cvht`) VALUES
+INSERT OR REPLACE INTO `lop_hoc` (`ma_lop`, `ten_lop`, `khoa`, `khoa_hoc`, `ma_cvht`) VALUES
 ('68IT1', '68IT1 - Công nghệ thông tin 1', 'Công nghệ thông tin', 2023, 'CV001'),
 ('68IT2', '68IT2 - Công nghệ thông tin 2', 'Công nghệ thông tin', 2023, 'CV002'),
 ('68KX1', '68KX1 - Kinh tế xây dựng 1', 'Kinh tế xây dựng', 2023, 'CV003');
 
-INSERT INTO `sinh_vien` (`ma_sv`, `ho_ten`, `ngay_sinh`, `gioi_tinh`, `email`, `so_dien_thoai`, `ma_lop`, `trang_thai`) VALUES
+INSERT OR REPLACE INTO `sinh_vien` (`ma_sv`, `ho_ten`, `ngay_sinh`, `gioi_tinh`, `email`, `so_dien_thoai`, `ma_lop`, `trang_thai`) VALUES
 ('20230001', 'Võ Minh Linh', '2005-05-27', 'Nữ', 'sv20230001@huce.edu.vn', '0952808199', '68IT1', 'DANG_HOC'),
 ('20230002', 'Lý Hữu Hoa', '2005-04-18', 'Nữ', 'sv20230002@huce.edu.vn', '0968962252', '68IT1', 'DANG_HOC'),
 ('20230003', 'Bùi Quang Đức', '2005-09-08', 'Nam', 'sv20230003@huce.edu.vn', '0939887513', '68IT1', 'DANG_HOC'),
@@ -237,7 +237,7 @@ INSERT INTO `sinh_vien` (`ma_sv`, `ho_ten`, `ngay_sinh`, `gioi_tinh`, `email`, `
 ('20230089', 'Lê Bảo Hà', '2005-04-27', 'Nam', 'sv20230089@huce.edu.vn', '0911977025', '68KX1', 'DANG_HOC'),
 ('20230090', 'Ngô Khánh Tuyệt', '2005-05-03', 'Nam', 'sv20230090@huce.edu.vn', '0999874357', '68KX1', 'DANG_HOC');
 
-INSERT INTO `ket_qua_hoc_tap` (`ma_sv`, `hoc_ky`, `nam_hoc`, `gpa_hoc_ky`, `gpa_tich_luy`, `so_tin_chi_no`) VALUES
+INSERT OR REPLACE INTO `ket_qua_hoc_tap` (`ma_sv`, `hoc_ky`, `nam_hoc`, `gpa_hoc_ky`, `gpa_tich_luy`, `so_tin_chi_no`) VALUES
 ('20230001', 2, '2023-2024', 3.23, 3.23, 0),
 ('20230002', 2, '2023-2024', 3.31, 3.31, 0),
 ('20230003', 2, '2023-2024', 3.42, 3.42, 0),
@@ -329,7 +329,7 @@ INSERT INTO `ket_qua_hoc_tap` (`ma_sv`, `hoc_ky`, `nam_hoc`, `gpa_hoc_ky`, `gpa_
 ('20230089', 2, '2023-2024', 3.23, 3.23, 0),
 ('20230090', 2, '2023-2024', 3.97, 3.97, 0);
 
-INSERT INTO `canh_bao_hoc_vu` (`ma_canh_bao`, `ma_sv`, `hoc_ky`, `nam_hoc`, `muc_canh_bao`, `gpa_xet_duyet`, `ly_do`, `ngay_quyet_dinh`, `trang_thai_tu_van`) VALUES
+INSERT OR REPLACE INTO `canh_bao_hoc_vu` (`ma_canh_bao`, `ma_sv`, `hoc_ky`, `nam_hoc`, `muc_canh_bao`, `gpa_xet_duyet`, `ly_do`, `ngay_quyet_dinh`, `trang_thai_tu_van`) VALUES
 ('CB-20232-20230009', '20230009', 2, '2023-2024', 'MUC_1', 1.61, 'Vi pham quy che hoc vu', '2024-07-01', 'CHUA_TU_VAN'),
 ('CB-20232-20230012', '20230012', 2, '2023-2024', 'MUC_1', 1.75, 'Vi pham quy che hoc vu', '2024-07-01', 'CHUA_TU_VAN'),
 ('CB-20232-20230014', '20230014', 2, '2023-2024', 'MUC_1', 1.74, 'Vi pham quy che hoc vu', '2024-07-01', 'CHUA_TU_VAN'),
@@ -365,24 +365,24 @@ INSERT INTO `canh_bao_hoc_vu` (`ma_canh_bao`, `ma_sv`, `hoc_ky`, `nam_hoc`, `muc
 ('CB-20232-20230086', '20230086', 2, '2023-2024', 'MUC_1', 1.87, 'Vi pham quy che hoc vu', '2024-07-01', 'CHUA_TU_VAN');
 
 
-INSERT INTO `nhat_ky_tu_van` (`ma_sv`, `ma_cvht`, `id_canh_bao`, `ngay_tu_van`, `hinh_thuc`, `noi_dung`, `nguyen_nhan`, `giai_phap`, `cam_ket_sinh_vien`) VALUES
+INSERT OR REPLACE INTO `nhat_ky_tu_van` (`ma_sv`, `ma_cvht`, `id_canh_bao`, `ngay_tu_van`, `hinh_thuc`, `noi_dung`, `nguyen_nhan`, `giai_phap`, `cam_ket_sinh_vien`) VALUES
 ('20230002', 'CV001', 1, '2024-07-10', 'Trực tiếp', 'Gặp mặt tư vấn sinh viên bị cảnh báo học vụ Mức 1 học kỳ 2 năm 2023-2024', 'Nghỉ học nhiều môn Giải tích do ốm kéo dài', 'Đăng ký học cải thiện vào học kỳ hè', 'Cam kết đạt GPA >= 2.5'),
 ('20230008', 'CV001', 5, '2024-07-12', 'Online (Teams/Zoom)', 'Tư vấn sinh viên bị cảnh báo học vụ Mức 2', 'Đi làm thêm quá sức dẫn tới bỏ tiết', 'Giảm giờ làm thêm, đăng ký học lại các môn nợ', 'Cam kết đi học đúng giờ và nộp bài tập');
 
-INSERT INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tro`, `ma_ref`) VALUES
+INSERT OR REPLACE INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tro`, `ma_ref`) VALUES
 ('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Quản trị hệ thống', 'admin@huce.edu.vn', 'ADMIN', NULL),
 ('cv_nguynvanan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'TS. Nguyễn Văn An', 'an.nv@huce.edu.vn', 'CO_VAN', 'CV001'),
 ('cv_tranthibinh', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThS. Trần Thị Bình', 'binh.tt@huce.edu.vn', 'CO_VAN', 'CV002'),
 ('quanly', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Trưởng khoa CNTT', 'khoacntt@huce.edu.vn', 'QUAN_LY', NULL);
 
-INSERT INTO `thong_bao` (`ma_thong_bao`, `tieu_de`, `noi_dung`, `nhom_rui_ro`, `ma_lop`, `ma_sv`, `ngay_gui`, `nguoi_gui`, `so_luong_nhan`, `trang_thai`) VALUES
+INSERT OR REPLACE INTO `thong_bao` (`ma_thong_bao`, `tieu_de`, `noi_dung`, `nhom_rui_ro`, `ma_lop`, `ma_sv`, `ngay_gui`, `nguoi_gui`, `so_luong_nhan`, `trang_thai`) VALUES
 ('TB-T1-1001', 'THÔNG BÁO BIỂU DƯƠNG HỌC TẬP XUẤT SẮC (TIER 1)', 'Tuyên dương các sinh viên thuộc nhóm Tier 1 có GPA >= 3.2. Đủ điều kiện đăng ký học bổng học kỳ này.', 'TIER_1', NULL, NULL, '2026-08-01 09:00:00', 'TS. Nguyễn Văn An', 28, 'DA_GUI'),
 ('TB-T2-1002', 'THÔNG BÁO DUY TRÌ PHONG ĐỘ HỌC TẬP (TIER 2)', 'Nhắc nhở sinh viên Tier 2 đăng ký bổ sung các môn cải thiện điểm số và theo dõi lịch thi.', 'TIER_2', NULL, NULL, '2026-08-05 10:30:00', 'TS. Nguyễn Văn An', 35, 'DA_GUI'),
 ('TB-T3-1003', 'CẢNH BÁO HỌC VỤ KHẨN CẤP & YÊU CẦU TƯ VẤN (TIER 3)', 'Yêu cầu tất cả sinh viên nhóm Tier 3 (GPA < 2.0 / Cảnh báo học vụ) liên hệ CVHT lập kế hoạch tư vấn.', 'TIER_3', NULL, NULL, '2026-08-10 14:00:00', 'TS. Nguyễn Văn An', 27, 'DA_GUI');
 
 -- 9. Bảng Lịch giảng dạy & Cố vấn học vụ
 CREATE TABLE `lich_giang_day` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_cvht` VARCHAR(20),
     `ten_cvht` VARCHAR(100),
     `ma_lop` VARCHAR(20),
@@ -392,70 +392,70 @@ CREATE TABLE `lich_giang_day` (
     `gio_bat_dau` VARCHAR(10),
     `gio_ket_thuc` VARCHAR(10),
     `dia_diem` VARCHAR(255),
-    `hinh_thuc` ENUM('TRUC_TIEP', 'ONLINE', 'HYBRID') DEFAULT 'TRUC_TIEP',
-    `loai_buoi` ENUM('GIANG_DAY', 'TU_VAN_DINH_KY', 'TU_VAN_CANH_BAO', 'HOC_BU') DEFAULT 'GIANG_DAY',
-    `trang_thai` ENUM('SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED') DEFAULT 'SCHEDULED',
+    `hinh_thuc` TEXT DEFAULT 'TRUC_TIEP',
+    `loai_buoi` TEXT DEFAULT 'GIANG_DAY',
+    `trang_thai` TEXT DEFAULT 'SCHEDULED',
     `ghi_chu` TEXT,
     CONSTRAINT `fk_lich_cvht` FOREIGN KEY (`ma_cvht`) REFERENCES `co_van_hoc_tap` (`ma_cvht`) ON DELETE SET NULL,
     CONSTRAINT `fk_lich_lop` FOREIGN KEY (`ma_lop`) REFERENCES `lop_hoc` (`ma_lop`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 10. Bảng Bài tập & Đánh giá quá trình
 CREATE TABLE `bai_tap` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `ma_lop` VARCHAR(20) NOT NULL,
     `tieu_de` VARCHAR(255) NOT NULL,
-    `loai_danh_gia` ENUM('TMA', 'CMA', 'PROJECT') DEFAULT 'TMA',
+    `loai_danh_gia` TEXT DEFAULT 'TMA',
     `trong_so` DOUBLE DEFAULT 20.0,
     `han_nop` DATE NOT NULL,
     `mo_ta` TEXT,
     `dinh_dang_cho_phep` VARCHAR(100) DEFAULT 'pdf, docx, zip',
-    `trang_thai` ENUM('OPEN', 'CLOSED', 'GRADED') DEFAULT 'OPEN',
+    `trang_thai` TEXT DEFAULT 'OPEN',
     CONSTRAINT `fk_baitap_lop` FOREIGN KEY (`ma_lop`) REFERENCES `lop_hoc` (`ma_lop`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 11. Bảng Nộp bài tập & Chấm điểm
 CREATE TABLE `nop_bai_tap` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `id_bai_tap` INT NOT NULL,
     `ma_sv` VARCHAR(20) NOT NULL,
-    `ngay_nop` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `ngay_nop` DATETIME DEFAULT (datetime('now', 'localtime')),
     `file_dinh_kem` VARCHAR(255),
     `diem_so` DOUBLE DEFAULT NULL,
     `nhan_xet` TEXT,
-    `trang_thai` ENUM('SUBMITTED', 'LATE', 'NOT_SUBMITTED', 'GRADED') DEFAULT 'SUBMITTED',
+    `trang_thai` TEXT DEFAULT 'SUBMITTED',
     CONSTRAINT `fk_nop_baitap` FOREIGN KEY (`id_bai_tap`) REFERENCES `bai_tap` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_nop_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- 12. Bảng Điểm danh & Chuyên cần
 CREATE TABLE `diem_danh` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `id_lich` INT NOT NULL,
     `ma_sv` VARCHAR(20) NOT NULL,
     `ngay_diem_danh` DATE NOT NULL,
-    `trang_thai` ENUM('ON_TIME', 'LATE', 'EXCUSED', 'ABSENT') DEFAULT 'ON_TIME',
+    `trang_thai` TEXT DEFAULT 'ON_TIME',
     `ghi_chu` TEXT,
     CONSTRAINT `fk_diemdanh_lich` FOREIGN KEY (`id_lich`) REFERENCES `lich_giang_day` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_diemdanh_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- Dữ liệu mẫu Lịch giảng dạy
-INSERT INTO `lich_giang_day` (`ma_cvht`, `ten_cvht`, `ma_lop`, `ten_lop`, `tieu_de`, `ngay`, `gio_bat_dau`, `gio_ket_thuc`, `dia_diem`, `hinh_thuc`, `loai_buoi`, `trang_thai`, `ghi_chu`) VALUES
+INSERT OR REPLACE INTO `lich_giang_day` (`ma_cvht`, `ten_cvht`, `ma_lop`, `ten_lop`, `tieu_de`, `ngay`, `gio_bat_dau`, `gio_ket_thuc`, `dia_diem`, `hinh_thuc`, `loai_buoi`, `trang_thai`, `ghi_chu`) VALUES
 ('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Sinh hoạt Lớp & Tư vấn Học vụ Đầu kỳ', '2026-08-25', '08:00', '10:00', 'Phòng H1-302', 'TRUC_TIEP', 'TU_VAN_DINH_KY', 'SCHEDULED', 'Phổ biến quy chế đào tạo tín chỉ và kế hoạch học tập năm 2026-2027'),
 ('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Tư vấn Cá nhân Nhóm Cảnh báo Học vụ (Tier 3)', '2026-08-26', '14:00', '16:30', 'Phòng Cố vấn Khoa CNTT', 'TRUC_TIEP', 'TU_VAN_CANH_BAO', 'SCHEDULED', 'Lập cam kết học tập và lộ trình trả nợ môn'),
 ('CV001', 'TS. Nguyễn Văn An', '68IT1', '68IT1 - Công nghệ thông tin 1', 'Chuyên đề: Công nghệ Java Nâng cao & Swing UI', '2026-08-28', '07:30', '11:00', 'Phòng Máy PM4-Lab2', 'TRUC_TIEP', 'GIANG_DAY', 'SCHEDULED', 'Thực hành xây dựng ứng dụng quản lý với FlatLaf'),
 ('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Hội thảo Online: Định hướng Đồ án & Thực tập Doanh nghiệp', '2026-08-29', '19:30', '21:30', 'https://meet.google.com/abc-defg-hij', 'ONLINE', 'GIANG_DAY', 'SCHEDULED', 'Khách mời từ doanh nghiệp phần mềm');
 
 -- Dữ liệu mẫu Bài tập & Đánh giá
-INSERT INTO `bai_tap` (`ma_lop`, `tieu_de`, `loai_danh_gia`, `trong_so`, `han_nop`, `mo_ta`, `dinh_dang_cho_phep`, `trang_thai`) VALUES
+INSERT OR REPLACE INTO `bai_tap` (`ma_lop`, `tieu_de`, `loai_danh_gia`, `trong_so`, `han_nop`, `mo_ta`, `dinh_dang_cho_phep`, `trang_thai`) VALUES
 ('68IT1', 'Bài tập lớn 01: Thiết kế Giao diện Desktop App Java Swing FlatLaf', 'TMA', 20.0, '2026-09-05', 'Xây dựng giao diện ứng dụng quản lý chuẩn FlatLaf có bảng số liệu và dialog form.', 'zip, rar, pdf', 'OPEN'),
 ('68IT1', 'Kiểm tra Giữa kỳ: Kiến trúc MVC & Kết nối CSDL JDBC', 'CMA', 30.0, '2026-09-20', 'Làm bài kiểm tra trắc nghiệm và thực hành viết DAO/Service kết nối SQLite/MySQL.', 'pdf, docx', 'OPEN'),
 ('68IT1', 'Đồ án Kết thúc Môn: Hệ thống Quản lý Cố vấn Học vụ Toàn diện', 'PROJECT', 50.0, '2026-10-15', 'Hoàn thiện full stack hệ thống quản lý, phân tầng học lực và xuất báo cáo Excel.', 'zip, pdf', 'OPEN'),
 ('68IT2', 'Bài tập lớn 01: Thiết kế Giao diện Desktop App Java Swing', 'TMA', 20.0, '2026-09-08', 'Xây dựng ứng dụng quản lý có FlatLaf theme và bảng số liệu.', 'zip, rar', 'OPEN');
 
 -- Dữ liệu mẫu Nộp bài tập
-INSERT INTO `nop_bai_tap` (`id_bai_tap`, `ma_sv`, `ngay_nop`, `file_dinh_kem`, `diem_so`, `nhan_xet`, `trang_thai`) VALUES
+INSERT OR REPLACE INTO `nop_bai_tap` (`id_bai_tap`, `ma_sv`, `ngay_nop`, `file_dinh_kem`, `diem_so`, `nhan_xet`, `trang_thai`) VALUES
 (1, '20230001', '2026-09-02 15:30:00', 'BTL01_20230001.zip', 9.5, 'Giao diện đẹp, chuẩn thiết kế, phân chia module rõ ràng', 'GRADED'),
 (1, '20230002', '2026-09-03 10:15:00', 'BTL01_20230002.zip', 8.5, 'Tốt, cần hoàn thiện thêm một số validation ở form nhập liệu', 'GRADED'),
 (1, '20230003', '2026-09-04 18:00:00', 'BTL01_20230003.zip', 7.5, 'Code chạy tốt, giao diện cần trau chuốt hơn', 'GRADED'),
@@ -463,7 +463,7 @@ INSERT INTO `nop_bai_tap` (`id_bai_tap`, `ma_sv`, `ngay_nop`, `file_dinh_kem`, `
 (1, '20230017', '2026-09-05 23:45:00', 'BTL01_20230017.zip', 5.5, 'Bài làm sơ sài, thiếu các chức năng lọc dữ liệu', 'GRADED');
 
 -- Dữ liệu mẫu Điểm danh
-INSERT INTO `diem_danh` (`id_lich`, `ma_sv`, `ngay_diem_danh`, `trang_thai`, `ghi_chu`) VALUES
+INSERT OR REPLACE INTO `diem_danh` (`id_lich`, `ma_sv`, `ngay_diem_danh`, `trang_thai`, `ghi_chu`) VALUES
 (1, '20230001', '2026-08-25', 'ON_TIME', 'Có mặt đúng giờ, tích cực tham gia'),
 (1, '20230002', '2026-08-25', 'ON_TIME', 'Có mặt đúng giờ'),
 (1, '20230009', '2026-08-25', 'LATE', 'Đi muộn 20 phút'),
@@ -471,7 +471,7 @@ INSERT INTO `diem_danh` (`id_lich`, `ma_sv`, `ngay_diem_danh`, `trang_thai`, `gh
 (1, '20230020', '2026-08-25', 'ABSENT', 'Vắng không phép - cần liên hệ phụ huynh');
 
 -- Dữ liệu mẫu Tài khoản người dùng (Mật khẩu mặc định: 123456)
-INSERT INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tro`, `ma_ref`) VALUES
+INSERT OR REPLACE INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tro`, `ma_ref`) VALUES
 ('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Quản trị viên Hệ thống', 'admin@huce.edu.vn', 'ADMIN', NULL),
 ('cv_nguynvanan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'TS. Nguyễn Văn An', 'an.nv@huce.edu.vn', 'CO_VAN', 'CV001'),
 ('cv_tranthibinh', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThS. Trần Thị Bình', 'binh.tt@huce.edu.vn', 'CO_VAN', 'CV002'),
