@@ -19,9 +19,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Panel Quan ly Sinh vien ho tro Bo loc thong minh Multi-Filter, Phan quyen RBAC va Excel Smart Import.
- */
 public class QuanLySinhVienPanel extends JPanel {
 
     private final TaiKhoan currentUser;
@@ -37,7 +34,10 @@ public class QuanLySinhVienPanel extends JPanel {
 
     private List<SinhVien> currentList;
 
-    private static final String[] COLUMNS = {"Mã SV", "Họ và Tên", "Ngày sinh", "Giới tính", "Email", "Số điện thoại", "Lớp", "Trạng thái Học vụ"};
+    private static final String[] COLUMNS = {
+        "M\u00E3 SV", "H\u1ECD v\u00E0 T\u00EAn", "Ng\u00E0y sinh", "Gi\u1EDBi t\u00EDnh",
+        "Email", "S\u1ED1 \u0111i\u1EC7n tho\u1EA1i", "L\u1EDBp", "Tr\u1EA1ng th\u00E1i H\u1ECDc v\u1EE5"
+    };
 
     public QuanLySinhVienPanel(TaiKhoan currentUser) {
         this.currentUser = currentUser;
@@ -53,17 +53,17 @@ public class QuanLySinhVienPanel extends JPanel {
     private void initHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
-        JLabel title = new JLabel("Quản lý Sinh viên");
+        JLabel title = new JLabel("H\u1ED3 S\u01A1 Sinh Vi\u00EAn");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
         if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro())) {
-            JLabel lblRoleInfo = new JLabel("  (Phạm vi phân quyền Cố vấn Học tập: Lớp phụ trách)");
+            JLabel lblRoleInfo = new JLabel("  (Ph\u1EA1m vi ph\u00E2n quy\u1EC1n C\u1ED1 v\u1EA5n: L\u1EDBp ph\u1EE5 tr\u00E1ch)");
             lblRoleInfo.setFont(UITheme.fontPlain(12));
             lblRoleInfo.setForeground(UITheme.PRIMARY);
             header.add(lblRoleInfo, BorderLayout.EAST);
         } else if (currentUser != null && "QUAN_LY".equals(currentUser.getVaiTro())) {
-            JLabel lblRoleInfo = new JLabel("  (Chế độ Trưởng Khoa / Ban Giám hiệu: Chỉ xem dữ liệu - Read-Only)");
+            JLabel lblRoleInfo = new JLabel("  (Ch\u1EBF \u0111\u1ED9 Qu\u1EA3n l\u00FD Khoa: Gi\u00E1m s\u00E1t & B\u00E1o c\u00E1o)");
             lblRoleInfo.setFont(UITheme.fontPlain(12));
             lblRoleInfo.setForeground(UITheme.WARNING);
             header.add(lblRoleInfo, BorderLayout.EAST);
@@ -74,47 +74,51 @@ public class QuanLySinhVienPanel extends JPanel {
     }
 
     private void initToolbar() {
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
-        bar.setBackground(UITheme.BG_WHITE);
-        bar.setBorder(BorderFactory.createCompoundBorder(
+        JPanel container = new JPanel(new GridLayout(2, 1, 0, 6));
+        container.setBackground(UITheme.BG_WHITE);
+        container.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT),
-            new EmptyBorder(6, 10, 6, 10)
+            new EmptyBorder(8, 12, 8, 12)
         ));
 
-        // 1. Multi-filter Controls
-        bar.add(new JLabel("Mã/Tên SV:"));
-        txtSearch = new JTextField(10);
-        txtSearch.setFont(UITheme.FONT_BODY);
-        txtSearch.addActionListener(e -> filterData());
-        bar.add(txtSearch);
+        // Row 1: Search & Multi-filter
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
+        row1.setOpaque(false);
 
-        bar.add(new JLabel("Lớp:"));
+        row1.add(new JLabel("T\u00ECm ki\u1EBFm:"));
+        txtSearch = new JTextField(12);
+        txtSearch.setFont(UITheme.FONT_BODY);
+        txtSearch.putClientProperty("JTextField.placeholderText", "M\u00E3 ho\u1EB7c T\u00EAn SV...");
+        txtSearch.addActionListener(e -> filterData());
+        row1.add(txtSearch);
+
+        row1.add(new JLabel("L\u1EDBp:"));
         cbFilterLop = new JComboBox<>();
-        cbFilterLop.addItem("--- Tất cả ---");
+        cbFilterLop.addItem("--- T\u1EA5t c\u1EA3 ---");
         List<LopHoc> listLop = coVanDAO.getAllLopHoc();
         for (LopHoc l : listLop) cbFilterLop.addItem(l);
         cbFilterLop.addActionListener(e -> filterData());
-        bar.add(cbFilterLop);
+        row1.add(cbFilterLop);
 
-        bar.add(new JLabel("Trạng thái:"));
+        row1.add(new JLabel("Tr\u1EA1ng th\u00E1i:"));
         cbFilterTrangThai = new JComboBox<>(new String[]{
-            "--- Tất cả ---", "DANG_HOC", "CANH_BAO_1", "CANH_BAO_2", "BUOC_THOI_HOC"
+            "--- T\u1EA5t c\u1EA3 ---", "DANG_HOC", "CANH_BAO_1", "CANH_BAO_2", "BUOC_THOI_HOC"
         });
         cbFilterTrangThai.addActionListener(e -> filterData());
-        bar.add(cbFilterTrangThai);
+        row1.add(cbFilterTrangThai);
 
-        bar.add(new JLabel("Khoảng GPA/TC:"));
+        row1.add(new JLabel("GPA / T\u00EDn ch\u1EC9 n\u1EE3:"));
         cbFilterGpa = new JComboBox<>(new String[]{
-            "--- Tất cả ---", "GPA < 1.5", "1.5 <= GPA < 2.0", "GPA >= 2.0", "Nợ >= 8 TC"
+            "--- T\u1EA5t c\u1EA3 ---", "GPA < 1.5", "1.5 <= GPA < 2.0", "GPA >= 2.0", "N\u1EE3 >= 8 TC"
         });
         cbFilterGpa.addActionListener(e -> filterData());
-        bar.add(cbFilterGpa);
+        row1.add(cbFilterGpa);
 
-        JButton btnSearch = createBtn("Lọc", UITheme.PRIMARY, Color.WHITE);
+        JButton btnSearch = UITheme.createButton("\uD83D\uDD0D L\u1ECDc D\u1EEF Li\u1EC7u", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
-        bar.add(btnSearch);
+        row1.add(btnSearch);
 
-        JButton btnReset = createBtn("Làm mới", UITheme.BORDER_MEDIUM, UITheme.TEXT_PRIMARY);
+        JButton btnReset = UITheme.createOutlineButton("\uD83D\uDD04 L\u00E0m M\u1EDBi", UITheme.BORDER_MEDIUM, UITheme.TEXT_PRIMARY);
         btnReset.addActionListener(e -> {
             txtSearch.setText("");
             cbFilterLop.setSelectedIndex(0);
@@ -122,43 +126,46 @@ public class QuanLySinhVienPanel extends JPanel {
             cbFilterGpa.setSelectedIndex(0);
             loadData();
         });
-        bar.add(btnReset);
+        row1.add(btnReset);
 
-        bar.add(new JSeparator(SwingConstants.VERTICAL));
+        // Row 2: Actions
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
+        row2.setOpaque(false);
 
-        // 2. RBAC Action Buttons
         boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getVaiTro());
         boolean isCoVan = currentUser != null && "CO_VAN".equals(currentUser.getVaiTro());
 
         if (isAdmin || isCoVan) {
-            JButton btnThem = createBtn("+ Thêm SV", UITheme.SUCCESS, Color.WHITE);
+            JButton btnThem = UITheme.createButton("\u2795 Th\u00EAm Sinh Vi\u00EAn", UITheme.SUCCESS, Color.WHITE);
             btnThem.addActionListener(e -> onThemSinhVien());
-            bar.add(btnThem);
+            row2.add(btnThem);
 
-            JButton btnSua = createBtn("Sửa SV", UITheme.WARNING, Color.WHITE);
+            JButton btnSua = UITheme.createButton("\u270F\uFE0F S\u1EEDa Th\u00F4ng Tin", UITheme.WARNING, Color.WHITE);
             btnSua.addActionListener(e -> onSuaSinhVien());
-            bar.add(btnSua);
+            row2.add(btnSua);
 
             if (isAdmin) {
-                JButton btnXoa = createBtn("Xóa SV", UITheme.DANGER, Color.WHITE);
+                JButton btnXoa = UITheme.createButton("\uD83D\uDDD1\uFE0F X\u00F3a SV", UITheme.DANGER, Color.WHITE);
                 btnXoa.addActionListener(e -> onXoaSinhVien());
-                bar.add(btnXoa);
+                row2.add(btnXoa);
             }
 
-            JButton btnImport = createBtn("📥 Import Excel", new Color(130, 60, 180), Color.WHITE);
+            JButton btnImport = UITheme.createButton("\uD83D\uDCE5 Import Excel", new Color(109, 40, 217), Color.WHITE);
             btnImport.addActionListener(e -> onImportExcel());
-            bar.add(btnImport);
+            row2.add(btnImport);
         }
 
-        JButton btnDetail = createBtn("Xem chi tiết & GPA", UITheme.INFO, Color.WHITE);
+        JButton btnDetail = UITheme.createButton("\uD83D\uDC41\uFE0F Xem H\u1ED3 S\u01A1 360\u00B0", UITheme.INFO, Color.WHITE);
         btnDetail.addActionListener(e -> showChiTiet());
-        bar.add(btnDetail);
+        row2.add(btnDetail);
 
-        JButton btnExport = createBtn("Xuất Excel", new Color(60, 140, 60), Color.WHITE);
+        JButton btnExport = UITheme.createButton("\uD83D\uDCCA Xu\u1EA5t File Excel", new Color(21, 128, 61), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableSinhVien, "Danh_Sach_Sinh_Vien"));
-        bar.add(btnExport);
+        row2.add(btnExport);
 
-        add(bar, BorderLayout.NORTH);
+        container.add(row1);
+        container.add(row2);
+        add(container, BorderLayout.NORTH);
     }
 
     private void initTable() {
@@ -170,17 +177,17 @@ public class QuanLySinhVienPanel extends JPanel {
         UITheme.styleTable(tableSinhVien);
         tableSinhVien.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Striped and Color renderer
         tableSinhVien.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
                 Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
+                setHorizontalAlignment(SwingConstants.CENTER);
                 if (!sel) comp.setBackground(r % 2 == 0 ? Color.WHITE : UITheme.BG_TABLE_STRIPE);
                 if (v != null && !sel) {
                     String s = v.toString();
-                    if (s.contains("Mức 1"))       { comp.setForeground(UITheme.WARNING);     setFont(getFont().deriveFont(Font.BOLD)); }
-                    else if (s.contains("Mức 2"))  { comp.setForeground(UITheme.DANGER);      setFont(getFont().deriveFont(Font.BOLD)); }
-                    else if (s.contains("thôi"))   { comp.setForeground(UITheme.DANGER_DARK); setFont(getFont().deriveFont(Font.BOLD)); }
-                    else                           { comp.setForeground(UITheme.SUCCESS); }
+                    if (s.contains("M\u1EE9c 1"))       { comp.setForeground(UITheme.WARNING);     setFont(getFont().deriveFont(Font.BOLD)); }
+                    else if (s.contains("M\u1EE9c 2"))  { comp.setForeground(UITheme.DANGER);      setFont(getFont().deriveFont(Font.BOLD)); }
+                    else if (s.contains("th\u00F4i"))   { comp.setForeground(UITheme.DANGER_DARK); setFont(getFont().deriveFont(Font.BOLD)); }
+                    else                                 { comp.setForeground(UITheme.SUCCESS); }
                 }
                 return comp;
             }
@@ -188,6 +195,14 @@ public class QuanLySinhVienPanel extends JPanel {
 
         int[] widths = {90, 160, 90, 80, 180, 110, 120, 160};
         for (int i = 0; i < widths.length; i++) tableSinhVien.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+
+        tableSinhVien.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    showChiTiet();
+                }
+            }
+        });
 
         JScrollPane scroll = new JScrollPane(tableSinhVien);
         scroll.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT));
@@ -206,7 +221,7 @@ public class QuanLySinhVienPanel extends JPanel {
         if (selLop instanceof LopHoc) maLop = ((LopHoc) selLop).getMaLop();
 
         String trangThai = (String) cbFilterTrangThai.getSelectedItem();
-        if ("--- Tất cả ---".equals(trangThai)) trangThai = "ALL";
+        if (trangThai == null || trangThai.startsWith("---")) trangThai = "ALL";
 
         String gpaSel = (String) cbFilterGpa.getSelectedItem();
         String gpaFilter = "ALL";
@@ -214,7 +229,7 @@ public class QuanLySinhVienPanel extends JPanel {
             if (gpaSel.contains("< 1.5")) gpaFilter = "<1.5";
             else if (gpaSel.contains("1.5 <= GPA")) gpaFilter = "1.5-2.0";
             else if (gpaSel.contains(">= 2.0")) gpaFilter = ">=2.0";
-            else if (gpaSel.contains("Nợ >= 8")) gpaFilter = "NO_TC_GE_8";
+            else if (gpaSel.contains("N\u1EE3 >= 8")) gpaFilter = "NO_TC_GE_8";
         }
 
         String maCvht = null;
@@ -230,22 +245,22 @@ public class QuanLySinhVienPanel extends JPanel {
         tableModel.setRowCount(0);
         for (SinhVien sv : list) {
             tableModel.addRow(new Object[]{
-                sv.getMaSv(), sv.getHoTen(), sv.getNgaySinh(),
-                sv.getGioiTinh(), sv.getEmail(), sv.getSoDienThoai(),
+                sv.getMaSv(),
+                sv.getHoTen(),
+                sv.getNgaySinh() != null ? sv.getNgaySinh().toString() : "---",
+                sv.getGioiTinh() != null ? sv.getGioiTinh() : "---",
+                sv.getEmail() != null ? sv.getEmail() : "---",
+                sv.getSoDienThoai() != null ? sv.getSoDienThoai() : "---",
                 sv.getTenLop() != null ? sv.getTenLop() : sv.getMaLop(),
-                sv.getTrangThaiHienThi()
+                UITheme.formatTrangThaiSinhVien(sv.getTrangThai())
             });
         }
     }
 
-    private void showChiTiet() {
+    private SinhVien getSelectedSinhVien() {
         int row = tableSinhVien.getSelectedRow();
-        if (row < 0) { warn("Vui lòng chọn 1 sinh viên trong bảng để xem chi tiết!"); return; }
-        String maSv = (String) tableModel.getValueAt(row, 0);
-        SinhVien sv = sinhVienDAO.getSinhVienById(maSv);
-        if (sv != null) {
-            new ChiTietSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv).setVisible(true);
-        }
+        if (row < 0 || row >= currentList.size()) return null;
+        return currentList.get(row);
     }
 
     private void onThemSinhVien() {
@@ -255,55 +270,51 @@ public class QuanLySinhVienPanel extends JPanel {
     }
 
     private void onSuaSinhVien() {
-        int row = tableSinhVien.getSelectedRow();
-        if (row < 0) { warn("Vui lòng chọn 1 sinh viên để sửa!"); return; }
-        String maSv = (String) tableModel.getValueAt(row, 0);
-        SinhVien sv = sinhVienDAO.getSinhVienById(maSv);
-        if (sv != null) {
-            ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv);
-            dlg.setVisible(true);
-            if (dlg.isSaved()) loadData();
+        SinhVien sv = getSelectedSinhVien();
+        if (sv == null) {
+            JOptionPane.showMessageDialog(this, "Vui l\u00F2ng ch\u1ECDn m\u1ED9t sinh vi\u00EAn c\u1EA7n s\u1EEDa!", "Th\u00F4ng b\u00E1o", JOptionPane.WARNING_MESSAGE);
+            return;
         }
+        ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) loadData();
     }
 
     private void onXoaSinhVien() {
-        int row = tableSinhVien.getSelectedRow();
-        if (row < 0) { warn("Vui lòng chọn 1 sinh viên để xóa!"); return; }
-        String maSv = (String) tableModel.getValueAt(row, 0);
-        String tenSv = (String) tableModel.getValueAt(row, 1);
-        int choice = JOptionPane.showConfirmDialog(this,
-            "Bạn có chắc muốn xóa sinh viên:\n" + maSv + " - " + tenSv + "?\nHành động này không thể hoàn tác!",
-            "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (choice == JOptionPane.YES_OPTION) {
-            if (sinhVienDAO.deleteSinhVien(maSv)) {
-                JOptionPane.showMessageDialog(this, "Xóa sinh viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        SinhVien sv = getSelectedSinhVien();
+        if (sv == null) {
+            JOptionPane.showMessageDialog(this, "Vui l\u00F2ng ch\u1ECDn sinh vi\u00EAn c\u1EA7n x\u00F3a!", "Th\u00F4ng b\u00E1o", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "B\u1EA1n c\u00F3 ch\u1EAFc ch\u1EAFn mu\u1ED1n x\u00F3a sinh vi\u00EAn " + sv.getHoTen() + " (" + sv.getMaSv() + ")?",
+            "X\u00E1c nh\u1EADn x\u00F3a", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean ok = sinhVienDAO.deleteSinhVien(sv.getMaSv());
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "\u0110\u00E3 x\u00F3a sinh vi\u00EAn th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", JOptionPane.INFORMATION_MESSAGE);
                 loadData();
             } else {
-                JOptionPane.showMessageDialog(this, "Không thể xóa. Sinh viên có thể đã có dữ liệu liên quan (GPA, cảnh báo,...)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "X\u00F3a th\u1EA5t b\u1EA1i!", "L\u1ED7i", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private void showChiTiet() {
+        SinhVien sv = getSelectedSinhVien();
+        if (sv == null) {
+            JOptionPane.showMessageDialog(this, "Vui l\u00F2ng ch\u1ECDn m\u1ED9t sinh vi\u00EAn \u0111\u1EC3 xem h\u1ED3 s\u01A1!", "Th\u00F4ng b\u00E1o", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        ChiTietSinhVienDialog dlg = new ChiTietSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv);
+        dlg.setVisible(true);
     }
 
     private void onImportExcel() {
         ExcelImportDialog dlg = new ExcelImportDialog((Frame) SwingUtilities.getWindowAncestor(this), ImportType.SINH_VIEN);
         dlg.setVisible(true);
-        if (dlg.isImportedSuccessfully()) {
-            loadData();
-        }
-    }
-
-    private JButton createBtn(String text, Color bg, Color fg) {
-        JButton btn = new JButton(text);
-        btn.setFont(UITheme.FONT_BTN);
-        btn.setBackground(bg);
-        btn.setForeground(fg);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private void warn(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "Thông báo", JOptionPane.WARNING_MESSAGE);
+        if (dlg.isImportedSuccessfully()) loadData();
     }
 }

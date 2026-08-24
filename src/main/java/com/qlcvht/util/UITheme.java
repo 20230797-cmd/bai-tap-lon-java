@@ -86,28 +86,30 @@ public class UITheme {
     }
 
     public static JButton createButton(String text, Color bg, Color fg) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                Color c = bg;
-                if (!isEnabled()) c = new Color(203, 213, 225);
-                else if (getModel().isPressed()) c = bg.darker();
-                else if (getModel().isRollover()) c = new Color(Math.min(255, bg.getRed()+15), Math.min(255, bg.getGreen()+15), Math.min(255, bg.getBlue()+15));
-                g2.setColor(c);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
+        JButton btn = new JButton(text);
         btn.setFont(FONT_BTN);
+        btn.setBackground(bg);
         btn.setForeground(fg);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(7, 14, 7, 14));
+        btn.putClientProperty("JButton.buttonType", "roundRect");
+        btn.putClientProperty("FlatLaf.style", "arc: 8");
+        btn.setMargin(new Insets(6, 14, 6, 14));
+        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width + 16, 36));
+        return btn;
+    }
+
+    public static JButton createOutlineButton(String text, Color borderColor, Color textColor) {
+        JButton btn = new JButton(text);
+        btn.setFont(FONT_BTN);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(textColor);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.putClientProperty("JButton.buttonType", "roundRect");
+        btn.putClientProperty("FlatLaf.style", "arc: 8");
+        btn.setMargin(new Insets(6, 14, 6, 14));
+        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width + 16, 36));
         return btn;
     }
 
