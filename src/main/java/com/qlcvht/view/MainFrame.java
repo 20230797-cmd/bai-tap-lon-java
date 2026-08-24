@@ -19,9 +19,13 @@ public class MainFrame extends JFrame {
 
     // Nav buttons
     private JButton btnDashboard;
+    private JButton btnLichGiangDay;
     private JButton btnSinhVien;
     private JButton btnKetQua;
+    private JButton btnBaiTap;
+    private JButton btnDiemDanh;
     private JButton btnCanhBao;
+    private JButton btnAIAdvisor;
     private JButton btnNhatKy;
     private JButton btnThongBao;
     private JButton btnThongKe;
@@ -33,8 +37,8 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
         setTitle("Hệ thống Quản lý Cố vấn Học tập & Cảnh báo Học vụ - HUCE");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1300, 780);
-        setMinimumSize(new Dimension(1080, 650));
+        setSize(1320, 800);
+        setMinimumSize(new Dimension(1100, 680));
         setLocationRelativeTo(null);
         initUI();
     }
@@ -52,7 +56,7 @@ public class MainFrame extends JFrame {
                 g2.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        topBar.setPreferredSize(new Dimension(1300, 58));
+        topBar.setPreferredSize(new Dimension(1320, 58));
         topBar.setBorder(new EmptyBorder(0, 18, 0, 18));
 
         // Logo & Title
@@ -69,7 +73,7 @@ public class MainFrame extends JFrame {
         String dbType = DatabaseConnection.getDatabaseType();
         JLabel lblDb = new JLabel("● " + dbType);
         lblDb.setFont(UITheme.fontBold(11));
-        lblDb.setForeground(DatabaseConnection.isUsingSQLite() ? new Color(255, 235, 160) : new Color(170, 255, 190));
+        lblDb.setForeground(new Color(170, 255, 190));
         lblDb.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 1, true),
             new EmptyBorder(4, 8, 4, 8)
@@ -118,20 +122,30 @@ public class MainFrame extends JFrame {
         sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
         sideBar.setBorder(new EmptyBorder(8, 0, 8, 0));
 
-        addSidebarSection("CHỨC NĂNG CHÍNH");
+        addSidebarSection("TỔNG QUAN & LỊCH TRÌNH");
+        btnDashboard    = createNavBtn("  📊  Tổng Quan (Dashboard)", "DASHBOARD");
+        btnLichGiangDay = createNavBtn("  📅  Lịch Giảng Dạy & CVHT", "LICH_GIANG_DAY");
+        sideBar.add(btnDashboard);
+        sideBar.add(btnLichGiangDay);
 
-        btnDashboard = createNavBtn("  📊  Tổng Quan (Dashboard)", "DASHBOARD");
+        addSidebarSection("QUẢN LÝ HỌC VỤ & LỚP");
         btnSinhVien  = createNavBtn("  👥  Hồ Sơ Sinh Viên", "SINH_VIEN");
         btnKetQua    = createNavBtn("  📑  Bảng Điểm & Kết Quả", "KET_QUA");
+        btnBaiTap    = createNavBtn("  📝  Bài Tập & Đánh Giá", "BAI_TAP");
+        btnDiemDanh  = createNavBtn("  ✅  Điểm Danh & Chuyên Cần", "DIEM_DANH");
+        sideBar.add(btnSinhVien);
+        sideBar.add(btnKetQua);
+        sideBar.add(btnBaiTap);
+        sideBar.add(btnDiemDanh);
+
+        addSidebarSection("CỐ VẤN & TRỢ LÝ AI");
         btnCanhBao   = createNavBtn("  ⚠️  Cảnh Báo Học Vụ", "CANH_BAO");
+        btnAIAdvisor = createNavBtn("  🤖  Trợ Lý AI Cố Vấn", "AI_ADVISOR");
         btnNhatKy    = createNavBtn("  📝  Nhật Ký Tư Vấn CVHT", "NHAT_KY");
         btnThongBao  = createNavBtn("  🔔  Thông Báo & Tiering", "THONG_BAO");
         btnThongKe   = createNavBtn("  📈  Báo Cáo & Thống Kê", "THONG_KE");
-
-        sideBar.add(btnDashboard);
-        sideBar.add(btnSinhVien);
-        sideBar.add(btnKetQua);
         sideBar.add(btnCanhBao);
+        sideBar.add(btnAIAdvisor);
         sideBar.add(btnNhatKy);
         sideBar.add(btnThongBao);
         sideBar.add(btnThongKe);
@@ -147,7 +161,7 @@ public class MainFrame extends JFrame {
         sideBar.add(Box.createVerticalGlue());
 
         JScrollPane sideBarScroll = new JScrollPane(sideBar);
-        sideBarScroll.setPreferredSize(new Dimension(235, 700));
+        sideBarScroll.setPreferredSize(new Dimension(245, 720));
         sideBarScroll.setBorder(null);
         sideBarScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         sideBarScroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -160,9 +174,13 @@ public class MainFrame extends JFrame {
         cardPanel.setBackground(UITheme.BG_MAIN);
 
         cardPanel.add(new DashboardPanel(currentUser), "DASHBOARD");
+        cardPanel.add(new LichGiangDayPanel(currentUser), "LICH_GIANG_DAY");
         cardPanel.add(new QuanLySinhVienPanel(currentUser), "SINH_VIEN");
         cardPanel.add(new QuanLyKetQuaHocTapPanel(currentUser), "KET_QUA");
+        cardPanel.add(new QuanLyBaiTapPanel(currentUser), "BAI_TAP");
+        cardPanel.add(new QuanLyDiemDanhPanel(currentUser), "DIEM_DANH");
         cardPanel.add(new QuanLyCanhBaoPanel(currentUser), "CANH_BAO");
+        cardPanel.add(new AIAdvisorPanel(currentUser), "AI_ADVISOR");
         cardPanel.add(new NhatKyTuVanPanel(currentUser), "NHAT_KY");
         cardPanel.add(new QuanLyThongBaoPanel(currentUser), "THONG_BAO");
         cardPanel.add(new BaoCaoThongKePanel(), "THONG_KE");
@@ -209,8 +227,8 @@ public class MainFrame extends JFrame {
         btn.setBorderPainted(false);
         btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-        btn.setPreferredSize(new Dimension(235, 42));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        btn.setPreferredSize(new Dimension(245, 40));
         btn.addActionListener(e -> switchCard(cardName, btn));
         return btn;
     }
@@ -220,7 +238,7 @@ public class MainFrame extends JFrame {
         cardLayout.show(cardPanel, cardName);
         sideBar.repaint();
         // Update text color
-        JButton[] allBtns = {btnDashboard, btnSinhVien, btnKetQua, btnCanhBao, btnNhatKy, btnThongBao, btnThongKe};
+        JButton[] allBtns = {btnDashboard, btnLichGiangDay, btnSinhVien, btnKetQua, btnBaiTap, btnDiemDanh, btnCanhBao, btnAIAdvisor, btnNhatKy, btnThongBao, btnThongKe};
         for (JButton b : allBtns) {
             if (b == null) continue;
             b.setForeground(b == btn ? Color.WHITE : UITheme.TEXT_SIDEBAR);

@@ -9,8 +9,8 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Quáº£n lÃ½ Cá»‘ váº¥n há»c táº­p vÃ  Cáº£nh bÃ¡o há»c vá»¥</name>
-    <description>BÃ i táº­p lá»›n mÃ´n CÃ´ng nghá»‡ Java - á»¨ng dá»¥ng Desktop Java Swing, JDBC vÃ  MySQL</description>
+    <name>Quản lý Cố vấn học tập và Cảnh báo học vụ</name>
+    <description>Bài tập lớn môn Công nghệ Java - Ứng dụng Desktop Java Swing, JDBC và MySQL</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -29,11 +29,11 @@
             <version>${mysql.connector.version}</version>
         </dependency>
 
-        <!-- SQLite JDBC Connector (Tá»± Ä‘á»™ng cháº¡y dá»± phÃ²ng khÃ´ng cáº§n cÃ i CSDL) -->
+        <!-- SQLite JDBC Connector for Zero-Config Fallback -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.1.0</version>
+            <version>3.45.2.0</version>
         </dependency>
 
         <!-- FlatLaf Modern Swing Look and Feel -->

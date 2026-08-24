@@ -1,8 +1,17 @@
-# Hướng dẫn thiết lập Cơ sở dữ liệu MySQL
+# HƯỚNG DẪN CƠ SỞ DỮ LIỆU MYSQL CHO DỰ ÁN
 
-Dự án này sử dụng JDBC để kết nối với CSDL MySQL. Nếu máy bạn chưa cài đặt MySQL, hệ thống sẽ tự động chuyển (fallback) sang dùng SQLite tạm thời. Tuy nhiên, để đáp ứng đúng yêu cầu của môn học (Java Swing + JDBC + MySQL), bạn cần chạy MySQL thực sự.
+Dự án sử dụng kiến trúc chuẩn Java Swing + JDBC kết nối trực tiếp với hệ quản trị CSDL **MySQL Server 8.4**.
 
-Dưới đây là 2 cách để bạn thiết lập môi trường CSDL:
+### 1. Thông tin cấu hình kết nối (`src/main/resources/database.properties`):
+- **Host:** `localhost`
+- **Port:** `3306`
+- **Database:** `ql_canhbao_hocvu`
+- **User:** `root`
+- **Password:** *(để trống theo mặc định hoặc điền mật khẩu của bạn)*
+
+### 2. Khởi động MySQL Server:
+- Nhấp đúp chuột vào file `start_mysql.cmd` ở thư mục gốc của dự án để khởi động MySQL Server bất kỳ lúc nào.
+- Dữ liệu và bảng được lưu trữ trực tiếp bên trong MySQL Server.
 
 ## Cách 1: Sử dụng Docker (Khuyên dùng - Nhanh nhất)
 
