@@ -11,6 +11,8 @@ import com.qlcvht.model.SinhVien;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
+import com.qlcvht.util.WrapLayout;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -63,7 +65,7 @@ public class QuanLyDiemDanhPanel extends JPanel {
 
         JPanel titlePanel = new JPanel(new GridLayout(2, 1, 0, 4));
         titlePanel.setOpaque(false);
-        JLabel lblTitle = new JLabel("✅  QUẢN LÝ ĐIỂM DANH & THEO DÕI CHUYÊN CẦN");
+        JLabel lblTitle = new JLabel("QUẢN LÝ ĐIỂM DANH & THEO DÕI CHUYÊN CẦN");
         lblTitle.setFont(UITheme.FONT_HEADER);
         lblTitle.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -83,8 +85,8 @@ public class QuanLyDiemDanhPanel extends JPanel {
         lblVang = addStatCard(statRow, "VẮNG MẶT (ABSENT)", "0 SV", new Color(198, 40, 40));
         topPanel.add(statRow, BorderLayout.CENTER);
 
-        // Toolbar
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
+        // Toolbar with WrapLayout
+        JPanel toolbar = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 6));
         toolbar.setBackground(UITheme.BG_WHITE);
         toolbar.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
@@ -93,19 +95,19 @@ public class QuanLyDiemDanhPanel extends JPanel {
 
         toolbar.add(new JLabel("Chọn Buổi Lịch:"));
         cbLichHoc = new JComboBox<>();
-        cbLichHoc.setPreferredSize(new Dimension(320, 32));
+        cbLichHoc.setPreferredSize(new Dimension(300, 32));
         cbLichHoc.addActionListener(e -> loadDanhSachSinhVien());
         toolbar.add(cbLichHoc);
 
-        JButton btnTatCaCoMat = UITheme.createButton("⚡ Tất Cả Có Mặt", new Color(46, 125, 50), Color.WHITE);
+        JButton btnTatCaCoMat = UITheme.createButton("Tất Cả Có Mặt", new Color(46, 125, 50), Color.WHITE);
         btnTatCaCoMat.addActionListener(e -> setAllStatus("ON_TIME"));
         toolbar.add(btnTatCaCoMat);
 
-        JButton btnLuu = UITheme.createButton("💾 Lưu Bảng Điểm Danh", UITheme.PRIMARY, Color.WHITE);
+        JButton btnLuu = UITheme.createButton("Lưu Bảng Điểm Danh", UITheme.PRIMARY, Color.WHITE);
         btnLuu.addActionListener(e -> luuDiemDanh());
         toolbar.add(btnLuu);
 
-        JButton btnLocVang = UITheme.createButton("⚠️ Cảnh Báo Vắng Nhiều", new Color(198, 40, 40), Color.WHITE);
+        JButton btnLocVang = UITheme.createButton("Cảnh Báo Vắng Nhiều", new Color(198, 40, 40), Color.WHITE);
         btnLocVang.addActionListener(e -> canhBaoVangNhieu());
         toolbar.add(btnLocVang);
 
@@ -151,16 +153,16 @@ public class QuanLyDiemDanhPanel extends JPanel {
                 String v = value != null ? value.toString() : "";
                 if (v.contains("ON_TIME") || v.contains("đúng giờ")) {
                     lbl.setForeground(new Color(46, 125, 50));
-                    lbl.setText("✔ Có mặt đúng giờ");
+                    lbl.setText("● Có mặt đúng giờ");
                 } else if (v.contains("LATE") || v.contains("muộn")) {
                     lbl.setForeground(new Color(230, 119, 0));
-                    lbl.setText("⏳ Đi muộn");
+                    lbl.setText("● Đi muộn");
                 } else if (v.contains("EXCUSED") || v.contains("có phép")) {
                     lbl.setForeground(new Color(25, 118, 210));
-                    lbl.setText("✉ Vắng có phép");
+                    lbl.setText("● Vắng có phép");
                 } else if (v.contains("ABSENT") || v.contains("không phép")) {
                     lbl.setForeground(new Color(198, 40, 40));
-                    lbl.setText("✖ Vắng không phép");
+                    lbl.setText("● Vắng không phép");
                 }
                 return lbl;
             }

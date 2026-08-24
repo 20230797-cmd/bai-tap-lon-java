@@ -56,7 +56,7 @@ public class NhatKyTuVanPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("📝  NHẬT KÝ & BIÊN BẢN TƯ VẤN CỦA CỐ VẤN HỌC TẬP");
+        JLabel title = new JLabel("NHẬT KÝ & BIÊN BẢN TƯ VẤN CỦA CỐ VẤN HỌC TẬP");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -81,34 +81,34 @@ public class NhatKyTuVanPanel extends JPanel {
         ));
 
         // Nút thêm nhật ký
-        JButton btnAdd = UITheme.createButton("➕ Lập Biên Bản Mới", UITheme.SUCCESS, Color.WHITE);
+        JButton btnAdd = UITheme.createButton("+ Lập Biên Bản Mới", UITheme.SUCCESS, Color.WHITE);
         btnAdd.addActionListener(e -> onLapMoi());
         bar.add(btnAdd);
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
         bar.add(new JLabel("Tìm kiếm:"));
-        txtSearch = new JTextField(14);
+        txtSearch = new JTextField(12);
         txtSearch.setFont(UITheme.FONT_BODY);
         txtSearch.putClientProperty("JTextField.placeholderText", "MSSV, tên SV, CVHT...");
         txtSearch.addActionListener(e -> filterData());
         bar.add(txtSearch);
 
-        JButton btnSearch = UITheme.createButton("🔍 Tìm", UITheme.PRIMARY, Color.WHITE);
+        JButton btnSearch = UITheme.createButton("Tìm Kiếm", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
         bar.add(btnSearch);
 
-        JButton btnReset = UITheme.createButton("🔄 Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnReset = UITheme.createButton("Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnReset.addActionListener(e -> { txtSearch.setText(""); loadData(); });
         bar.add(btnReset);
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        JButton btnDelete = UITheme.createButton("🗑️ Xóa Biên Bản", UITheme.DANGER, Color.WHITE);
+        JButton btnDelete = UITheme.createButton("Xóa Biên Bản", UITheme.DANGER, Color.WHITE);
         btnDelete.addActionListener(e -> onDelete());
         bar.add(btnDelete);
 
-        JButton btnExport = UITheme.createButton("📊 Xuất Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableNhatKy, "Nhat_Ky_Tu_Van_Hoc_Tap"));
         bar.add(btnExport);
 

@@ -47,7 +47,7 @@ public class QuanLyLopHocPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("🏫  QUẢN LÝ LỚP HỌC & PHÂN CÔNG CỐ VẤN HỌC TẬP");
+        JLabel title = new JLabel("QUẢN LÝ LỚP HỌC & PHÂN CÔNG CỐ VẤN HỌC TẬP");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -71,25 +71,25 @@ public class QuanLyLopHocPanel extends JPanel {
             new EmptyBorder(6, 10, 6, 10)
         ));
 
-        JButton btnThem = UITheme.createButton("➕ Thêm Lớp Mới", UITheme.SUCCESS, Color.WHITE);
+        JButton btnThem = UITheme.createButton("+ Thêm Lớp Mới", UITheme.SUCCESS, Color.WHITE);
         btnThem.addActionListener(e -> onThem());
         bar.add(btnThem);
 
-        JButton btnSua = UITheme.createButton("✏️ Sửa Lớp & Phân Công", UITheme.WARNING, Color.WHITE);
+        JButton btnSua = UITheme.createButton("Sửa Lớp & Phân Công", UITheme.WARNING, Color.WHITE);
         btnSua.addActionListener(e -> onSua());
         bar.add(btnSua);
 
-        JButton btnXoa = UITheme.createButton("🗑️ Xóa Lớp", UITheme.DANGER, Color.WHITE);
+        JButton btnXoa = UITheme.createButton("Xóa Lớp", UITheme.DANGER, Color.WHITE);
         btnXoa.addActionListener(e -> onXoa());
         bar.add(btnXoa);
 
-        JButton btnRefresh = UITheme.createButton("🔄 Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnRefresh = UITheme.createButton("Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnRefresh.addActionListener(e -> loadData());
         bar.add(btnRefresh);
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        JButton btnExport = UITheme.createButton("📊 Xuất Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(table, "Danh_Sach_Lop_Hoc"));
         bar.add(btnExport);
 

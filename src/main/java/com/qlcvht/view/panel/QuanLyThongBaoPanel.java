@@ -355,17 +355,17 @@ public class QuanLyThongBaoPanel extends JPanel {
         txtSearchKeyword = new JTextField(11);
         txtSearchKeyword.setFont(UITheme.fontPlain(12));
 
-        JButton btnApplyFilter = UITheme.createButton("🔍 Lọc Danh Sách", UITheme.PRIMARY, Color.WHITE);
+        JButton btnApplyFilter = UITheme.createButton("Lọc Danh Sách", UITheme.PRIMARY, Color.WHITE);
         btnApplyFilter.addActionListener(e -> applyStudentFilter());
 
-        JButton btnResetFilter = UITheme.createButton("🔄 Khôi Phục", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnResetFilter = UITheme.createButton("Khôi Phục", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnResetFilter.addActionListener(e -> resetStudentFilter());
 
-        JButton btnSimulateGrade = UITheme.createButton("⚡ Giả Lập Điểm", UITheme.PURPLE, Color.WHITE);
+        JButton btnSimulateGrade = UITheme.createButton("Giả Lập Điểm", UITheme.PURPLE, Color.WHITE);
         btnSimulateGrade.setToolTipText("Giả lập điểm thi học kỳ cho sinh viên được chọn");
         btnSimulateGrade.addActionListener(e -> handleGradeSimulation());
 
-        JButton btnClearSimulation = UITheme.createButton("↩️ Điểm Gốc", new Color(245, 230, 230), UITheme.DANGER);
+        JButton btnClearSimulation = UITheme.createButton("Điểm Gốc", new Color(245, 230, 230), UITheme.DANGER);
         btnClearSimulation.setToolTipText("Khôi phục lại điểm gốc ban đầu");
         btnClearSimulation.addActionListener(e -> clearSimulation());
 
@@ -428,13 +428,13 @@ public class QuanLyThongBaoPanel extends JPanel {
         JPanel toolBar = new JPanel(new WrapLayout(FlowLayout.RIGHT, 10, 6));
         toolBar.setOpaque(false);
 
-        JButton btnViewDetail = UITheme.createButton("🔍 Xem Chi Tiết Nội Dung", UITheme.PRIMARY, Color.WHITE);
+        JButton btnViewDetail = UITheme.createButton("Xem Chi Tiết", UITheme.PRIMARY, Color.WHITE);
         btnViewDetail.addActionListener(e -> viewNotificationDetail());
 
-        JButton btnDeleteHistory = UITheme.createButton("🗑️ Xóa Thông Báo", UITheme.DANGER, Color.WHITE);
+        JButton btnDeleteHistory = UITheme.createButton("Xóa Thông Báo", UITheme.DANGER, Color.WHITE);
         btnDeleteHistory.addActionListener(e -> deleteNotificationHistory());
 
-        JButton btnRefreshHistory = UITheme.createButton("🔄 Tải Lại Lịch Sử", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnRefreshHistory = UITheme.createButton("Tải Lại Lịch Sử", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnRefreshHistory.addActionListener(e -> loadHistoryData());
 
         toolBar.add(btnViewDetail);

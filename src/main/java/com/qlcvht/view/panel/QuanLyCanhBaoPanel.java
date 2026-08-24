@@ -60,7 +60,7 @@ public class QuanLyCanhBaoPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("⚠️  QUẢN LÝ QUYẾT ĐỊNH & CẢNH BÁO HỌC VỤ");
+        JLabel title = new JLabel("QUẢN LÝ QUYẾT ĐỊNH & CẢNH BÁO HỌC VỤ");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -85,7 +85,7 @@ public class QuanLyCanhBaoPanel extends JPanel {
         ));
 
         // Nút Quét tự động
-        JButton btnScan = UITheme.createButton("⚡ Quét Tự Động", UITheme.DANGER, Color.WHITE);
+        JButton btnScan = UITheme.createButton("Quét Tự Động", UITheme.DANGER, Color.WHITE);
         btnScan.setToolTipText("Quét hệ thống và tự động phát hiện sinh viên đạt điều kiện cảnh báo học vụ");
         btnScan.addActionListener(e -> onScanCanhBao());
         bar.add(btnScan);
@@ -122,11 +122,11 @@ public class QuanLyCanhBaoPanel extends JPanel {
         txtSearch.addActionListener(e -> filterData());
         bar.add(txtSearch);
 
-        JButton btnSearch = UITheme.createButton("🔍 Tìm", UITheme.PRIMARY, Color.WHITE);
+        JButton btnSearch = UITheme.createButton("Tìm Kiếm", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
         bar.add(btnSearch);
 
-        JButton btnReset = UITheme.createButton("🔄 Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnReset = UITheme.createButton("Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnReset.addActionListener(e -> { 
             cbFilterMuc.setSelectedIndex(0); 
             cbFilterTuVan.setSelectedIndex(0); 
@@ -137,17 +137,17 @@ public class QuanLyCanhBaoPanel extends JPanel {
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        JButton btnNhatKy = UITheme.createButton("📝 Lập Nhật Ký", UITheme.INFO, Color.WHITE);
+        JButton btnNhatKy = UITheme.createButton("Lập Nhật Ký", UITheme.INFO, Color.WHITE);
         btnNhatKy.setToolTipText("Lập biên bản tư vấn CVHT cho sinh viên được chọn");
         btnNhatKy.addActionListener(e -> onLapNhatKy());
         bar.add(btnNhatKy);
 
-        JButton btnDelete = UITheme.createButton("🗑️ Gỡ QĐ", new Color(170, 70, 70), Color.WHITE);
+        JButton btnDelete = UITheme.createButton("Gỡ QĐ", new Color(170, 70, 70), Color.WHITE);
         btnDelete.setToolTipText("Hủy bỏ/Gỡ quyết định cảnh báo học vụ đã chọn");
         btnDelete.addActionListener(e -> onDeleteCanhBao());
         bar.add(btnDelete);
 
-        JButton btnExport = UITheme.createButton("📊 Xuất Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableCanhBao, "Danh_Sach_Canh_Bao_Hoc_Vu"));
         bar.add(btnExport);
 

@@ -56,7 +56,7 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("📑  QUẢN LÝ BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP (GPA / CPA)");
+        JLabel title = new JLabel("QUẢN LÝ BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP (GPA / CPA)");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -97,11 +97,11 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
         cbHocKy.addActionListener(e -> filterData());
         bar.add(cbHocKy);
 
-        JButton btnSearch = UITheme.createButton("🔍 Tìm", UITheme.PRIMARY, Color.WHITE);
+        JButton btnSearch = UITheme.createButton("Tìm Kiếm", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
         bar.add(btnSearch);
 
-        JButton btnReset = UITheme.createButton("🔄 Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnReset = UITheme.createButton("Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnReset.addActionListener(e -> { 
             txtSearchSv.setText(""); 
             cbNamHoc.setSelectedIndex(0); 
@@ -113,25 +113,25 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
         // Nút Nhập GPA
-        JButton btnNhap = UITheme.createButton("➕ Nhập Điểm", UITheme.SUCCESS, Color.WHITE);
+        JButton btnNhap = UITheme.createButton("+ Nhập Điểm", UITheme.SUCCESS, Color.WHITE);
         btnNhap.addActionListener(e -> onNhapGPA());
         bar.add(btnNhap);
 
         // Nút Sửa GPA
-        JButton btnSua = UITheme.createButton("✏️ Sửa Điểm", UITheme.WARNING, Color.WHITE);
+        JButton btnSua = UITheme.createButton("Sửa Điểm", UITheme.WARNING, Color.WHITE);
         btnSua.addActionListener(e -> onSuaGPA());
         bar.add(btnSua);
 
         // Nút Xóa
         boolean isAdmin = "ADMIN".equals(currentUser != null ? currentUser.getVaiTro() : "");
         if (isAdmin) {
-            JButton btnXoa = UITheme.createButton("🗑️ Xóa", UITheme.DANGER, Color.WHITE);
+            JButton btnXoa = UITheme.createButton("Xóa Điểm", UITheme.DANGER, Color.WHITE);
             btnXoa.addActionListener(e -> onXoaGPA());
             bar.add(btnXoa);
         }
 
         // Xuất Excel
-        JButton btnExport = UITheme.createButton("📊 Xuất Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(table, "Bang_Diem_Ket_Qua_Hoc_Tap"));
         bar.add(btnExport);
 

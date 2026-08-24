@@ -42,7 +42,7 @@ public class BaoCaoThongKePanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("📈  BÁO CÁO THỐNG KÊ & TRỰC QUAN HÓA DỮ LIỆU");
+        JLabel title = new JLabel("BÁO CÁO THỐNG KÊ & TRỰC QUAN HÓA DỮ LIỆU");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -65,11 +65,11 @@ public class BaoCaoThongKePanel extends JPanel {
         }
         cbFilterLop.addActionListener(e -> loadStats());
         
-        JButton btnRefresh = UITheme.createButton("🔄 Cập Nhật Số Liệu", UITheme.PRIMARY, Color.WHITE);
+        JButton btnRefresh = UITheme.createButton("Cập Nhật Số Liệu", UITheme.PRIMARY, Color.WHITE);
         btnRefresh.setToolTipText("Tải lại số liệu thống kê mới nhất");
         btnRefresh.addActionListener(e -> loadStats());
 
-        JButton btnExport = UITheme.createButton("📊 Xuất Báo Cáo Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Báo Cáo Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.setToolTipText("Xuất toàn bộ chỉ tiêu thống kê ra file Excel .xlsx");
         btnExport.addActionListener(e -> exportReportToExcel());
         

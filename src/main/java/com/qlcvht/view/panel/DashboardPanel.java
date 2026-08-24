@@ -60,7 +60,7 @@ public class DashboardPanel extends JPanel {
         titleGrp.add(sub);
         header.add(titleGrp, BorderLayout.WEST);
 
-        JButton btnRefresh = UITheme.createButton("🔄 Làm Mới Dữ Liệu", UITheme.PRIMARY, Color.WHITE);
+        JButton btnRefresh = UITheme.createButton("Làm Mới Dữ Liệu", UITheme.PRIMARY, Color.WHITE);
         btnRefresh.addActionListener(e -> loadData());
         header.add(btnRefresh, BorderLayout.EAST);
 
@@ -99,7 +99,7 @@ public class DashboardPanel extends JPanel {
         // Bottom instruction tip
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bottom.setOpaque(false);
-        JLabel tip = new JLabel("💡 Mẹo: Sử dụng thanh điều hướng bên trái để quét tự động cảnh báo học vụ, xem hồ sơ 360°, ghi nhật ký tư vấn hoặc xuất báo cáo Excel.");
+        JLabel tip = new JLabel("Hướng dẫn: Sử dụng thanh điều hướng bên trái để quét tự động cảnh báo học vụ, xem hồ sơ 360°, ghi nhật ký tư vấn hoặc xuất báo cáo Excel.");
         tip.setFont(UITheme.FONT_SMALL);
         tip.setForeground(UITheme.TEXT_SECONDARY);
         bottom.add(tip);

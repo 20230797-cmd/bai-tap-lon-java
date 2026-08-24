@@ -57,7 +57,7 @@ public class ChiTietSinhVienDialog extends JDialog {
         header.setBackground(UITheme.PRIMARY_DARK);
         header.setBorder(new EmptyBorder(16, 22, 16, 22));
 
-        JLabel lblName = new JLabel("🎓 " + sinhVien.getHoTen() + "  -  MSSV: " + sinhVien.getMaSv());
+        JLabel lblName = new JLabel(sinhVien.getHoTen() + "  -  MSSV: " + sinhVien.getMaSv());
         lblName.setFont(UITheme.fontBold(20));
         lblName.setForeground(Color.WHITE);
 
@@ -91,10 +91,10 @@ public class ChiTietSinhVienDialog extends JDialog {
         // Center Tabs
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(UITheme.FONT_BODY_BOLD);
-        tabs.addTab("  📊 Kết quả & Quỹ đạo GPA  ", createKetQuaPanel());
-        tabs.addTab("  ⚠️ Lịch sử Cảnh báo  ", createCanhBaoPanel());
-        tabs.addTab("  📝 Nhật ký Tư vấn  ", createTuVanPanel());
-        tabs.addTab("  ✅ Chuyên cần & Điểm danh  ", createDiemDanhPanel());
+        tabs.addTab("  Kết quả & Quỹ đạo GPA  ", createKetQuaPanel());
+        tabs.addTab("  Lịch sử Cảnh báo  ", createCanhBaoPanel());
+        tabs.addTab("  Nhật ký Tư vấn  ", createTuVanPanel());
+        tabs.addTab("  Chuyên cần & Điểm danh  ", createDiemDanhPanel());
         add(tabs, BorderLayout.CENTER);
 
         // Bottom Actions
@@ -102,7 +102,7 @@ public class ChiTietSinhVienDialog extends JDialog {
         bottom.setBackground(UITheme.BG_WHITE);
         bottom.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_LIGHT));
 
-        JButton btnAiAdvisor = UITheme.createButton("🤖 Tư Vấn AI Cải Thiện", new Color(123, 31, 162), Color.WHITE);
+        JButton btnAiAdvisor = UITheme.createButton("Tư Vấn AI Cải Thiện", new Color(123, 31, 162), Color.WHITE);
         btnAiAdvisor.addActionListener(e -> showAiAdvisorQuickDialog());
         bottom.add(btnAiAdvisor);
 

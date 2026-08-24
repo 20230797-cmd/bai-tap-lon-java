@@ -60,7 +60,7 @@ public class ExcelImportDialog extends JDialog {
                 new EmptyBorder(6, 8, 6, 8)));
         txtFilePath.setText("Chưa chọn file...");
 
-        btnBrowse = new JButton("📂 Chọn file");
+        btnBrowse = new JButton("Chọn file...");
         btnBrowse.setFont(UITheme.FONT_BTN);
         btnBrowse.setBackground(UITheme.PRIMARY);
         btnBrowse.setForeground(Color.WHITE);
@@ -73,7 +73,7 @@ public class ExcelImportDialog extends JDialog {
         fileRow.add(btnBrowse, BorderLayout.EAST);
 
         JLabel lblHint = new JLabel("<html><span style='color:#888;font-size:11px;'>" +
-                "📌 Cột theo thứ tự: <b>Mã SV | Họ tên | Ngày sinh (yyyy-MM-dd) | Giới tính | Email | SĐT | Mã lớp | Trạng thái</b>" +
+                "Ghi chú: Cột theo thứ tự: <b>Mã SV | Họ tên | Ngày sinh (yyyy-MM-dd) | Giới tính | Email | SĐT | Mã lớp | Trạng thái</b>" +
                 "</span></html>");
         lblHint.setBorder(new EmptyBorder(4, 0, 4, 0));
 
@@ -99,7 +99,7 @@ public class ExcelImportDialog extends JDialog {
         bottom.setBackground(UITheme.BG_MAIN);
         bottom.setBorder(new EmptyBorder(12, 0, 0, 0));
 
-        btnImport = new JButton("⬆ Bắt đầu Import");
+        btnImport = new JButton("Bắt đầu Import");
         btnImport.setFont(UITheme.FONT_BTN);
         btnImport.setBackground(UITheme.SUCCESS);
         btnImport.setForeground(Color.WHITE);

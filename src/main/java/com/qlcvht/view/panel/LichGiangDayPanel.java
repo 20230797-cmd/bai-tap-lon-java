@@ -8,6 +8,8 @@ import com.qlcvht.model.LopHoc;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
+import com.qlcvht.util.WrapLayout;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -48,7 +50,7 @@ public class LichGiangDayPanel extends JPanel {
 
         JPanel titlePanel = new JPanel(new GridLayout(2, 1, 0, 4));
         titlePanel.setOpaque(false);
-        JLabel lblTitle = new JLabel("📅  THỜI KHÓA BIỂU & LỊCH CỐ VẤN HỌC VỤ");
+        JLabel lblTitle = new JLabel("THỜI KHÓA BIỂU & LỊCH CỐ VẤN HỌC VỤ");
         lblTitle.setFont(UITheme.FONT_HEADER);
         lblTitle.setForeground(UITheme.TEXT_PRIMARY);
 
@@ -59,17 +61,17 @@ public class LichGiangDayPanel extends JPanel {
         titlePanel.add(lblSub);
         topPanel.add(titlePanel, BorderLayout.NORTH);
 
-        // Filter & Action Toolbar
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
+        // Filter & Action Toolbar with WrapLayout
+        JPanel toolbar = new JPanel(new WrapLayout(FlowLayout.LEFT, 8, 6));
         toolbar.setBackground(UITheme.BG_WHITE);
         toolbar.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
-            new EmptyBorder(6, 12, 6, 12)
+            new EmptyBorder(6, 10, 6, 10)
         ));
 
         toolbar.add(new JLabel("Lớp học:"));
         cbFilterLop = new JComboBox<>();
-        cbFilterLop.setPreferredSize(new Dimension(140, 32));
+        cbFilterLop.setPreferredSize(new Dimension(130, 32));
         cbFilterLop.addItem("--- Tất cả ---");
         List<LopHoc> dsLop = coVanDAO.getAllLopHoc();
         for (LopHoc l : dsLop) {
@@ -80,29 +82,29 @@ public class LichGiangDayPanel extends JPanel {
 
         toolbar.add(new JLabel("Thời gian:"));
         cbFilterThoiGian = new JComboBox<>(new String[]{"Tất cả", "Hôm nay", "Tuần này", "Tháng này"});
-        cbFilterThoiGian.setPreferredSize(new Dimension(120, 32));
+        cbFilterThoiGian.setPreferredSize(new Dimension(110, 32));
         cbFilterThoiGian.addActionListener(e -> loadData());
         toolbar.add(cbFilterThoiGian);
 
         toolbar.add(new JLabel("Trạng thái:"));
         cbFilterTrangThai = new JComboBox<>(new String[]{"Tất cả", "SCHEDULED (Đã lên lịch)", "COMPLETED (Đã hoàn thành)", "CANCELLED (Đã hủy)"});
-        cbFilterTrangThai.setPreferredSize(new Dimension(180, 32));
+        cbFilterTrangThai.setPreferredSize(new Dimension(160, 32));
         cbFilterTrangThai.addActionListener(e -> loadData());
         toolbar.add(cbFilterTrangThai);
 
-        JButton btnThemLich = UITheme.createButton("➕ Thêm Lịch Mới", UITheme.PRIMARY, Color.WHITE);
+        JButton btnThemLich = UITheme.createButton("+ Thêm Lịch Mới", UITheme.PRIMARY, Color.WHITE);
         btnThemLich.addActionListener(e -> showThemSuaDialog(null));
         toolbar.add(btnThemLich);
 
-        JButton btnHoanThanh = UITheme.createButton("✓ Đánh dấu Hoàn thành", new Color(46, 125, 50), Color.WHITE);
+        JButton btnHoanThanh = UITheme.createButton("Đánh dấu Hoàn thành", new Color(46, 125, 50), Color.WHITE);
         btnHoanThanh.addActionListener(e -> danhDauTrangThai("COMPLETED"));
         toolbar.add(btnHoanThanh);
 
-        JButton btnHuyLich = UITheme.createButton("✕ Hủy Buổi", new Color(198, 40, 40), Color.WHITE);
+        JButton btnHuyLich = UITheme.createButton("Hủy Buổi", new Color(198, 40, 40), Color.WHITE);
         btnHuyLich.addActionListener(e -> danhDauTrangThai("CANCELLED"));
         toolbar.add(btnHuyLich);
 
-        JButton btnXoa = UITheme.createButton("🗑 Xóa", new Color(150, 150, 150), Color.WHITE);
+        JButton btnXoa = UITheme.createButton("Xóa Lịch", new Color(150, 150, 150), Color.WHITE);
         btnXoa.addActionListener(e -> xoaLich());
         toolbar.add(btnXoa);
 
@@ -142,10 +144,10 @@ public class LichGiangDayPanel extends JPanel {
                     lbl.setText("● Đã lên lịch");
                 } else if ("COMPLETED".equals(v) || v.contains("Hoàn thành")) {
                     lbl.setForeground(new Color(46, 125, 50));
-                    lbl.setText("✔ Hoàn thành");
+                    lbl.setText("● Hoàn thành");
                 } else if ("CANCELLED".equals(v) || v.contains("Hủy")) {
                     lbl.setForeground(new Color(198, 40, 40));
-                    lbl.setText("✖ Đã hủy");
+                    lbl.setText("● Đã hủy");
                 }
                 return lbl;
             }
@@ -190,7 +192,7 @@ public class LichGiangDayPanel extends JPanel {
                 default: loaiHienThi = "Giảng Dạy / Chuyên Đề"; break;
             }
 
-            String hinhThuc = "ONLINE".equals(l.getHinhThuc()) ? "🌐 Online" : ("HYBRID".equals(l.getHinhThuc()) ? "⚡ Kết hợp" : "🏫 Trực tiếp");
+            String hinhThuc = "ONLINE".equals(l.getHinhThuc()) ? "Online" : ("HYBRID".equals(l.getHinhThuc()) ? "Kết hợp" : "Trực tiếp");
 
             tableModel.addRow(new Object[]{
                 l.getId(),
