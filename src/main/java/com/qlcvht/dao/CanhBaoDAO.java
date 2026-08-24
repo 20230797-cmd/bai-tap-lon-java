@@ -210,4 +210,9 @@ public class CanhBaoDAO {
             return null;
         }
     }
+
+    public List<CanhBaoHocVu> getCanhBaoByLop(String maLop) {
+        return filterCanhBao("ALL", "ALL", maLop, "");
+    }
+
 }
