@@ -28,7 +28,7 @@ public class DiemDanhDAO {
                     d.setMaSv(rs.getString("ma_sv"));
                     d.setHoTen(rs.getString("ho_ten"));
                     d.setMaLop(rs.getString("ma_lop"));
-                    Date dt = rs.getDate("ngay_diem_danh");
+                    Date dt = parseDateSafely(rs.getString("ngay_diem_danh"));
                     if (dt != null) {
                         d.setNgayDiemDanh(dt.toLocalDate());
                     }
@@ -57,7 +57,7 @@ public class DiemDanhDAO {
                     d.setId(rs.getInt("id"));
                     d.setIdLich(rs.getInt("id_lich"));
                     d.setMaSv(rs.getString("ma_sv"));
-                    Date dt = rs.getDate("ngay_diem_danh");
+                    Date dt = parseDateSafely(rs.getString("ngay_diem_danh"));
                     if (dt != null) {
                         d.setNgayDiemDanh(dt.toLocalDate());
                     }
@@ -144,4 +144,17 @@ public class DiemDanhDAO {
         }
         return stats;
     }
+
+    private Date parseDateSafely(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try {
+            if (dateStr.length() >= 10) {
+                return Date.valueOf(dateStr.substring(0, 10));
+            }
+            return Date.valueOf(dateStr);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

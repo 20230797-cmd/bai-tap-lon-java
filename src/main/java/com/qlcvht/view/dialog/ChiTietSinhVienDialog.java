@@ -1,16 +1,13 @@
 package com.qlcvht.view.dialog;
 
-import com.qlcvht.dao.BaiTapDAO;
 import com.qlcvht.dao.CanhBaoDAO;
 import com.qlcvht.dao.DiemDanhDAO;
 import com.qlcvht.dao.KetQuaHocTapDAO;
 import com.qlcvht.dao.NhatKyTuVanDAO;
-import com.qlcvht.model.BaiTap;
 import com.qlcvht.model.CanhBaoHocVu;
 import com.qlcvht.model.DiemDanh;
 import com.qlcvht.model.KetQuaHocTap;
 import com.qlcvht.model.NhatKyTuVan;
-import com.qlcvht.model.NopBaiTap;
 import com.qlcvht.model.SinhVien;
 import com.qlcvht.util.UITheme;
 
@@ -39,8 +36,7 @@ public class ChiTietSinhVienDialog extends JDialog {
     private final CanhBaoDAO canhBaoDAO = new CanhBaoDAO();
     private final NhatKyTuVanDAO nhatKyDAO = new NhatKyTuVanDAO();
     private final DiemDanhDAO diemDanhDAO = new DiemDanhDAO();
-    private final BaiTapDAO baiTapDAO = new BaiTapDAO();
-
+    
     public ChiTietSinhVienDialog(Frame parent, SinhVien sv) {
         super(parent, "Hồ sơ Học vụ 360°: " + sv.getHoTen() + " (" + sv.getMaSv() + ")", true);
         this.sinhVien = sv;
@@ -99,7 +95,6 @@ public class ChiTietSinhVienDialog extends JDialog {
         tabs.addTab("  ⚠️ Lịch sử Cảnh báo  ", createCanhBaoPanel());
         tabs.addTab("  📝 Nhật ký Tư vấn  ", createTuVanPanel());
         tabs.addTab("  ✅ Chuyên cần & Điểm danh  ", createDiemDanhPanel());
-        tabs.addTab("  📑 Bài tập & Đánh giá  ", createBaiTapPanel());
         add(tabs, BorderLayout.CENTER);
 
         // Bottom Actions
@@ -363,32 +358,7 @@ public class ChiTietSinhVienDialog extends JDialog {
         return p;
     }
 
-    private JPanel createBaiTapPanel() {
-        JPanel p = new JPanel(new BorderLayout(0, 8));
-        p.setBorder(new EmptyBorder(12, 14, 12, 14));
-        p.setBackground(Color.WHITE);
-
-        String[] cols = {"Mã Bài", "File Đã Nộp", "Điểm Số Quá Trình", "Nhận Xét Đánh Giá", "Tình Trạng"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        List<NopBaiTap> list = baiTapDAO.getSubmissionsByStudent(sinhVien.getMaSv());
-        for (NopBaiTap n : list) {
-            model.addRow(new Object[]{
-                n.getIdBaiTap(),
-                n.getFileDinhKem() != null ? n.getFileDinhKem() : "---",
-                n.getDiemSo() != null ? String.format("%.1f", n.getDiemSo()) : "Chưa chấm",
-                n.getNhanXet() != null ? n.getNhanXet() : "---",
-                n.getTrangThai()
-            });
-        }
-
-        JTable tbl = new JTable(model);
-        UITheme.styleTable(tbl);
-        p.add(new JScrollPane(tbl), BorderLayout.CENTER);
-        return p;
-    }
+    
 
     private void showAiAdvisorQuickDialog() {
         JDialog d = new JDialog(this, "Trợ Lý AI: Lộ Trình Cải Thiện cho " + sinhVien.getHoTen(), true);

@@ -10,8 +10,6 @@
 
 -- 1. Bảng Cố vấn học tập (CVHT)
 DROP TABLE IF EXISTS `diem_danh`;
-DROP TABLE IF EXISTS `nop_bai_tap`;
-DROP TABLE IF EXISTS `bai_tap`;
 DROP TABLE IF EXISTS `lich_giang_day`;
 DROP TABLE IF EXISTS `nhat_ky_tu_van`;
 DROP TABLE IF EXISTS `canh_bao_hoc_vu`;
@@ -401,32 +399,8 @@ CREATE TABLE `lich_giang_day` (
 );
 
 -- 10. Bảng Bài tập & Đánh giá quá trình
-CREATE TABLE `bai_tap` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `ma_lop` VARCHAR(20) NOT NULL,
-    `tieu_de` VARCHAR(255) NOT NULL,
-    `loai_danh_gia` TEXT DEFAULT 'TMA',
-    `trong_so` DOUBLE DEFAULT 20.0,
-    `han_nop` DATE NOT NULL,
-    `mo_ta` TEXT,
-    `dinh_dang_cho_phep` VARCHAR(100) DEFAULT 'pdf, docx, zip',
-    `trang_thai` TEXT DEFAULT 'OPEN',
-    CONSTRAINT `fk_baitap_lop` FOREIGN KEY (`ma_lop`) REFERENCES `lop_hoc` (`ma_lop`) ON DELETE CASCADE
-);
 
 -- 11. Bảng Nộp bài tập & Chấm điểm
-CREATE TABLE `nop_bai_tap` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `id_bai_tap` INT NOT NULL,
-    `ma_sv` VARCHAR(20) NOT NULL,
-    `ngay_nop` DATETIME DEFAULT (datetime('now', 'localtime')),
-    `file_dinh_kem` VARCHAR(255),
-    `diem_so` DOUBLE DEFAULT NULL,
-    `nhan_xet` TEXT,
-    `trang_thai` TEXT DEFAULT 'SUBMITTED',
-    CONSTRAINT `fk_nop_baitap` FOREIGN KEY (`id_bai_tap`) REFERENCES `bai_tap` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_nop_sv` FOREIGN KEY (`ma_sv`) REFERENCES `sinh_vien` (`ma_sv`) ON DELETE CASCADE
-);
 
 -- 12. Bảng Điểm danh & Chuyên cần
 CREATE TABLE `diem_danh` (
@@ -448,19 +422,8 @@ INSERT OR REPLACE INTO `lich_giang_day` (`ma_cvht`, `ten_cvht`, `ma_lop`, `ten_l
 ('CV002', 'ThS. Trần Thị Bình', '68IT2', '68IT2 - Công nghệ thông tin 2', 'Hội thảo Online: Định hướng Đồ án & Thực tập Doanh nghiệp', '2026-08-29', '19:30', '21:30', 'https://meet.google.com/abc-defg-hij', 'ONLINE', 'GIANG_DAY', 'SCHEDULED', 'Khách mời từ doanh nghiệp phần mềm');
 
 -- Dữ liệu mẫu Bài tập & Đánh giá
-INSERT OR REPLACE INTO `bai_tap` (`ma_lop`, `tieu_de`, `loai_danh_gia`, `trong_so`, `han_nop`, `mo_ta`, `dinh_dang_cho_phep`, `trang_thai`) VALUES
-('68IT1', 'Bài tập lớn 01: Thiết kế Giao diện Desktop App Java Swing FlatLaf', 'TMA', 20.0, '2026-09-05', 'Xây dựng giao diện ứng dụng quản lý chuẩn FlatLaf có bảng số liệu và dialog form.', 'zip, rar, pdf', 'OPEN'),
-('68IT1', 'Kiểm tra Giữa kỳ: Kiến trúc MVC & Kết nối CSDL JDBC', 'CMA', 30.0, '2026-09-20', 'Làm bài kiểm tra trắc nghiệm và thực hành viết DAO/Service kết nối SQLite/MySQL.', 'pdf, docx', 'OPEN'),
-('68IT1', 'Đồ án Kết thúc Môn: Hệ thống Quản lý Cố vấn Học vụ Toàn diện', 'PROJECT', 50.0, '2026-10-15', 'Hoàn thiện full stack hệ thống quản lý, phân tầng học lực và xuất báo cáo Excel.', 'zip, pdf', 'OPEN'),
-('68IT2', 'Bài tập lớn 01: Thiết kế Giao diện Desktop App Java Swing', 'TMA', 20.0, '2026-09-08', 'Xây dựng ứng dụng quản lý có FlatLaf theme và bảng số liệu.', 'zip, rar', 'OPEN');
 
 -- Dữ liệu mẫu Nộp bài tập
-INSERT OR REPLACE INTO `nop_bai_tap` (`id_bai_tap`, `ma_sv`, `ngay_nop`, `file_dinh_kem`, `diem_so`, `nhan_xet`, `trang_thai`) VALUES
-(1, '20230001', '2026-09-02 15:30:00', 'BTL01_20230001.zip', 9.5, 'Giao diện đẹp, chuẩn thiết kế, phân chia module rõ ràng', 'GRADED'),
-(1, '20230002', '2026-09-03 10:15:00', 'BTL01_20230002.zip', 8.5, 'Tốt, cần hoàn thiện thêm một số validation ở form nhập liệu', 'GRADED'),
-(1, '20230003', '2026-09-04 18:00:00', 'BTL01_20230003.zip', 7.5, 'Code chạy tốt, giao diện cần trau chuốt hơn', 'GRADED'),
-(1, '20230009', '2026-09-06 08:30:00', 'BTL01_20230009.zip', 6.0, 'Nộp muộn 1 ngày, cần chú ý thời hạn nộp bài', 'GRADED'),
-(1, '20230017', '2026-09-05 23:45:00', 'BTL01_20230017.zip', 5.5, 'Bài làm sơ sài, thiếu các chức năng lọc dữ liệu', 'GRADED');
 
 -- Dữ liệu mẫu Điểm danh
 INSERT OR REPLACE INTO `diem_danh` (`id_lich`, `ma_sv`, `ngay_diem_danh`, `trang_thai`, `ghi_chu`) VALUES

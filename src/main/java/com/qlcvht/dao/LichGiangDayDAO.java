@@ -166,7 +166,7 @@ public class LichGiangDayDAO {
         l.setMaLop(rs.getString("ma_lop"));
         l.setTenLop(rs.getString("ten_lop"));
         l.setTieuDe(rs.getString("tieu_de"));
-        Date d = rs.getDate("ngay");
+        Date d = parseDateSafely(rs.getString("ngay"));
         if (d != null) {
             l.setNgay(d.toLocalDate());
         }
@@ -179,4 +179,17 @@ public class LichGiangDayDAO {
         l.setGhiChu(rs.getString("ghi_chu"));
         return l;
     }
+
+    private Date parseDateSafely(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try {
+            if (dateStr.length() >= 10) {
+                return Date.valueOf(dateStr.substring(0, 10));
+            }
+            return Date.valueOf(dateStr);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }
