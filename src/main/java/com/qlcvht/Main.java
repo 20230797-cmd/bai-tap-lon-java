@@ -25,9 +25,9 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             boolean connected = DatabaseConnection.testConnection();
             if (connected) {
-                System.out.println("[INFO] K?t n?i CSDL th?nh c?ng: " + DatabaseConnection.getDatabaseType());
+                System.out.println("[INFO] K\u1EBFt n\u1ED1i CSDL th\u00E0nh c\u00F4ng: " + DatabaseConnection.getDatabaseType());
             } else {
-                System.err.println("[WARN] Kh?ng th? kh?i t?o CSDL!");
+                System.err.println("[WARN] Kh\u00F4ng th\u1EC3 kh\u1EDFi t\u1EA1o CSDL!");
             }
             new LoginFrame().setVisible(true);
         });

@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
         this.role = (user != null && user.getVaiTro() != null) ? user.getVaiTro() : "CO_VAN";
 
-        setTitle("H? th?ng Qu?n l? C? v?n H?c t?p & C?nh b?o H?c v?");
+        setTitle("H\u1EC7 th\u1ED1ng Qu\u1EA3n l\u00FD C\u1ED1 v\u1EA5n H\u1ECDc t\u1EADp & C\u1EA3nh b\u00E1o H\u1ECDc v\u1EE5");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1320, 780);
         setMinimumSize(new Dimension(1080, 680));
@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
         topBar.setPreferredSize(new Dimension(0, 56));
         topBar.setBorder(new EmptyBorder(0, 20, 0, 16));
 
-        JLabel lblTitle = new JLabel("??  H? TH?NG C? V?N H?C T?P & C?NH B?O H?C V?");
+        JLabel lblTitle = new JLabel("\uD83C\uDF93  H\u1EC6 TH\u1ED0NG C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP & C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4");
         lblTitle.setFont(UITheme.fontBold(15));
         lblTitle.setForeground(Color.WHITE);
         topBar.add(lblTitle, BorderLayout.WEST);
@@ -63,7 +63,7 @@ public class MainFrame extends JFrame {
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 11));
         userPanel.setOpaque(false);
 
-        String dbType = DatabaseConnection.isUsingSQLite() ? "? SQLite (Offline)" : "? MySQL (Online)";
+        String dbType = DatabaseConnection.isUsingSQLite() ? "\u26A1 SQLite (Offline)" : "\u26A1 MySQL (Online)";
         Color dbColor = DatabaseConnection.isUsingSQLite() ? new Color(251, 191, 36) : new Color(52, 211, 153);
         JLabel lblDb = new JLabel(dbType);
         lblDb.setFont(UITheme.fontBold(11));
@@ -75,31 +75,31 @@ public class MainFrame extends JFrame {
         userPanel.add(lblDb);
 
         String roleTitle = switch (role) {
-            case "ADMIN"   -> "?? Qu?n tr? vi?n";
-            case "QUAN_LY" -> "??? Qu?n l? Khoa";
-            case "CO_VAN"  -> "?? C? v?n H?c t?p";
+            case "ADMIN"   -> "\uD83D\uDC51 Qu\u1EA3n tr\u1ECB vi\u00EAn";
+            case "QUAN_LY" -> "\uD83C\uDFDB\uFE0F Qu\u1EA3n l\u00FD Khoa";
+            case "CO_VAN"  -> "\uD83C\uDF93 C\u1ED1 v\u1EA5n H\u1ECDc t\u1EADp";
             default        -> role;
         };
 
-        JLabel lblUser = new JLabel(roleTitle + " ? " + (currentUser != null ? currentUser.getHoTen() : "User"));
+        JLabel lblUser = new JLabel(roleTitle + " \u2013 " + (currentUser != null ? currentUser.getHoTen() : "User"));
         lblUser.setFont(UITheme.fontPlain(13));
         lblUser.setForeground(new Color(226, 232, 240));
         userPanel.add(lblUser);
 
-        JButton btnDoiPass = UITheme.createButton("??i MK", new Color(30, 58, 138), Color.WHITE);
+        JButton btnDoiPass = UITheme.createButton("\u0110\u1ED5i MK", new Color(30, 58, 138), Color.WHITE);
         btnDoiPass.setFont(UITheme.fontBold(11));
-        btnDoiPass.setToolTipText("Thay ??i m?t kh?u t?i kho?n");
+        btnDoiPass.setToolTipText("Thay \u0111\u1ED5i m\u1EADt kh\u1EA9u t\u00E0i kho\u1EA3n");
         btnDoiPass.addActionListener(e -> new DoiMatKhauDialog(this, currentUser).setVisible(true));
         userPanel.add(btnDoiPass);
 
-        JButton btnLogout = UITheme.createButton("??ng Xu?t", new Color(185, 28, 28), Color.WHITE);
+        JButton btnLogout = UITheme.createButton("\u0110\u0103ng Xu\u1EA5t", new Color(185, 28, 28), Color.WHITE);
         btnLogout.setFont(UITheme.fontBold(11));
-        btnLogout.setToolTipText("??ng xu?t kh?i h? th?ng");
+        btnLogout.setToolTipText("\u0110\u0103ng xu\u1EA5t kh\u1ECFi h\u1EC7 th\u1ED1ng");
         btnLogout.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "B?n c? ch?c ch?n mu?n ??ng xu?t kh?i h? th?ng?",
-                "X?c nh?n ??ng xu?t",
+                "B\u1EA1n c\u00F3 ch\u1EAFc ch\u1EAFn mu\u1ED1n \u0111\u0103ng xu\u1EA5t kh\u1ECFi h\u1EC7 th\u1ED1ng?",
+                "X\u00E1c nh\u1EADn \u0111\u0103ng xu\u1EA5t",
                 JOptionPane.YES_NO_OPTION
             );
             if (confirm == JOptionPane.YES_OPTION) {
@@ -119,38 +119,38 @@ public class MainFrame extends JFrame {
         sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
         sideBar.setBorder(new EmptyBorder(8, 0, 8, 0));
 
-        addSidebarSection("T?NG QUAN & L?CH TR?NH");
-        btnDashboard    = createNavBtn("  ??  T?ng Quan (Dashboard)", "DASHBOARD");
-        btnLichGiangDay = createNavBtn("  ??  L?ch Gi?ng D?y & CVHT", "LICH_GIANG_DAY");
+        addSidebarSection("T\u1ED4NG QUAN & L\u1ECACH TR\u00CCNH");
+        btnDashboard    = createNavBtn("  \uD83D\uDCCA  T\u1ED5ng Quan (Dashboard)", "DASHBOARD");
+        btnLichGiangDay = createNavBtn("  \uD83D\uDCC5  L\u1ECBch Gi\u1EA3ng D\u1EA1y & CVHT", "LICH_GIANG_DAY");
         sideBar.add(btnDashboard);
         sideBar.add(btnLichGiangDay);
 
-        addSidebarSection("QU?N L? H?C V? & SINH VI?N");
-        btnSinhVien = createNavBtn("  ??  H? S? Sinh Vi?n", "SINH_VIEN");
-        btnKetQua   = createNavBtn("  ??  B?ng ?i?m & K?t Qu? HT", "KET_QUA");
-        btnDiemDanh = createNavBtn("  ?  ?i?m Danh & Chuy?n C?n", "DIEM_DANH");
+        addSidebarSection("QU\u1EA2N L\u00DD H\u1ECCC V\u1EE4 & SINH VI\u00CAN");
+        btnSinhVien = createNavBtn("  \uD83D\uDC65  H\u1ED3 S\u01A1 Sinh Vi\u00EAn", "SINH_VIEN");
+        btnKetQua   = createNavBtn("  \uD83D\uDCD1  B\u1EA3ng \u0110i\u1EC3m & K\u1EBFt Qu\u1EA3 HT", "KET_QUA");
+        btnDiemDanh = createNavBtn("  \u2705  \u0110i\u1EC3m Danh & Chuy\u00EAn C\u1EA7n", "DIEM_DANH");
         sideBar.add(btnSinhVien);
         sideBar.add(btnKetQua);
         if (!"QUAN_LY".equals(role)) {
             sideBar.add(btnDiemDanh);
         }
 
-        addSidebarSection("C? V?N & C?NH B?O H?C V?");
-        btnCanhBao  = createNavBtn("  ??  C?nh B?o H?c V?", "CANH_BAO");
-        btnNhatKy   = createNavBtn("  ??  Nh?t K? T? V?n CVHT", "NHAT_KY");
-        btnThongBao = createNavBtn("  ??  Th?ng B?o Sinh Vi?n", "THONG_BAO");
+        addSidebarSection("C\u1ED0 V\u1EA4N & C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4");
+        btnCanhBao  = createNavBtn("  \u26A0\uFE0F  C\u1EA3nh B\u00E1o H\u1ECDc V\u1EE4", "CANH_BAO");
+        btnNhatKy   = createNavBtn("  \uD83D\uDCCB  Nh\u1EADt K\u00FD T\u01B0 V\u1EA5n CVHT", "NHAT_KY");
+        btnThongBao = createNavBtn("  \uD83D\uDD14  Th\u00F4ng B\u00E1o Sinh Vi\u00EAn", "THONG_BAO");
         sideBar.add(btnCanhBao);
         sideBar.add(btnNhatKy);
         sideBar.add(btnThongBao);
 
-        addSidebarSection("B?O C?O & TH?NG K?");
-        btnThongKe = createNavBtn("  ??  B?o C?o & Th?ng K?", "THONG_KE");
+        addSidebarSection("B\u00C1O C\u00C1O & TH\u1ED0NG K\u00CA");
+        btnThongKe = createNavBtn("  \uD83D\uDCC8  B\u00E1o C\u00E1o & Th\u1ED1ng K\u00EA", "THONG_KE");
         sideBar.add(btnThongKe);
 
         boolean isAdminOrQL = "ADMIN".equals(role) || "QUAN_LY".equals(role);
         if (isAdminOrQL) {
-            addSidebarSection("QU?N TR? H? TH?NG");
-            btnLopHoc = createNavBtn("  ??  Qu?n L? L?p & CVHT", "LOP_HOC");
+            addSidebarSection("QU\u1EA2N TR\u1ECA H\u1EC6 TH\u1ED0NG");
+            btnLopHoc = createNavBtn("  \uD83C\uDFEB  Qu\u1EA3n L\u00FD L\u1EDBp & CVHT", "LOP_HOC");
             sideBar.add(btnLopHoc);
         }
 

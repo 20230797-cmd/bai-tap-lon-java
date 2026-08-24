@@ -19,7 +19,7 @@ public class LoginFrame extends JFrame {
     private JLabel lblStatus;
 
     public LoginFrame() {
-        setTitle("??ng Nh?p - H? Th?ng Qu?n L? C? V?n H?c T?p & C?nh B?o H?c V?");
+        setTitle("\u0110\u0103ng Nh\u1EADp - H\u1EC7 Th\u1ED1ng Qu\u1EA3n L\u00FD C\u1ED1 V\u1EA5n H\u1ECDc T\u1EADp & C\u1EA3nh B\u00E1o H\u1ECDc V\u1EE5");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(480, 640);
         setMinimumSize(new Dimension(440, 600));
@@ -51,16 +51,16 @@ public class LoginFrame extends JFrame {
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(new EmptyBorder(32, 28, 16, 28));
 
-        JLabel lblBadge = new JLabel("??", SwingConstants.CENTER);
+        JLabel lblBadge = new JLabel("\uD83C\uDF93", SwingConstants.CENTER);
         lblBadge.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 42));
         lblBadge.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblTitle = new JLabel("QU?N L? C? V?N H?C T?P", SwingConstants.CENTER);
+        JLabel lblTitle = new JLabel("QU\u1EA2N L\u00DD C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP", SwingConstants.CENTER);
         lblTitle.setFont(UITheme.fontBold(18));
         lblTitle.setForeground(Color.WHITE);
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblSub = new JLabel("V? C?NH B?O H?C V?", SwingConstants.CENTER);
+        JLabel lblSub = new JLabel("V\u00C0 C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4", SwingConstants.CENTER);
         lblSub.setFont(UITheme.fontBold(14));
         lblSub.setForeground(new Color(147, 197, 253));
         lblSub.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -93,7 +93,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 0;
         gbc.insets = new Insets(0, 0, 4, 0);
-        JLabel lblQuick = new JLabel("??ng nh?p m?u nhanh:");
+        JLabel lblQuick = new JLabel("\u0110\u0103ng nh\u1EADp m\u1EABu nhanh:");
         lblQuick.setFont(UITheme.fontBold(11));
         lblQuick.setForeground(UITheme.PRIMARY);
         card.add(lblQuick, gbc);
@@ -101,10 +101,10 @@ public class LoginFrame extends JFrame {
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 10, 0);
         cbQuickLogin = new JComboBox<>(new String[]{
-            "?? admin (Qu?n tr? vi?n)",
-            "?? cv_nguynvanan (TS. Nguy?n V?n An)",
-            "?? cv_tranthibinh (ThS. Tr?n Th? B?nh)",
-            "??? quanly (Tr??ng khoa CNTT)"
+            "\uD83D\uDC51 admin (Qu\u1EA3n tr\u1ECB vi\u00EAn)",
+            "\uD83C\uDF93 cv_nguynvanan (TS. Nguy\u1EC5n V\u0103n An)",
+            "\uD83C\uDF93 cv_tranthibinh (ThS. Tr\u1EA7n Th\u1ECB B\u00ECnh)",
+            "\uD83C\uDFDB\uFE0F quanly (Tr\u01B0\u1EDFng khoa CNTT)"
         });
         cbQuickLogin.setFont(UITheme.fontPlain(13));
         cbQuickLogin.addActionListener(e -> {
@@ -119,7 +119,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 2;
         gbc.insets = new Insets(4, 0, 4, 0);
-        JLabel lblUser = new JLabel("T?n ??ng nh?p:");
+        JLabel lblUser = new JLabel("T\u00EAn \u0111\u0103ng nh\u1EADp:");
         lblUser.setFont(UITheme.fontBold(12));
         lblUser.setForeground(new Color(51, 65, 85));
         card.add(lblUser, gbc);
@@ -133,7 +133,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 4;
         gbc.insets = new Insets(4, 0, 4, 0);
-        JLabel lblPass = new JLabel("M?t kh?u:");
+        JLabel lblPass = new JLabel("M\u1EADt kh\u1EA9u:");
         lblPass.setFont(UITheme.fontBold(12));
         lblPass.setForeground(new Color(51, 65, 85));
         card.add(lblPass, gbc);
@@ -147,12 +147,12 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 6;
         gbc.insets = new Insets(0, 0, 6, 0);
-        chkShowPass = new JCheckBox("Hi?n th? m?t kh?u");
+        chkShowPass = new JCheckBox("Hi\u1EC3n th\u1ECB m\u1EADt kh\u1EA9u");
         chkShowPass.setFont(UITheme.fontPlain(12));
         chkShowPass.setOpaque(false);
         chkShowPass.setForeground(UITheme.TEXT_SECONDARY);
         chkShowPass.addActionListener(e -> {
-            txtPassword.setEchoChar(chkShowPass.isSelected() ? (char) 0 : '•');
+            txtPassword.setEchoChar(chkShowPass.isSelected() ? (char) 0 : '\u2022');
         });
         card.add(chkShowPass, gbc);
 
@@ -165,7 +165,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 8;
         gbc.insets = new Insets(4, 0, 8, 0);
-        btnLogin = UITheme.createButton("??NG NH?P", UITheme.PRIMARY, Color.WHITE);
+        btnLogin = UITheme.createButton("\u0110\u0102NG NH\u1EACP", UITheme.PRIMARY, Color.WHITE);
         btnLogin.setFont(UITheme.fontBold(13));
         btnLogin.setPreferredSize(new Dimension(340, 42));
         btnLogin.addActionListener(e -> onLogin());
@@ -173,7 +173,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 9;
         gbc.insets = new Insets(4, 0, 0, 0);
-        String dbInfo = DatabaseConnection.isUsingSQLite() ? "? ?ang d?ng CSDL SQLite Offline" : "? ?ang d?ng CSDL MySQL Online";
+        String dbInfo = DatabaseConnection.isUsingSQLite() ? "\u26A1 \u0110ang d\u00F9ng CSDL SQLite Offline" : "\u26A1 \u0110ang d\u00F9ng CSDL MySQL Online";
         JLabel hint = new JLabel(dbInfo, SwingConstants.CENTER);
         hint.setFont(UITheme.fontPlain(11));
         hint.setForeground(new Color(100, 116, 139));
@@ -197,12 +197,12 @@ public class LoginFrame extends JFrame {
 
         if (username.isEmpty() || password.isEmpty()) {
             lblStatus.setForeground(UITheme.DANGER);
-            lblStatus.setText("Vui l?ng nh?p ??y ?? t?n ??ng nh?p v? m?t kh?u!");
+            lblStatus.setText("Vui l\u00F2ng nh\u1EADp \u0111\u1EA7y \u0111\u1EE7 t\u00EAn \u0111\u0103ng nh\u1EADp v\u00E0 m\u1EADt kh\u1EA9u!");
             return;
         }
 
         lblStatus.setForeground(UITheme.PRIMARY);
-        lblStatus.setText("?ang x?c th?c th?ng tin...");
+        lblStatus.setText("\u0110ang x\u00E1c th\u1EF1c th\u00F4ng tin...");
         btnLogin.setEnabled(false);
 
         SwingUtilities.invokeLater(() -> {
@@ -212,7 +212,7 @@ public class LoginFrame extends JFrame {
                 new MainFrame(user).setVisible(true);
             } else {
                 lblStatus.setForeground(UITheme.DANGER);
-                lblStatus.setText("T?n ??ng nh?p ho?c m?t kh?u kh?ng ??ng!");
+                lblStatus.setText("T\u00EAn \u0111\u0103ng nh\u1EADp ho\u1EB7c m\u1EADt kh\u1EA9u kh\u00F4ng \u0111\u00FAng!");
                 btnLogin.setEnabled(true);
                 txtPassword.selectAll();
                 txtPassword.requestFocus();

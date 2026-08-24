@@ -31,18 +31,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Utility xu?t Bi?u m?u B?o c?o H?nh ch?nh (Bi?n b?n h?p l?p, B?o c?o t?ng h?p Khoa/L?p)
- * sang ??nh d?ng Word (.docx) v? PDF (.pdf).
+ * Utility xu\u1EA5t Bi\u1EC3u m\u1EABu B\u00E1o c\u00E1o H\u00E0nh ch\u00EDnh
  */
 public class ReportExporter {
 
     private static final ThongKeService thongKeService = new ThongKeService();
     private static final CanhBaoDAO canhBaoDAO = new CanhBaoDAO();
     private static final SinhVienDAO sinhVienDAO = new SinhVienDAO();
-
-    // =========================================================================
-    // 1. XU?T BI?N B?N H?P L?P C? V?N H?C T?P
-    // =========================================================================
 
     public static void exportBienBanHopLopWord(String maLop) {
         File fileToSave = chooseSaveFile("Bien_Ban_Hop_Lop_" + maLop, "docx", "Word Document (*.docx)");
@@ -53,44 +48,44 @@ public class ReportExporter {
         String currentDateStr = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
         try (XWPFDocument doc = new XWPFDocument()) {
-            addParagraph(doc, "B? GI?O D?C V? ??O T?O", 10, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "TR??NG ??I H?C X?Y D?NG H? N?I (HUCE)", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "C?NG H?A X? H?I CH? NGH?A VI?T NAM", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "??c l?p - T? do - H?nh ph?c", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "B\u1ED8 GI\u00C1O D\u1EE4C V\u00C0 \u0110\u00C0O T\u1EA0O", 10, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "C\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "------------------------", 10, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "BI?N B?N H?P L?P C? V?N H?C T?P", 16, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "V/v T?nh h?nh h?c t?p, C?nh b?o h?c v? & T? v?n sinh vi?n", 12, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "Th?i gian th?c hi?n: Ng?y " + currentDateStr, 11, false, ParagraphAlignment.CENTER);
+            addParagraph(doc, "BI\u00CAN B\u1EA2N H\u1ECCC L\u1EDAP C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP", 16, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "V/v T\u00ECnh h\u00ECnh h\u1ECDc t\u1EADp, C\u1EA3nh b\u00E1o h\u1ECDc v\u1EE5 & T\u01B0 v\u1EA5n sinh vi\u00EAn", 12, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "Th\u1EDDi gian th\u1EF1c hi\u1EC7n: Ng\u00E0y " + currentDateStr, 11, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "I. TH?NG TIN CHUNG", 13, true, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? L?p sinh ho?t: " + ("ALL".equals(maLop) ? "T?t c? c?c l?p" : maLop), 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? T?ng s? sinh vi?n: " + stats.getOrDefault("tong_sv", 0) + " sinh vi?n", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? Ch? tr? cu?c h?p: C? v?n h?c t?p ph? tr?ch l?p", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? Th? k?: L?p tr??ng / ??i di?n l?p", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "I. TH\u00D4NG TIN CHUNG", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, "\u2022 L\u1EDBp sinh ho\u1EA1t: " + ("ALL".equals(maLop) ? "T\u1EA5t c\u1EA3 c\u00E1c l\u1EDBp" : maLop), 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "\u2022 T\u1ED5ng s\u1ED1 sinh vi\u00EAn: " + stats.getOrDefault("tong_sv", 0) + " sinh vi\u00EAn", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "\u2022 Ch\u1EE7 tr\u00EC cu\u1ED9c h\u1ECDp: C\u1ED1 v\u1EA5n h\u1ECDc t\u1EADp ph\u1EE5 tr\u00E1ch l\u1EDBp", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "\u2022 Th\u01B0 k\u00FD: L\u1EDBp tr\u01B0\u1EDFng / \u0110\u1EA1i di\u1EC7n l\u1EDBp", 11, false, ParagraphAlignment.LEFT);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "II. TH?NG K? T?NH H?NH C?NH B?O H?C V?", 13, true, ParagraphAlignment.LEFT);
-            addParagraph(doc, "1. S? l??ng sinh vi?n ?ang h?c b?nh th??ng: " + stats.getOrDefault("sv_binh_thuong", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "2. S? l??ng sinh vi?n b? C?nh b?o h?c v? M?c 1: " + stats.getOrDefault("cb_muc_1", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "3. S? l??ng sinh vi?n b? C?nh b?o h?c v? M?c 2: " + stats.getOrDefault("cb_muc_2", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "4. S? l??ng sinh vi?n b? Bu?c th?i h?c: " + stats.getOrDefault("buoc_thoi_hoc", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "II. TH\u1ED0NG K\u00CA T\u00CCNH H\u00CCNH C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, "1. S\u1ED1 l\u01B0\u1EE3ng SV \u0111ang h\u1ECDc b\u00ECnh th\u01B0\u1EDDng: " + stats.getOrDefault("sv_binh_thuong", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "2. S\u1ED1 l\u01B0\u1EE3ng SV b\u1ECB C\u1EA3nh b\u00E1o h\u1ECDc v\u1EE5 M\u1EE9c 1: " + stats.getOrDefault("cb_muc_1", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "3. S\u1ED1 l\u01B0\u1EE3ng SV b\u1ECB C\u1EA3nh b\u00E1o h\u1ECDc v\u1EE5 M\u1EE9c 2: " + stats.getOrDefault("cb_muc_2", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "4. S\u1ED1 l\u01B0\u1EE3ng SV b\u1ECB Bu\u1ED9c th\u00F4i h\u1ECDc: " + stats.getOrDefault("buoc_thoi_hoc", 0) + " SV", 11, false, ParagraphAlignment.LEFT);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "III. DANH S?CH SINH VI?N B? C?NH B?O H?C V? C?N T? V?N", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, "III. DANH S\u00C1CH SINH VI\u00CAN B\u1ECA C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4", 13, true, ParagraphAlignment.LEFT);
 
             XWPFTable table = doc.createTable();
             XWPFTableRow headerRow = table.getRow(0);
             setHeaderCell(headerRow, 0, "STT");
-            setHeaderCell(headerRow, 1, "M? SV");
-            setHeaderCell(headerRow, 2, "H? v? T?n");
-            setHeaderCell(headerRow, 3, "L?p");
-            setHeaderCell(headerRow, 4, "M?c C?nh B?o");
-            setHeaderCell(headerRow, 5, "GPA X?t Duy?t");
-            setHeaderCell(headerRow, 6, "L? Do");
-            setHeaderCell(headerRow, 7, "Tr?ng Th?i T? V?n");
+            setHeaderCell(headerRow, 1, "M\u00E3 SV");
+            setHeaderCell(headerRow, 2, "H\u1ECD v\u00E0 T\u00EAn");
+            setHeaderCell(headerRow, 3, "L\u1EDBp");
+            setHeaderCell(headerRow, 4, "M\u1EE9c C\u1EA3nh B\u00E1o");
+            setHeaderCell(headerRow, 5, "GPA X\u00E9t");
+            setHeaderCell(headerRow, 6, "L\u00FD Do");
+            setHeaderCell(headerRow, 7, "Tr\u1EA1ng Th\u00E1i");
 
             int idx = 1;
             for (CanhBaoHocVu cb : cbList) {
@@ -106,20 +101,19 @@ public class ReportExporter {
             }
 
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "IV. K?T LU?N & CAM K?T", 13, true, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? CVHT y?u c?u t?t c? sinh vi?n thu?c di?n C?nh b?o h?c v? li?n h? t? v?n tr?c ti?p.", 11, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "? Ban c?n s? l?p ph?i h?p theo d?i s? s? v? nh?c nh? l?ch ??ng k? m?n h?c c?i thi?n.", 11, false, ParagraphAlignment.LEFT);
+            addParagraph(doc, "IV. K\u1EBEt LU\u1EACN & CAM K\u1EBEt", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, "\u2022 CVHT y\u00EAu c\u1EA7u t\u1EA5t c\u1EA3 sinh vi\u00EAn thu\u1ED9c di\u1EC7n C\u1EA3nh b\u00E1o h\u1ECDc v\u1EE5 li\u00EAn h\u1EC7 t\u01B0 v\u1EA5n tr\u1EF1c ti\u1EBFp.", 11, false, ParagraphAlignment.LEFT);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "       L?P TR??NG                                             C? V?N H?C T?P", 12, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "     (K? v? ghi r? h? t?n)                                   (K? v? ghi r? h? t?n)", 10, false, ParagraphAlignment.CENTER);
+            addParagraph(doc, "       L\u1EDBp TR\u01AF\u1EDENG                                             C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP", 12, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "     (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)                                   (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)", 10, false, ParagraphAlignment.CENTER);
 
             try (FileOutputStream out = new FileOutputStream(fileToSave)) {
                 doc.write(out);
             }
-            showSuccess("Xu?t Bi?n b?n h?p l?p (Word) th?nh c?ng:\n" + fileToSave.getAbsolutePath());
+            showSuccess("Xu\u1EA5t Bi\u00EAn b\u1EA3n h\u1ECDp l\u1EDBp (Word) th\u00E0nh c\u00F4ng:\n" + fileToSave.getAbsolutePath());
         } catch (Exception e) {
-            showError("L?i xu?t file Word: " + e.getMessage());
+            showError("L\u1ED7i xu\u1EA5t file Word: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -143,23 +137,23 @@ public class ReportExporter {
             Font fNormal = getPdfFont(10, Font.NORMAL);
             Font fSmall = getPdfFont(9, Font.NORMAL);
 
-            Paragraph pHeader = new Paragraph("TR??NG ??I H?C X?Y D?NG H? N?I (HUCE)\nC?NG H?A X? H?I CH? NGH?A VI?T NAM\n??c l?p - T? do - H?nh ph?c\n------------------------", fHeader);
+            Paragraph pHeader = new Paragraph("TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)\nC\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM\n\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc\n------------------------", fHeader);
             pHeader.setAlignment(Element.ALIGN_CENTER);
             document.add(pHeader);
 
             document.add(new Paragraph("\n"));
-            Paragraph pTitle = new Paragraph("BI?N B?N H?P L?P C? V?N H?C T?P\nV/v C?nh B?o H?c V? & T? V?n H?c T?p", fTitle);
+            Paragraph pTitle = new Paragraph("BI\u00CAN B\u1EA2N H\u1ECCC L\u1EDAP C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP\nV/v C\u1EA3nh B\u00E1o H\u1ECDc V\u1EE5 & T\u01B0 V\u1EA5n H\u1ECDc T\u1EADp", fTitle);
             pTitle.setAlignment(Element.ALIGN_CENTER);
             document.add(pTitle);
 
-            document.add(new Paragraph("Th?i gian: Ng?y " + currentDateStr + "   |   L?p: " + ("ALL".equals(maLop) ? "T?t c? c?c l?p" : maLop) + "\n\n", fNormal));
+            document.add(new Paragraph("Th\u1EDDi gian: Ng\u00E0y " + currentDateStr + "   |   L\u1EDBp: " + ("ALL".equals(maLop) ? "T\u1EA5t c\u1EA3 c\u00E1c l\u1EDBp" : maLop) + "\n\n", fNormal));
 
-            document.add(new Paragraph("I. TH?NG K? T?NH H?NH H?C T?P", fBold));
-            document.add(new Paragraph(String.format("? T?ng s? SV: %d | B?nh th??ng: %d | C?nh b?o M1: %d | C?nh b?o M2: %d | Bu?c th?i h?c: %d\n\n",
+            document.add(new Paragraph("I. TH\u1ED0NG K\u00CA T\u00CCNH H\u00CCNH H\u1ECCC T\u1EACP", fBold));
+            document.add(new Paragraph(String.format("\u2022 T\u1ED5ng s\u1ED1 SV: %d | B\u00ECnh th\u01B0\u1EDDng: %d | C\u1EA3nh b\u00E1o M1: %d | C\u1EA3nh b\u00E1o M2: %d | Bu\u1ED9c th\u00F4i h\u1ECDc: %d\n\n",
                 stats.getOrDefault("tong_sv", 0), stats.getOrDefault("sv_binh_thuong", 0),
                 stats.getOrDefault("cb_muc_1", 0), stats.getOrDefault("cb_muc_2", 0), stats.getOrDefault("buoc_thoi_hoc", 0)), fNormal));
 
-            document.add(new Paragraph("II. DANH S?CH SINH VI?N B? C?NH B?O H?C V?", fBold));
+            document.add(new Paragraph("II. DANH S\u00C1CH SINH VI\u00CAN B\u1ECA C\u1EA2NH B\u00C1O H\u1ECCC V\u1EE4", fBold));
             document.add(new Paragraph("\n"));
 
             PdfPTable table = new PdfPTable(7);
@@ -167,12 +161,12 @@ public class ReportExporter {
             table.setWidths(new float[]{1, 2, 3.5f, 2, 2.5f, 1.5f, 2.5f});
 
             addPdfHeaderCell(table, "STT", fBold);
-            addPdfHeaderCell(table, "M? SV", fBold);
-            addPdfHeaderCell(table, "H? T?n", fBold);
-            addPdfHeaderCell(table, "L?p", fBold);
-            addPdfHeaderCell(table, "M?c CB", fBold);
-            addPdfHeaderCell(table, "GPA X?t", fBold);
-            addPdfHeaderCell(table, "Tr?ng Th?i", fBold);
+            addPdfHeaderCell(table, "M\u00E3 SV", fBold);
+            addPdfHeaderCell(table, "H\u1ECD T\u00EAn", fBold);
+            addPdfHeaderCell(table, "L\u1EDBp", fBold);
+            addPdfHeaderCell(table, "M\u1EE9c CB", fBold);
+            addPdfHeaderCell(table, "GPA X\u00E9t", fBold);
+            addPdfHeaderCell(table, "Tr\u1EA1ng Th\u00E1i", fBold);
 
             int idx = 1;
             for (CanhBaoHocVu cb : cbList) {
@@ -187,14 +181,14 @@ public class ReportExporter {
             document.add(table);
 
             document.add(new Paragraph("\n\n"));
-            Paragraph pSig = new Paragraph("         L?P TR??NG                                                  C? V?N H?C T?P\n    (K? v? ghi r? h? t?n)                                      (K? v? ghi r? h? t?n)", fBold);
+            Paragraph pSig = new Paragraph("         L\u1EDBp TR\u01AF\u1EDENG                                                  C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP\n    (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)                                      (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)", fBold);
             pSig.setAlignment(Element.ALIGN_CENTER);
             document.add(pSig);
 
             document.close();
-            showSuccess("Xu?t Bi?n b?n h?p l?p (PDF) th?nh c?ng:\n" + fileToSave.getAbsolutePath());
+            showSuccess("Xu\u1EA5t Bi\u00EAn b\u1EA3n h\u1ECDp l\u1EDBp (PDF) th\u00E0nh c\u00F4ng:\n" + fileToSave.getAbsolutePath());
         } catch (Exception e) {
-            showError("L?i xu?t file PDF: " + e.getMessage());
+            showError("L\u1ED7i xu\u1EA5t file PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -209,37 +203,37 @@ public class ReportExporter {
         String currentDateStr = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
         try (XWPFDocument doc = new XWPFDocument()) {
-            addParagraph(doc, "B? GI?O D?C V? ??O T?O", 10, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "TR??NG ??I H?C X?Y D?NG H? N?I (HUCE)", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "C?NG H?A X? H?I CH? NGH?A VI?T NAM", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "??c l?p - T? do - H?nh ph?c", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "B\u1ED8 GI\u00C1O D\u1EE4C V\u00C0 \u0110\u00C0O T\u1EA0O", 10, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "C\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "------------------------", 10, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "B?O C?O T?NG H?P T?NH H?NH H?C V? & TI?N ?? T? V?N", 16, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "K?nh g?i: Ban Gi?m Hi?u & Ph?ng ??o T?o", 12, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "Th?i ?i?m b?o c?o: Ng?y " + currentDateStr + "  |  Ph?m vi: " + maLop, 11, false, ParagraphAlignment.CENTER);
+            addParagraph(doc, "B\u00C1O C\u00C1O T\u1ED4NG H\u1EE2P T\u00CCNH H\u00CCNH H\u1ECCC V\u1EE4 & TI\u1EBEt \u0110\u1ED8 T\u01AF V\u1EA4N", 16, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "K\u00EDnh g\u1EEDi: Ban Gi\u00E1m Hi\u1EC7u & Ph\u00F2ng \u0110\u00E0o T\u1EA1o", 12, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "Th\u1EDDi \u0111i\u1EC3m b\u00E1o c\u00E1o: Ng\u00E0y " + currentDateStr + "  |  Ph\u1EA1m vi: " + maLop, 11, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
 
-            addParagraph(doc, "I. T? L? TI?N ?? T? V?N & C?I THI?N ?I?M S?", 13, true, ParagraphAlignment.LEFT);
-            addParagraph(doc, String.format("? T? l? sinh vi?n b? c?nh b?o ?? ???c t? v?n: %.1f%% (%s / %s SV)\n" +
-                                             "? T? l? sinh vi?n c?i thi?n ?i?m s? sau t? v?n: %.1f%% (%s / %s SV ?? t? v?n)\n",
+            addParagraph(doc, "I. T\u1EC8 L\u1EC6 TI\u1EBEt \u0110\u1ED8 T\u01AF V\u1EA4N & C\u1EA2I THI\u1EC6N \u0110I\u1EC2M S\u1ED0", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, String.format("\u2022 T\u1EC9 l\u1EC7 SV b\u1ECB c\u1EA3nh b\u00E1o \u0111\u00E3 \u0111\u01B0\u1EE3c t\u01B0 v\u1EA5n: %.1f%% (%s / %s SV)\n" +
+                                             "\u2022 T\u1EC9 l\u1EC7 SV c\u1EA3i thi\u1EC7n \u0111i\u1EC3m s\u1ED1 sau t\u01B0 v\u1EA5n: %.1f%% (%s / %s SV \u0111\u00E3 t\u01B0 v\u1EA5n)\n",
                 progressStats.get("percentDaTuVan"), progressStats.get("svDaTuVan"), progressStats.get("tongSvCanhBao"),
                 progressStats.get("percentCaiThien"), progressStats.get("svCaiThienDiem"), progressStats.get("svDaTuVan")), 11, false, ParagraphAlignment.LEFT);
 
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "II. CHI TI?T TI?N ?? V? K?T QU? T? V?N", 13, true, ParagraphAlignment.LEFT);
+            addParagraph(doc, "II. CHI TI\u1EBEt TI\u1EBEt \u0110\u1ED8 V\u00C0 K\u1EBEt QU\u1EA2 T\u01AF V\u1EA4N", 13, true, ParagraphAlignment.LEFT);
 
             XWPFTable table = doc.createTable();
             XWPFTableRow headerRow = table.getRow(0);
             setHeaderCell(headerRow, 0, "STT");
-            setHeaderCell(headerRow, 1, "M? SV");
-            setHeaderCell(headerRow, 2, "H? v? T?n");
-            setHeaderCell(headerRow, 3, "L?p");
-            setHeaderCell(headerRow, 4, "Ng?y T? V?n");
-            setHeaderCell(headerRow, 5, "GPA Tr??c");
+            setHeaderCell(headerRow, 1, "M\u00E3 SV");
+            setHeaderCell(headerRow, 2, "H\u1ECD v\u00E0 T\u00EAn");
+            setHeaderCell(headerRow, 3, "L\u1EDBp");
+            setHeaderCell(headerRow, 4, "Ng\u00E0y T\u01B0 V\u1EA5n");
+            setHeaderCell(headerRow, 5, "GPA Tr\u01B0\u1EDBc");
             setHeaderCell(headerRow, 6, "GPA Sau");
-            setHeaderCell(headerRow, 7, "K?t Qu? C?i Thi?n");
+            setHeaderCell(headerRow, 7, "K\u1EBFt Qu\u1EA3 C\u1EA3i Thi\u1EC7n");
 
             int idx = 1;
             for (CounselingProgressItem item : counselingItems) {
@@ -255,15 +249,15 @@ public class ReportExporter {
             }
 
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
-            addParagraph(doc, "        C? V?N H?C T?P / TR??NG KHOA                               TR??NG PH?NG ??O T?O", 12, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "            (K? v? ghi r? h? t?n)                                      (K? v? ghi r? h? t?n)", 10, false, ParagraphAlignment.CENTER);
+            addParagraph(doc, "        C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP / TR\u01AF\u1EDENG KHOA                               TR\u01AF\u1EDENG PH\u00D2NG \u0110\u00C0O T\u1EA0O", 12, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "            (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)                                      (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)", 10, false, ParagraphAlignment.CENTER);
 
             try (FileOutputStream out = new FileOutputStream(fileToSave)) {
                 doc.write(out);
             }
-            showSuccess("Xu?t B?o c?o t?ng h?p (Word) th?nh c?ng:\n" + fileToSave.getAbsolutePath());
+            showSuccess("Xu\u1EA5t B\u00E1o c\u00E1o t\u1ED5ng h\u1EE3p (Word) th\u00E0nh c\u00F4ng:\n" + fileToSave.getAbsolutePath());
         } catch (Exception e) {
-            showError("L?i xu?t file Word: " + e.getMessage());
+            showError("L\u1ED7i xu\u1EA5t file Word: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -288,24 +282,24 @@ public class ReportExporter {
             Font fNormal = getPdfFont(10, Font.NORMAL);
             Font fSmall = getPdfFont(9, Font.NORMAL);
 
-            Paragraph pHeader = new Paragraph("TR??NG ??I H?C X?Y D?NG H? N?I (HUCE)\nC?NG H?A X? H?I CH? NGH?A VI?T NAM\n------------------------", fHeader);
+            Paragraph pHeader = new Paragraph("TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)\nC\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM\n------------------------", fHeader);
             pHeader.setAlignment(Element.ALIGN_CENTER);
             document.add(pHeader);
 
             document.add(new Paragraph("\n"));
-            Paragraph pTitle = new Paragraph("B?O C?O T?NG H?P T?NH H?NH H?C V? & TI?N ?? T? V?N\nK?NH G?I: BAN GI?M HI?U", fTitle);
+            Paragraph pTitle = new Paragraph("B\u00C1O C\u00C1O T\u1ED4NG H\u1EE2P T\u00CCNH H\u00CCNH H\u1ECCC V\u1EE4 & TI\u1EBEt \u0110\u1ED8 T\u01AF V\u1EA4N\nK\u00CDNH G\u1EEDI: BAN GI\u00C1M HI\u1EC6U", fTitle);
             pTitle.setAlignment(Element.ALIGN_CENTER);
             document.add(pTitle);
 
-            document.add(new Paragraph("Th?i ?i?m b?o c?o: " + currentDateStr + "   |   Ph?m vi: " + maLop + "\n\n", fNormal));
+            document.add(new Paragraph("Th\u1EDDi \u0111i\u1EC3m b\u00E1o c\u00E1o: " + currentDateStr + "   |   Ph\u1EA1m vi: " + maLop + "\n\n", fNormal));
 
-            document.add(new Paragraph("I. T? L? TI?N ?? T? V?N & C?I THI?N ?I?M S?", fBold));
-            document.add(new Paragraph(String.format("? T? l? sinh vi?n b? c?nh b?o ?? ???c t? v?n: %.1f%% (%s / %s SV)\n" +
-                                                     "? T? l? sinh vi?n c?i thi?n ?i?m s? sau t? v?n: %.1f%% (%s / %s SV ?? t? v?n)\n\n",
+            document.add(new Paragraph("I. T\u1EC8 L\u1EC6 TI\u1EBEt \u0110\u1ED8 T\u01AF V\u1EA4N & C\u1EA2I THI\u1EC6N \u0110I\u1EC2M S\u1ED0", fBold));
+            document.add(new Paragraph(String.format("\u2022 T\u1EC9 l\u1EC7 SV b\u1ECB c\u1EA3nh b\u00E1o \u0111\u00E3 \u0111\u01B0\u1EE3c t\u01B0 v\u1EA5n: %.1f%% (%s / %s SV)\n" +
+                                                     "\u2022 T\u1EC9 l\u1EC7 SV c\u1EA3i thi\u1EC7n \u0111i\u1EC3m s\u1ED1 sau t\u01B0 v\u1EA5n: %.1f%% (%s / %s SV \u0111\u00E3 t\u01B0 v\u1EA5n)\n\n",
                 progressStats.get("percentDaTuVan"), progressStats.get("svDaTuVan"), progressStats.get("tongSvCanhBao"),
                 progressStats.get("percentCaiThien"), progressStats.get("svCaiThienDiem"), progressStats.get("svDaTuVan")), fNormal));
 
-            document.add(new Paragraph("II. CHI TI?T K?T QU? T? V?N V? C?I THI?N ?I?M S?", fBold));
+            document.add(new Paragraph("II. CHI TI\u1EBEt K\u1EBEt QU\u1EA2 T\u01AF V\u1EA4N V\u00C0 C\u1EA2I THI\u1EC6N \u0110I\u1EC2M S\u1ED0", fBold));
             document.add(new Paragraph("\n"));
 
             PdfPTable table = new PdfPTable(8);
@@ -313,13 +307,13 @@ public class ReportExporter {
             table.setWidths(new float[]{1, 2, 3, 1.5f, 2, 1.5f, 1.5f, 3.5f});
 
             addPdfHeaderCell(table, "STT", fBold);
-            addPdfHeaderCell(table, "M? SV", fBold);
-            addPdfHeaderCell(table, "H? T?n", fBold);
-            addPdfHeaderCell(table, "L?p", fBold);
-            addPdfHeaderCell(table, "Ng?y TV", fBold);
-            addPdfHeaderCell(table, "GPA Tr??c", fBold);
+            addPdfHeaderCell(table, "M\u00E3 SV", fBold);
+            addPdfHeaderCell(table, "H\u1ECD T\u00EAn", fBold);
+            addPdfHeaderCell(table, "L\u1EDBp", fBold);
+            addPdfHeaderCell(table, "Ng\u00E0y TV", fBold);
+            addPdfHeaderCell(table, "GPA Tr\u01B0\u1EDBc", fBold);
             addPdfHeaderCell(table, "GPA Sau", fBold);
-            addPdfHeaderCell(table, "??nh gi? C?i thi?n", fBold);
+            addPdfHeaderCell(table, "K\u1EBFt Qu\u1EA3", fBold);
 
             int idx = 1;
             for (CounselingProgressItem item : counselingItems) {
@@ -335,21 +329,21 @@ public class ReportExporter {
             document.add(table);
 
             document.add(new Paragraph("\n\n"));
-            Paragraph pSig = new Paragraph(" C? V?N H?C T?P / TR??NG KHOA                               TR??NG PH?NG ??O T?O\n    (K? v? ghi r? h? t?n)                                      (K? v? ghi r? h? t?n)", fBold);
+            Paragraph pSig = new Paragraph(" C\u1ED0 V\u1EA4N H\u1ECCC T\u1EACP / TR\u01AF\u1EDENG KHOA                               TR\u01AF\u1EDENG PH\u00D2NG \u0110\u00C0O T\u1EA0O\n    (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)                                      (K\u00FD v\u00E0 ghi r\u00F5 h\u1ECD t\u00EAn)", fBold);
             pSig.setAlignment(Element.ALIGN_CENTER);
             document.add(pSig);
 
             document.close();
-            showSuccess("Xu?t B?o c?o t?ng h?p (PDF) th?nh c?ng:\n" + fileToSave.getAbsolutePath());
+            showSuccess("Xu\u1EA5t B\u00E1o c\u00E1o t\u1ED5ng h\u1EE3p (PDF) th\u00E0nh c\u00F4ng:\n" + fileToSave.getAbsolutePath());
         } catch (Exception e) {
-            showError("L?i xu?t file PDF: " + e.getMessage());
+            showError("L\u1ED7i xu\u1EA5t file PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private static File chooseSaveFile(String defaultName, String ext, String extDescription) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Ch?n v? tr? l?u file b?o c?o");
+        fileChooser.setDialogTitle("Ch\u1ECDn v\u1ECB tr\u00ED l\u01B0u file b\u00E1o c\u00E1o");
         fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
         fileChooser.setSelectedFile(new File(defaultName + "." + ext));
 
@@ -402,10 +396,10 @@ public class ReportExporter {
     }
 
     private static void showSuccess(String msg) {
-        JOptionPane.showMessageDialog(null, msg, "Xu?t B?o C?o Th?nh C?ng", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, msg, "Xu\u1EA5t B\u00E1o C\u00E1o Th\u00E0nh C\u00F4ng", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private static void showError(String msg) {
-        JOptionPane.showMessageDialog(null, msg, "L?i Xu?t File", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, msg, "L\u1ED7i Xu\u1EA5t File", JOptionPane.ERROR_MESSAGE);
     }
 }

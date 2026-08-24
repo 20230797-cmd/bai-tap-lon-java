@@ -137,32 +137,32 @@ public class UITheme {
     }
 
     public static String formatTrangThaiSinhVien(String raw) {
-        if (raw == null) return "?ang h?c";
+        if (raw == null) return "\u0110ang h\u1ECDc";
         switch (raw) {
-            case "CANH_BAO_1": return "C?nh b?o m?c 1";
-            case "CANH_BAO_2": return "C?nh b?o m?c 2";
-            case "BUOC_THOI_HOC": return "Bu?c th?i h?c";
-            case "DA_TOT_NGHIEP": return "?? t?t nghi?p";
-            default: return "?ang h?c";
+            case "CANH_BAO_1": return "C\u1EA3nh b\u00E1o m\u1EE9c 1";
+            case "CANH_BAO_2": return "C\u1EA3nh b\u00E1o m\u1EE9c 2";
+            case "BUOC_THOI_HOC": return "Bu\u1ED9c th\u00F4i h\u1ECDc";
+            case "DA_TOT_NGHIEP": return "\u0110\u00E3 t\u1ED1t nghi\u1EC7p";
+            default: return "\u0110ang h\u1ECDc";
         }
     }
 
     public static String formatMucCanhBao(String raw) {
         if (raw == null) return "-";
         switch (raw) {
-            case "MUC_1": return "M?c 1 (GPA < 2.0)";
-            case "MUC_2": return "M?c 2 (GPA < 1.5)";
-            case "BUOC_THOI_HOC": return "Bu?c th?i h?c (GPA < 1.0)";
+            case "MUC_1": return "M\u1EE9c 1 (GPA < 2.0)";
+            case "MUC_2": return "M\u1EE9c 2 (GPA < 1.5)";
+            case "BUOC_THOI_HOC": return "Bu\u1ED9c th\u00F4i h\u1ECDc (GPA < 1.0)";
             default: return raw;
         }
     }
 
     public static String formatTrangThaiTuVan(String raw) {
-        if (raw == null) return "Ch?a t? v?n";
+        if (raw == null) return "Ch\u01B0a t\u01B0 v\u1EA5n";
         switch (raw) {
-            case "DA_TU_VAN": return "?? t? v?n";
-            case "DANG_THEO_DOI": return "?ang theo d?i";
-            default: return "Ch?a t? v?n";
+            case "DA_TU_VAN": return "\u0110\u00E3 t\u01B0 v\u1EA5n";
+            case "DANG_THEO_DOI": return "\u0110ang theo d\u00F5i";
+            default: return "Ch\u01B0a t\u01B0 v\u1EA5n";
         }
     }
 }
