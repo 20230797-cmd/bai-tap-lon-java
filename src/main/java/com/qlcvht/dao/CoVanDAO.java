@@ -136,5 +136,49 @@ public class CoVanDAO {
             return false;
         }
     }
+
+    public CoVanHocTap getCoVanByMa(String maCvht) {
+        String sql = "SELECT * FROM co_van_hoc_tap WHERE ma_cvht = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maCvht);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new CoVanHocTap(
+                        rs.getString("ma_cvht"),
+                        rs.getString("ho_ten"),
+                        rs.getString("email"),
+                        rs.getString("so_dien_thoai"),
+                        rs.getString("khoa")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public CoVanHocTap getCoVanByLop(String maLop) {
+        String sql = "SELECT c.* FROM co_van_hoc_tap c JOIN lop_hoc l ON c.ma_cvht = l.ma_cvht WHERE l.ma_lop = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maLop);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new CoVanHocTap(
+                        rs.getString("ma_cvht"),
+                        rs.getString("ho_ten"),
+                        rs.getString("email"),
+                        rs.getString("so_dien_thoai"),
+                        rs.getString("khoa")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
 

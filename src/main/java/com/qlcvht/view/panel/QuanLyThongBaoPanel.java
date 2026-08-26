@@ -1,11 +1,18 @@
 package com.qlcvht.view.panel;
 
+import com.qlcvht.dao.SinhVienDAO;
+import com.qlcvht.dao.ThongBaoDAO;
+import com.qlcvht.model.SinhVien;
 import com.qlcvht.model.SinhVienTier;
 import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.model.ThongBao;
 import com.qlcvht.service.ThongBaoService;
+import com.qlcvht.util.NotificationPopup;
 import com.qlcvht.util.UITheme;
 import com.qlcvht.util.WrapLayout;
+import com.qlcvht.websocket.ChatMessage;
+import com.qlcvht.websocket.ChatWebSocketClient;
+import com.qlcvht.websocket.WebSocketService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,6 +27,8 @@ public class QuanLyThongBaoPanel extends JPanel {
 
     private final TaiKhoan currentUser;
     private final ThongBaoService thongBaoService = new ThongBaoService();
+    private final ThongBaoDAO thongBaoDAO = new ThongBaoDAO();
+    private final SinhVienDAO sinhVienDAO = new SinhVienDAO();
 
     // Data lists
     private List<SinhVienTier> fullStudentList = new ArrayList<>();
@@ -54,6 +63,20 @@ public class QuanLyThongBaoPanel extends JPanel {
     // Tab 3: History components
     private JTable tblHistory;
     private DefaultTableModel modelHistory;
+
+    // Tab 4: Real-time Chat with Students components
+    private JTextField txtSearchChatStudent;
+    private JTable tblChatStudents;
+    private DefaultTableModel modelChatStudents;
+    private List<SinhVien> fullChatStudentList = new ArrayList<>();
+    private List<SinhVien> chatStudentList = new ArrayList<>();
+    private SinhVien selectedChatStudent;
+    private JTextPane chatTextPane;
+    private JTextField txtChatReply;
+    private JLabel lblChatStudentHeader;
+    private JLabel lblChatWsStatus;
+    private JButton btnSendChatReply;
+    private ChatWebSocketClient wsClient;
 
     public QuanLyThongBaoPanel(TaiKhoan currentUser) {
         this.currentUser = currentUser;
@@ -180,7 +203,9 @@ public class QuanLyThongBaoPanel extends JPanel {
         tabbedPane.addTab("  Gửi Thông Báo Mới  ", createTabSendNotification());
         tabbedPane.addTab("  Lọc & Giả Lập Điểm  ", createTabFilterAndSimulation());
         tabbedPane.addTab("  Lịch Sử Thông Báo Đã Gửi  ", createTabHistory());
+        tabbedPane.addTab("  💬 Hộp Thư & Chat Với Sinh Viên (Realtime)  ", createTabStudentFeedback());
 
+        initWebSocket();
         add(tabbedPane, BorderLayout.CENTER);
     }
 
@@ -816,5 +841,366 @@ public class QuanLyThongBaoPanel extends JPanel {
             }
             return label;
         }
+    }
+
+    // =========================================================================
+    // TAB 4: HỘP THƯ & CHAT TRỰC TIẾP VỚI SINH VIÊN (REALTIME WEBSOCKET)
+    // =========================================================================
+    private void initWebSocket() {
+        String myId = (currentUser != null && currentUser.getMaRef() != null && !currentUser.getMaRef().isEmpty())
+            ? currentUser.getMaRef()
+            : (currentUser != null ? currentUser.getTenDangNhap() : "CO_VAN");
+
+        try {
+            wsClient = WebSocketService.getInstance().getClient(myId);
+            if (wsClient != null) {
+                wsClient.addListener(new ChatWebSocketClient.MessageListener() {
+                    @Override
+                    public void onMessageReceived(ChatMessage message) {
+                        loadChatStudentList();
+                        if (selectedChatStudent != null && selectedChatStudent.getMaSv().equalsIgnoreCase(message.getFromId())) {
+                            thongBaoDAO.markMessagesAsReadByAdvisor(message.getFromId());
+                            loadChatConversation(selectedChatStudent.getMaSv());
+                        } else {
+                            NotificationPopup.showPopup(
+                                SwingUtilities.getWindowAncestor(QuanLyThongBaoPanel.this),
+                                "Tin Nhắn Từ Sinh Viên: " + message.getFromName(),
+                                message.getContent(),
+                                () -> selectStudentInChat(message.getFromId())
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onStatusChanged(boolean connected, String statusText) {
+                        if (lblChatWsStatus != null) {
+                            lblChatWsStatus.setText(statusText);
+                            lblChatWsStatus.setForeground(connected ? new Color(16, 185, 129) : new Color(239, 68, 68));
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private JPanel createTabStudentFeedback() {
+        JPanel panel = new JPanel(new BorderLayout(15, 15));
+        panel.setBackground(UITheme.BG_WHITE);
+        panel.setBorder(new EmptyBorder(15, 20, 15, 20));
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setResizeWeight(0.38);
+        splitPane.setDividerLocation(420);
+        splitPane.setBorder(null);
+
+        // --- LEFT: Student List with Search Bar ---
+        JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
+        leftPanel.setBackground(Color.WHITE);
+        leftPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
+            new EmptyBorder(12, 12, 12, 12)
+        ));
+
+        JPanel leftHeader = new JPanel(new BorderLayout(0, 8));
+        leftHeader.setOpaque(false);
+
+        JPanel titleBar = new JPanel(new BorderLayout());
+        titleBar.setOpaque(false);
+        JLabel lblListTitle = new JLabel("👥 SINH VIÊN NHẮN TIN & TƯ VẤN");
+        lblListTitle.setFont(UITheme.fontBold(13));
+        lblListTitle.setForeground(UITheme.PRIMARY_DARK);
+        titleBar.add(lblListTitle, BorderLayout.WEST);
+
+        JButton btnRefreshList = UITheme.createButton("🔄 Làm Mới", UITheme.PRIMARY_LIGHT, UITheme.PRIMARY);
+        btnRefreshList.setFont(UITheme.fontBold(11));
+        btnRefreshList.setPreferredSize(new Dimension(85, 26));
+        btnRefreshList.addActionListener(e -> loadChatStudentList());
+        titleBar.add(btnRefreshList, BorderLayout.EAST);
+        leftHeader.add(titleBar, BorderLayout.NORTH);
+
+        // Search Bar for chatting students
+        txtSearchChatStudent = new JTextField();
+        txtSearchChatStudent.setFont(UITheme.fontPlain(12));
+        txtSearchChatStudent.setPreferredSize(new Dimension(300, 32));
+        txtSearchChatStudent.putClientProperty("JTextField.placeholderText", "🔍 Tìm kiếm theo Tên, Mã SV, Lớp...");
+        txtSearchChatStudent.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filterChatStudentList(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filterChatStudentList(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterChatStudentList(); }
+        });
+        leftHeader.add(txtSearchChatStudent, BorderLayout.SOUTH);
+        leftPanel.add(leftHeader, BorderLayout.NORTH);
+
+        String[] cols = {"Mã SV", "Họ Tên", "Lớp", "Chưa Đọc"};
+        modelChatStudents = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tblChatStudents = new JTable(modelChatStudents);
+        UITheme.styleTable(tblChatStudents);
+        tblChatStudents.getColumnModel().getColumn(0).setPreferredWidth(75);
+        tblChatStudents.getColumnModel().getColumn(1).setPreferredWidth(125);
+        tblChatStudents.getColumnModel().getColumn(2).setPreferredWidth(60);
+        tblChatStudents.getColumnModel().getColumn(3).setPreferredWidth(80);
+
+        // Custom Unread Badge Renderer
+        tblChatStudents.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                int unread = 0;
+                try {
+                    unread = Integer.parseInt(value != null ? value.toString() : "0");
+                } catch (Exception ignored) {}
+
+                if (unread > 0) {
+                    label.setText("🔴 " + unread + " mới");
+                    label.setFont(UITheme.fontBold(11));
+                    label.setForeground(new Color(220, 38, 38));
+                    label.setBackground(new Color(254, 242, 242));
+                    label.setOpaque(true);
+                } else {
+                    label.setText("✔ Đã đọc");
+                    label.setFont(UITheme.fontPlain(11));
+                    label.setForeground(new Color(100, 116, 139));
+                    label.setOpaque(false);
+                }
+                if (isSelected) {
+                    label.setBackground(UITheme.PRIMARY_LIGHT);
+                }
+                return label;
+            }
+        });
+
+        tblChatStudents.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblChatStudents.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tblChatStudents.getSelectedRow();
+                if (row >= 0 && row < chatStudentList.size()) {
+                    selectedChatStudent = chatStudentList.get(row);
+                    lblChatStudentHeader.setText("👤 Sinh viên: " + selectedChatStudent.getHoTen() + " (" + selectedChatStudent.getMaSv() + ") - Lớp: " + selectedChatStudent.getMaLop());
+                    
+                    // Mark as read in DB and update row
+                    thongBaoDAO.markMessagesAsReadByAdvisor(selectedChatStudent.getMaSv());
+                    modelChatStudents.setValueAt(0, row, 3);
+
+                    loadChatConversation(selectedChatStudent.getMaSv());
+                    txtChatReply.setEnabled(true);
+                    btnSendChatReply.setEnabled(true);
+                    txtChatReply.requestFocus();
+                }
+            }
+        });
+
+        JScrollPane scrollStudents = new JScrollPane(tblChatStudents);
+        leftPanel.add(scrollStudents, BorderLayout.CENTER);
+        splitPane.setLeftComponent(leftPanel);
+
+        // --- RIGHT: Live Chat Window ---
+        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
+        rightPanel.setBackground(Color.WHITE);
+        rightPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
+            new EmptyBorder(12, 12, 12, 12)
+        ));
+
+        // Right Top Header
+        JPanel rightHeader = new JPanel(new BorderLayout());
+        rightHeader.setOpaque(false);
+        rightHeader.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        lblChatStudentHeader = new JLabel("👈 Chọn một sinh viên bên trái để xem và trả lời tin nhắn");
+        lblChatStudentHeader.setFont(UITheme.fontBold(13));
+        lblChatStudentHeader.setForeground(UITheme.PRIMARY_DARK);
+
+        lblChatWsStatus = new JLabel("🟢 WebSocket Online (Real-time)");
+        lblChatWsStatus.setFont(UITheme.fontBold(11));
+        lblChatWsStatus.setForeground(new Color(16, 185, 129));
+
+        rightHeader.add(lblChatStudentHeader, BorderLayout.WEST);
+        rightHeader.add(lblChatWsStatus, BorderLayout.EAST);
+        rightPanel.add(rightHeader, BorderLayout.NORTH);
+
+        // Chat Text Pane
+        chatTextPane = new JTextPane();
+        chatTextPane.setContentType("text/html");
+        chatTextPane.setEditable(false);
+        chatTextPane.setFont(UITheme.fontPlain(13));
+        chatTextPane.setText("<html><body style='font-family:Segoe UI, sans-serif; padding:10px; color:#64748b;'><i>Chưa có tin nhắn nào được chọn.</i></body></html>");
+        JScrollPane chatScroll = new JScrollPane(chatTextPane);
+        chatScroll.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT));
+        rightPanel.add(chatScroll, BorderLayout.CENTER);
+
+        // Bottom Reply Input
+        JPanel replyBox = new JPanel(new BorderLayout(8, 0));
+        replyBox.setOpaque(false);
+        replyBox.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+        txtChatReply = new JTextField();
+        txtChatReply.setFont(UITheme.fontPlain(13));
+        txtChatReply.setPreferredSize(new Dimension(300, 38));
+        txtChatReply.setEnabled(false);
+        txtChatReply.addActionListener(e -> onSendChatReply());
+
+        btnSendChatReply = UITheme.createButton("🚀 Gửi Trả Lời (Realtime)", UITheme.PRIMARY, Color.WHITE);
+        btnSendChatReply.setFont(UITheme.fontBold(12));
+        btnSendChatReply.setPreferredSize(new Dimension(190, 38));
+        btnSendChatReply.setEnabled(false);
+        btnSendChatReply.addActionListener(e -> onSendChatReply());
+
+        replyBox.add(txtChatReply, BorderLayout.CENTER);
+        replyBox.add(btnSendChatReply, BorderLayout.EAST);
+        rightPanel.add(replyBox, BorderLayout.SOUTH);
+
+        splitPane.setRightComponent(rightPanel);
+        panel.add(splitPane, BorderLayout.CENTER);
+
+        // Load student list initially
+        SwingUtilities.invokeLater(this::loadChatStudentList);
+
+        return panel;
+    }
+
+    public void selectStudentInChat(String maSv) {
+        if (maSv == null) return;
+        for (int i = 0; i < chatStudentList.size(); i++) {
+            if (chatStudentList.get(i).getMaSv().equalsIgnoreCase(maSv)) {
+                tblChatStudents.setRowSelectionInterval(i, i);
+                tblChatStudents.scrollRectToVisible(tblChatStudents.getCellRect(i, 0, true));
+                break;
+            }
+        }
+    }
+
+    private void loadChatStudentList() {
+        String myMaCvht = (currentUser != null) ? currentUser.getMaRef() : null;
+        fullChatStudentList = thongBaoDAO.getDanhSachSinhVienDaGuiTinNhan(myMaCvht);
+
+        if (fullChatStudentList.isEmpty()) {
+            if (myMaCvht != null && !myMaCvht.isEmpty()) {
+                fullChatStudentList = sinhVienDAO.getSinhVienByCoVan(myMaCvht);
+            } else {
+                fullChatStudentList = sinhVienDAO.getAllSinhVien();
+            }
+        }
+
+        filterChatStudentList();
+    }
+
+    private void filterChatStudentList() {
+        String query = (txtSearchChatStudent != null) ? txtSearchChatStudent.getText().trim().toLowerCase() : "";
+        chatStudentList.clear();
+
+        for (SinhVien sv : fullChatStudentList) {
+            boolean match = query.isEmpty()
+                || sv.getMaSv().toLowerCase().contains(query)
+                || sv.getHoTen().toLowerCase().contains(query)
+                || (sv.getMaLop() != null && sv.getMaLop().toLowerCase().contains(query));
+            if (match) {
+                chatStudentList.add(sv);
+            }
+        }
+
+        modelChatStudents.setRowCount(0);
+        int selectedIndex = -1;
+        for (int i = 0; i < chatStudentList.size(); i++) {
+            SinhVien sv = chatStudentList.get(i);
+            int unread = thongBaoDAO.getUnreadCountForAdvisor(sv.getMaSv());
+            modelChatStudents.addRow(new Object[]{
+                sv.getMaSv(),
+                sv.getHoTen(),
+                sv.getMaLop(),
+                unread
+            });
+            if (selectedChatStudent != null && selectedChatStudent.getMaSv().equalsIgnoreCase(sv.getMaSv())) {
+                selectedIndex = i;
+            }
+        }
+
+        if (selectedIndex >= 0 && selectedIndex < modelChatStudents.getRowCount()) {
+            tblChatStudents.setRowSelectionInterval(selectedIndex, selectedIndex);
+        }
+    }
+
+    private void loadChatConversation(String maSv) {
+        if (maSv == null) return;
+        List<ThongBao> history = thongBaoDAO.getChatHistory(maSv);
+        StringBuilder html = new StringBuilder();
+        html.append("<html><head><style>");
+        html.append("body { font-family: Segoe UI, sans-serif; padding: 10px; background-color: #f8fafc; }");
+        html.append(".msg-box { margin-bottom: 12px; }");
+        html.append(".bubble-sv { background-color: #e2e8f0; color: #0f172a; padding: 8px 14px; border-radius: 12px; display: inline-block; max-width: 75%; }");
+        html.append(".bubble-cv { background-color: #2563eb; color: #ffffff; padding: 8px 14px; border-radius: 12px; display: inline-block; max-width: 75%; text-align: left; }");
+        html.append(".meta-sv { font-size: 11px; color: #64748b; margin-bottom: 3px; }");
+        html.append(".meta-cv { font-size: 11px; color: #93c5fd; margin-bottom: 3px; }");
+        html.append("</style></head><body>");
+
+        if (history.isEmpty()) {
+            html.append("<div style='text-align:center; color:#94a3b8; margin-top:20px;'>Chưa có tin nhắn nào trao đổi với sinh viên này. Hãy gửi lời chào đầu tiên!</div>");
+        } else {
+            for (ThongBao tb : history) {
+                boolean isFromStudent = (tb.getNhomRuiRo() != null && tb.getNhomRuiRo().contains("SV"))
+                                     || (tb.getTrangThai() != null && tb.getTrangThai().contains("SV"));
+                
+                String senderName = tb.getNguoiGui() != null ? tb.getNguoiGui() : (isFromStudent ? "Sinh viên" : "Cố vấn học tập");
+                String time = tb.getNgayGui() != null ? tb.getNgayGui() : "";
+
+                if (isFromStudent) {
+                    html.append("<div class='msg-box' style='text-align:left;'>");
+                    html.append("<div class='meta-sv'><b>🎓 ").append(senderName).append("</b> • ").append(time).append("</div>");
+                    html.append("<div class='bubble-sv'>");
+                    if (tb.getTieuDe() != null && !tb.getTieuDe().isEmpty()) {
+                        html.append("<div style='font-weight:bold; margin-bottom:3px;'>").append(escapeHtml(tb.getTieuDe())).append("</div>");
+                    }
+                    html.append(escapeHtml(tb.getNoiDung()).replace("\n", "<br/>"));
+                    html.append("</div></div>");
+                } else {
+                    html.append("<div class='msg-box' style='text-align:right;'>");
+                    html.append("<div style='font-size:11px; color:#64748b; margin-bottom:3px;'><b>👨‍🏫 ").append(senderName).append(" (Bạn)</b> • ").append(time).append("</div>");
+                    html.append("<div class='bubble-cv'>");
+                    if (tb.getTieuDe() != null && !tb.getTieuDe().isEmpty()) {
+                        html.append("<div style='font-weight:bold; margin-bottom:3px;'>").append(escapeHtml(tb.getTieuDe())).append("</div>");
+                    }
+                    html.append(escapeHtml(tb.getNoiDung()).replace("\n", "<br/>"));
+                    html.append("</div></div>");
+                }
+            }
+        }
+
+        html.append("</body></html>");
+        chatTextPane.setText(html.toString());
+        chatTextPane.setCaretPosition(chatTextPane.getDocument().getLength());
+    }
+
+    private void onSendChatReply() {
+        if (selectedChatStudent == null) return;
+        String content = txtChatReply.getText().trim();
+        if (content.isEmpty()) return;
+
+        String myCvht = (currentUser != null && currentUser.getMaRef() != null) ? currentUser.getMaRef() : "CVHT";
+        String myName = (currentUser != null) ? currentUser.getHoTen() : "Cố vấn học tập";
+
+        // 1. Save to Database
+        thongBaoDAO.traLoiTinNhanSinhVien(myCvht, myName, selectedChatStudent.getMaSv(), "Phản hồi câu hỏi", content);
+
+        // 2. Send via WebSocket Realtime
+        if (wsClient != null && wsClient.isOpen()) {
+            ChatMessage msg = new ChatMessage(myCvht, myName, "CO_VAN", selectedChatStudent.getMaSv(), "Phản hồi câu hỏi", content);
+            wsClient.sendChatMessage(msg);
+        }
+
+        txtChatReply.setText("");
+        loadChatConversation(selectedChatStudent.getMaSv());
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;");
     }
 }
