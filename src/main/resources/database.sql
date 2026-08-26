@@ -229,15 +229,21 @@ INSERT OR REPLACE INTO `nhat_ky_tu_van` (`id`, `ma_sv`, `ma_cvht`, `id_canh_bao`
 (5, '20230013', 'CV002', 5, '2024-07-20', 'Tr?c ti?p', 'T? v?n ph??ng ph?p h?c c?c m?n chuy?n ng?nh Kinh t? x?y d?ng', 'Kh? kh?n trong vi?c hi?u b?i gi?ng ?? ?n', 'Tham gia c?c bu?i ph? ??o c?a Khoa', 'Cam k?t n?p ?? ?n ??ng ti?n ??');
 
 INSERT OR REPLACE INTO `tai_khoan` (`ten_dang_nhap`, `mat_khau`, `ho_ten`, `email`, `vai_tro`, `ma_ref`) VALUES
-('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Qu?n tr? vi?n H? th?ng', 'admin@huce.edu.vn', 'ADMIN', NULL),
-('cv_nguynvanan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'TS. Nguy?n V?n An', 'an.nv@huce.edu.vn', 'CO_VAN', 'CV001'),
-('cv_tranthibinh', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThS. Tr?n Th? B?nh', 'binh.tt@huce.edu.vn', 'CO_VAN', 'CV002'),
-('quanly', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Tr??ng khoa CNTT', 'quanly.cntt@huce.edu.vn', 'QUAN_LY', NULL);
+('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Quản trị viên Hệ thống', 'admin@huce.edu.vn', 'ADMIN', NULL),
+('cv_nguynvanan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'TS. Nguyễn Văn An', 'an.nv@huce.edu.vn', 'CO_VAN', 'CV001'),
+('cv_tranthibinh', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThS. Trần Thị Bình', 'binh.tt@huce.edu.vn', 'CO_VAN', 'CV002'),
+('quanly', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Trưởng khoa CNTT', 'quanly.cntt@huce.edu.vn', 'QUAN_LY', NULL),
+('20230001', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Nguyễn Văn Nam', 'sv20230001@huce.edu.vn', 'SINH_VIEN', '20230001'),
+('20230009', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Phạm Minh Tuấn', 'sv20230009@huce.edu.vn', 'SINH_VIEN', '20230009'),
+('20230010', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Vũ Đức Hải', 'sv20230010@huce.edu.vn', 'SINH_VIEN', '20230010');
 
 INSERT OR REPLACE INTO `thong_bao` (`ma_thong_bao`, `tieu_de`, `noi_dung`, `nhom_rui_ro`, `ma_lop`, `ma_sv`, `ngay_gui`, `nguoi_gui`, `so_luong_nhan`, `trang_thai`) VALUES
-('TB-T1-1001', 'TH?NG B?O BI?U D??NG H?C T?P XU?T S?C (TIER 1)', 'Tuy?n d??ng c?c sinh vi?n thu?c nh?m Tier 1 c? GPA >= 3.2. ?? ?i?u ki?n x?t c?p h?c b?ng khuy?n kh?ch h?c t?p k? t?i.', 'TIER_1', 'ALL', NULL, CURRENT_TIMESTAMP, 'TS. Nguy?n V?n An', 4, 'DA_GUI'),
-('TB-T2-1002', 'NH?C NH? DUY TR? TI?N ?? H?C T?P V? ??NG K? T?N CH? (TIER 2)', 'Nh?c nh? c?c sinh vi?n nh?m Tier 2 (2.0 <= GPA < 3.2) ch? ??ng ??ng k? m?n h?c v? ho?n th?nh c?c m?n ti?n quy?t.', 'TIER_2', 'ALL', NULL, CURRENT_TIMESTAMP, 'TS. Nguy?n V?n An', 4, 'DA_GUI'),
-('TB-T3-1003', 'C?NH B?O H?C V? & L?CH T? V?N B?T BU?C (TIER 3)', 'Y?u c?u c?c sinh vi?n c? GPA < 2.0 ho?c n? t?n ch? li?n h? ngay C? v?n h?c t?p ?? l?m k? ho?ch h?c t?p c?i thi?n.', 'TIER_3', 'ALL', NULL, CURRENT_TIMESTAMP, 'Ph?ng ??o T?o', 7, 'DA_GUI');
+('TB-T1-1001', 'THÔNG BÁO BIỂU DƯƠNG HỌC TẬP XUẤT SẮC (TIER 1)', 'Tuyên dương các sinh viên thuộc nhóm Tier 1 có GPA >= 3.2. Đủ điều kiện xét cấp học bổng khuyến khích học tập kỳ tới.', 'TIER_1', 'ALL', NULL, CURRENT_TIMESTAMP, 'TS. Nguyễn Văn An', 4, 'DA_GUI'),
+('TB-T2-1002', 'NHẮC NHỞ DUY TRÌ TIẾN ĐỘ HỌC TẬP VÀ ĐĂNG KÝ TÍN CHỈ (TIER 2)', 'Nhắc nhở các sinh viên nhóm Tier 2 (2.0 <= GPA < 3.2) chủ động đăng ký môn học và hoàn thành các môn tiên quyết.', 'TIER_2', 'ALL', NULL, CURRENT_TIMESTAMP, 'TS. Nguyễn Văn An', 4, 'DA_GUI'),
+('TB-T3-1003', 'CẢNH BÁO HỌC VỤ & LỊCH TƯ VẤN BẮT BUỘC (TIER 3)', 'Yêu cầu các sinh viên có GPA < 2.0 hoặc nợ tín chỉ liên hệ ngay Cố vấn học tập để làm kế hoạch học tập cải thiện.', 'TIER_3', 'ALL', NULL, CURRENT_TIMESTAMP, 'Phòng Đào Tạo', 7, 'DA_GUI'),
+('TB-SV-20230001', 'Biểu dương thành tích học tập xuất sắc học kỳ 2', 'Thầy chúc mừng em Nguyễn Văn Nam đã đạt GPA 3.65 trong học kỳ vừa rồi. Em tiếp tục phát huy để nhận học bổng khuyến khích học tập của Trường nhé!', 'CA_NHAN', '68IT1', '20230001', CURRENT_TIMESTAMP, 'TS. Nguyễn Văn An', 1, 'DA_GUI'),
+('TB-SV-20230009', 'Lịch hẹn tư vấn riêng và kế hoạch cải thiện học tập', 'Chào em Tuấn, do kết quả học kỳ 2 bị cảnh báo học vụ mức 1, thầy hẹn em 14h00 chiều thứ Tư tới phòng CVHT để trao đổi và lập kế hoạch học lại các môn nợ nhé.', 'CA_NHAN', '68IT1', '20230009', CURRENT_TIMESTAMP, 'TS. Nguyễn Văn An', 1, 'DA_GUI'),
+('TB-SV-20230010', 'Thông báo cảnh báo học vụ Mức 2 và cảnh báo nguy cơ thôi học', 'Em Hải liên hệ ngay với thầy trong tuần này để nộp bản cam kết học tập và giảm giờ làm thêm theo đúng quy chế học vụ.', 'CA_NHAN', '68IT1', '20230010', CURRENT_TIMESTAMP, 'TS. Nguyễn Văn An', 1, 'DA_GUI');
 
 INSERT OR REPLACE INTO `lich_giang_day` (`id`, `ma_cvht`, `ten_cvht`, `ma_lop`, `ten_lop`, `tieu_de`, `ngay`, `gio_bat_dau`, `gio_ket_thuc`, `dia_diem`, `hinh_thuc`, `loai_buoi`, `trang_thai`, `ghi_chu`) VALUES
 (1, 'CV001', 'TS. Nguy?n V?n An', '68IT1', '68IT1 - C?ng ngh? th?ng tin 1', 'Sinh ho?t l?p ??nh k? ??u h?c k? 1', '2026-08-25', '08:00', '10:00', 'Ph?ng 302-H1', 'Tr?c ti?p', 'SINH_HOAT_LOP', 'HOAN_THANH', 'Tri?n khai k? ho?ch n?m h?c m?i v? r? so?t k?t qu? h?c t?p'),

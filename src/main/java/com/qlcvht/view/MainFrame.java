@@ -35,7 +35,15 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
         this.role = (user != null && user.getVaiTro() != null) ? user.getVaiTro() : "CO_VAN";
 
-        setTitle("H\u1EC7 th\u1ED1ng Qu\u1EA3n l\u00FD C\u1ED1 v\u1EA5n H\u1ECDc t\u1EADp & C\u1EA3nh b\u00E1o H\u1ECDc v\u1EE5");
+        if ("SINH_VIEN".equalsIgnoreCase(this.role)) {
+            SwingUtilities.invokeLater(() -> {
+                dispose();
+                new StudentMainFrame(currentUser).setVisible(true);
+            });
+            return;
+        }
+
+        setTitle("Hệ thống Quản lý Cố vấn Học tập & Cảnh báo Học vụ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1320, 780);
         setMinimumSize(new Dimension(1080, 680));

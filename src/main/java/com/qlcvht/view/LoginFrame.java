@@ -105,7 +105,10 @@ public class LoginFrame extends JFrame {
             "admin (Quản trị viên)",
             "cv_nguynvanan (TS. Nguyễn Văn An)",
             "cv_tranthibinh (ThS. Trần Thị Bình)",
-            "quanly (Trưởng khoa CNTT)"
+            "quanly (Trưởng khoa CNTT)",
+            "20230001 (Sinh viên: Nguyễn Văn Nam - Tier 1 Xuất sắc)",
+            "20230009 (Sinh viên: Phạm Minh Tuấn - Tier 3 Cảnh báo 1)",
+            "20230010 (Sinh viên: Vũ Đức Hải - Tier 3 Cảnh báo 2)"
         });
         cbQuickLogin.setFont(UITheme.fontPlain(13));
         cbQuickLogin.addActionListener(e -> {
@@ -114,13 +117,16 @@ public class LoginFrame extends JFrame {
             else if (idx == 1) txtUsername.setText("cv_nguynvanan");
             else if (idx == 2) txtUsername.setText("cv_tranthibinh");
             else if (idx == 3) txtUsername.setText("quanly");
+            else if (idx == 4) txtUsername.setText("20230001");
+            else if (idx == 5) txtUsername.setText("20230009");
+            else if (idx == 6) txtUsername.setText("20230010");
             txtPassword.setText("123456");
         });
         card.add(cbQuickLogin, gbc);
 
         gbc.gridy = 2;
         gbc.insets = new Insets(4, 0, 4, 0);
-        JLabel lblUser = new JLabel("Tên đăng nhập:");
+        JLabel lblUser = new JLabel("Tên đăng nhập / Mã Sinh Viên (MSSV):");
         lblUser.setFont(UITheme.fontBold(12));
         lblUser.setForeground(new Color(51, 65, 85));
         card.add(lblUser, gbc);
@@ -134,7 +140,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 4;
         gbc.insets = new Insets(4, 0, 4, 0);
-        JLabel lblPass = new JLabel("Mật khẩu:");
+        JLabel lblPass = new JLabel("Mật khẩu (Mặc định: 123456):");
         lblPass.setFont(UITheme.fontBold(12));
         lblPass.setForeground(new Color(51, 65, 85));
         card.add(lblPass, gbc);
@@ -198,22 +204,26 @@ public class LoginFrame extends JFrame {
 
         if (username.isEmpty() || password.isEmpty()) {
             lblStatus.setForeground(UITheme.DANGER);
-            lblStatus.setText("Vui l\u00F2ng nh\u1EADp \u0111\u1EA7y \u0111\u1EE7 t\u00EAn \u0111\u0103ng nh\u1EADp v\u00E0 m\u1EADt kh\u1EA9u!");
+            lblStatus.setText("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
             return;
         }
 
         lblStatus.setForeground(UITheme.PRIMARY);
-        lblStatus.setText("\u0110ang x\u00E1c th\u1EF1c th\u00F4ng tin...");
+        lblStatus.setText("Đang xác thực thông tin...");
         btnLogin.setEnabled(false);
 
         SwingUtilities.invokeLater(() -> {
             TaiKhoan user = new TaiKhoanDAO().login(username, password);
             if (user != null) {
                 dispose();
-                new MainFrame(user).setVisible(true);
+                if ("SINH_VIEN".equalsIgnoreCase(user.getVaiTro())) {
+                    new StudentMainFrame(user).setVisible(true);
+                } else {
+                    new MainFrame(user).setVisible(true);
+                }
             } else {
                 lblStatus.setForeground(UITheme.DANGER);
-                lblStatus.setText("T\u00EAn \u0111\u0103ng nh\u1EADp ho\u1EB7c m\u1EADt kh\u1EA9u kh\u00F4ng \u0111\u00FAng!");
+                lblStatus.setText("Tên đăng nhập hoặc mật khẩu không đúng!");
                 btnLogin.setEnabled(true);
                 txtPassword.selectAll();
                 txtPassword.requestFocus();
