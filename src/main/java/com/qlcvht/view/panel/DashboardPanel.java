@@ -164,17 +164,28 @@ public class DashboardPanel extends JPanel {
     }
 
     public void loadData() {
-        Map<String, Integer> stats = thongKeService.getThongKeTongQuan();
-        valTongSv.setText(String.valueOf(stats.getOrDefault("tong_sv", 0)));
-        valBinhThuong.setText(String.valueOf(stats.getOrDefault("sv_binh_thuong", 0)));
-        valCB1.setText(String.valueOf(stats.getOrDefault("cb_muc_1", 0)));
-        valCB2.setText(String.valueOf(stats.getOrDefault("cb_muc_2", 0)));
-        valBuoc.setText(String.valueOf(stats.getOrDefault("buoc_thoi_hoc", 0)));
-        valDaTuVan.setText(String.valueOf(stats.getOrDefault("da_tu_van", 0)));
+        com.qlcvht.util.AsyncWorker.execute(
+            () -> {
+                if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+                    return thongKeService.getThongKeTongQuanByCoVan(currentUser.getMaRef());
+                } else {
+                    return thongKeService.getThongKeTongQuan();
+                }
+            },
+            stats -> {
+                valTongSv.setText(String.valueOf(stats.getOrDefault("tong_sv", 0)));
+                valBinhThuong.setText(String.valueOf(stats.getOrDefault("sv_binh_thuong", 0)));
+                valCB1.setText(String.valueOf(stats.getOrDefault("cb_muc_1", 0)));
+                valCB2.setText(String.valueOf(stats.getOrDefault("cb_muc_2", 0)));
+                valBuoc.setText(String.valueOf(stats.getOrDefault("buoc_thoi_hoc", 0)));
+                valDaTuVan.setText(String.valueOf(stats.getOrDefault("da_tu_van", 0)));
 
-        valTier1.setText(stats.getOrDefault("tier_1", 0) + " SV");
-        valTier2.setText(stats.getOrDefault("tier_2", 0) + " SV");
-        valTier3.setText(stats.getOrDefault("tier_3", 0) + " SV");
-        valChuaTuVan.setText(stats.getOrDefault("chua_tu_van", 0) + " SV");
+                valTier1.setText(stats.getOrDefault("tier_1", 0) + " SV");
+                valTier2.setText(stats.getOrDefault("tier_2", 0) + " SV");
+                valTier3.setText(stats.getOrDefault("tier_3", 0) + " SV");
+                valChuaTuVan.setText(stats.getOrDefault("chua_tu_van", 0) + " SV");
+            },
+            err -> err.printStackTrace()
+        );
     }
 }

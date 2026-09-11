@@ -51,7 +51,7 @@ public class LoginFrame extends JFrame {
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(new EmptyBorder(32, 28, 16, 28));
 
-        JLabel lblBadge = new JLabel("HỌC VIỆN / ĐẠI HỌC", SwingConstants.CENTER);
+        JLabel lblBadge = new JLabel("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)", SwingConstants.CENTER);
         lblBadge.setFont(UITheme.fontBold(13));
         lblBadge.setForeground(new Color(147, 197, 253));
         lblBadge.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -85,41 +85,44 @@ public class LoginFrame extends JFrame {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(22, 26, 22, 26));
+        card.setBorder(new EmptyBorder(24, 28, 24, 28));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
-        gbc.gridx = 0;
+        gbc.weightx = 1.0;
 
         gbc.gridy = 0;
         gbc.insets = new Insets(0, 0, 4, 0);
-        JLabel lblQuick = new JLabel("Đăng nhập mẫu nhanh:");
-        lblQuick.setFont(UITheme.fontBold(11));
-        lblQuick.setForeground(UITheme.PRIMARY);
+        JLabel lblQuick = new JLabel("Tài khoản mẫu EAUT (Chọn nhanh):");
+        lblQuick.setFont(UITheme.fontBold(12));
+        lblQuick.setForeground(new Color(100, 116, 139));
         card.add(lblQuick, gbc);
 
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 10, 0);
         cbQuickLogin = new JComboBox<>(new String[]{
-            "admin (Quản trị viên)",
-            "cv_nguynvanan (TS. Nguyễn Văn An)",
-            "cv_tranthibinh (ThS. Trần Thị Bình)",
-            "quanly (Trưởng khoa CNTT)",
-            "20230001 (Sinh viên: Nguyễn Văn Nam - Tier 1 Xuất sắc)",
-            "20230009 (Sinh viên: Phạm Minh Tuấn - Tier 3 Cảnh báo 1)",
-            "20230010 (Sinh viên: Vũ Đức Hải - Tier 3 Cảnh báo 2)"
+            "admin (Quản trị viên Hệ thống EAUT)",
+            "quanly (Trưởng phòng Đào tạo EAUT)",
+            "cv_phongdv (TS. Đinh Văn Phong - Khoa CNTT)",
+            "cv_haint (PGS.TS. Nguyễn Thanh Hải - Khoa Ô tô)",
+            "cv_maiht (ThS. Hoàng Thị Mai - Khoa QTKD)",
+            "cv_sonvt (TS. Vũ Trường Sơn - Khoa Điện tử)",
+            "20230001 (Sinh viên: Nguyễn Văn Nam - Lớp DCCTPM14A)",
+            "20230009 (Sinh viên: Phạm Minh Tuấn - Cảnh báo 1)",
+            "20230010 (Sinh viên: Vũ Đức Hải - Cảnh báo 2)"
         });
         cbQuickLogin.setFont(UITheme.fontPlain(13));
         cbQuickLogin.addActionListener(e -> {
             int idx = cbQuickLogin.getSelectedIndex();
             if (idx == 0) txtUsername.setText("admin");
-            else if (idx == 1) txtUsername.setText("cv_nguynvanan");
-            else if (idx == 2) txtUsername.setText("cv_tranthibinh");
-            else if (idx == 3) txtUsername.setText("quanly");
-            else if (idx == 4) txtUsername.setText("20230001");
-            else if (idx == 5) txtUsername.setText("20230009");
-            else if (idx == 6) txtUsername.setText("20230010");
+            else if (idx == 1) txtUsername.setText("quanly");
+            else if (idx == 2) txtUsername.setText("cv_phongdv");
+            else if (idx == 3) txtUsername.setText("cv_haint");
+            else if (idx == 4) txtUsername.setText("cv_maiht");
+            else if (idx == 5) txtUsername.setText("cv_sonvt");
+            else if (idx == 6) txtUsername.setText("20230001");
+            else if (idx == 7) txtUsername.setText("20230009");
+            else if (idx == 8) txtUsername.setText("20230010");
             txtPassword.setText("123456");
         });
         card.add(cbQuickLogin, gbc);

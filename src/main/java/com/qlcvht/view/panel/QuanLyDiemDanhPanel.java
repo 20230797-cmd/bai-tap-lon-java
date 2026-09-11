@@ -196,7 +196,11 @@ public class QuanLyDiemDanhPanel extends JPanel {
 
     public void loadLichHoc() {
         cbLichHoc.removeAllItems();
-        dsLich = lichDAO.getAll();
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            dsLich = lichDAO.getByFilter(null, currentUser.getMaRef(), null, null, null);
+        } else {
+            dsLich = lichDAO.getAll();
+        }
         for (LichGiangDay l : dsLich) {
             String item = "[" + l.getId() + "] " + l.getNgay() + " - " + l.getTieuDe() + " (" + l.getMaLop() + ")";
             cbLichHoc.addItem(item);

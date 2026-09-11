@@ -109,7 +109,12 @@ public class QuanLySinhVienPanel extends JPanel {
         toolbar.add(new JLabel("Lớp:"));
         cbFilterLop = new JComboBox<>();
         cbFilterLop.addItem("--- Tất cả ---");
-        List<LopHoc> listLop = coVanDAO.getAllLopHoc();
+        List<LopHoc> listLop;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            listLop = coVanDAO.getLopHocByCoVan(currentUser.getMaRef());
+        } else {
+            listLop = coVanDAO.getAllLopHoc();
+        }
         for (LopHoc l : listLop) cbFilterLop.addItem(l);
         cbFilterLop.addActionListener(e -> filterData());
         toolbar.add(cbFilterLop);
@@ -144,10 +149,10 @@ public class QuanLySinhVienPanel extends JPanel {
 
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getVaiTro());
-        boolean isCoVan = currentUser != null && "CO_VAN".equals(currentUser.getVaiTro());
+        boolean isQuanLy = currentUser != null && "QUAN_LY".equals(currentUser.getVaiTro());
+        boolean isCoVan  = currentUser != null && "CO_VAN".equals(currentUser.getVaiTro());
 
-        if (isAdmin || isCoVan) {
+        if (isQuanLy || isCoVan) {
             JButton btnThem = UITheme.createButton("+ Thêm Sinh Viên", UITheme.SUCCESS, Color.WHITE);
             btnThem.addActionListener(e -> onThemSinhVien());
             toolbar.add(btnThem);
@@ -156,7 +161,7 @@ public class QuanLySinhVienPanel extends JPanel {
             btnSua.addActionListener(e -> onSuaSinhVien());
             toolbar.add(btnSua);
 
-            if (isAdmin) {
+            if (isQuanLy) {
                 JButton btnXoa = UITheme.createButton("Xóa SV", UITheme.DANGER, Color.WHITE);
                 btnXoa.addActionListener(e -> onXoaSinhVien());
                 toolbar.add(btnXoa);
@@ -278,7 +283,7 @@ public class QuanLySinhVienPanel extends JPanel {
     }
 
     private void onThemSinhVien() {
-        ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), null);
+        ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), null, currentUser);
         dlg.setVisible(true);
         if (dlg.isSaved()) loadData();
     }
@@ -286,10 +291,10 @@ public class QuanLySinhVienPanel extends JPanel {
     private void onSuaSinhVien() {
         SinhVien sv = getSelectedSinhVien();
         if (sv == null) {
-            JOptionPane.showMessageDialog(this, "Vui l\u00F2ng ch\u1ECDn m\u1ED9t sinh vi\u00EAn c\u1EA7n s\u1EEDa!", "Th\u00F4ng b\u00E1o", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một sinh viên cần sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv);
+        ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv, currentUser);
         dlg.setVisible(true);
         if (dlg.isSaved()) loadData();
     }

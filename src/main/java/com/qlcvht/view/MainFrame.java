@@ -21,6 +21,7 @@ public class MainFrame extends JFrame {
     private JButton activeBtn;
 
     private JButton btnDashboard;
+    private JButton btnTaiKhoan;
     private JButton btnLichGiangDay;
     private JButton btnSinhVien;
     private JButton btnKetQua;
@@ -43,7 +44,7 @@ public class MainFrame extends JFrame {
             return;
         }
 
-        setTitle("Hệ thống Quản lý Cố vấn Học tập & Cảnh báo Học vụ");
+        setTitle("Hệ thống Quản lý Cố vấn Học tập & Cảnh báo Học vụ - Đại học Công nghệ Đông Á (EAUT)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1320, 780);
         setMinimumSize(new Dimension(1080, 680));
@@ -54,7 +55,12 @@ public class MainFrame extends JFrame {
         buildSidebar();
         buildCardPanel();
 
-        switchCard("DASHBOARD", btnDashboard);
+        // Default open tab
+        if ("ADMIN".equals(role)) {
+            switchCard("TAI_KHOAN", btnTaiKhoan != null ? btnTaiKhoan : btnDashboard);
+        } else {
+            switchCard("DASHBOARD", btnDashboard);
+        }
     }
 
     private void buildTopBar() {
@@ -63,7 +69,7 @@ public class MainFrame extends JFrame {
         topBar.setPreferredSize(new Dimension(0, 56));
         topBar.setBorder(new EmptyBorder(0, 20, 0, 16));
 
-        JLabel lblTitle = new JLabel("HỆ THỐNG CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
+        JLabel lblTitle = new JLabel("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT) - HỆ THỐNG CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
         lblTitle.setFont(UITheme.fontBold(15));
         lblTitle.setForeground(Color.WHITE);
         topBar.add(lblTitle, BorderLayout.WEST);
@@ -83,8 +89,8 @@ public class MainFrame extends JFrame {
         userPanel.add(lblDb);
 
         String roleTitle = switch (role) {
-            case "ADMIN"   -> "Quản trị viên";
-            case "QUAN_LY" -> "Quản lý Khoa";
+            case "ADMIN"   -> "Quản trị viên Hệ thống";
+            case "QUAN_LY" -> "Quản lý Đào tạo / Khoa";
             case "CO_VAN"  -> "Cố vấn Học tập";
             default        -> role;
         };
@@ -127,39 +133,63 @@ public class MainFrame extends JFrame {
         sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
         sideBar.setBorder(new EmptyBorder(8, 0, 8, 0));
 
-        addSidebarSection("TỔNG QUAN & LỊCH TRÌNH");
-        btnDashboard    = createNavBtn("  Tổng Quan (Dashboard)", "DASHBOARD");
-        btnLichGiangDay = createNavBtn("  Lịch Giảng Dạy & CVHT", "LICH_GIANG_DAY");
-        sideBar.add(btnDashboard);
-        sideBar.add(btnLichGiangDay);
-
-        addSidebarSection("QUẢN LÝ HỌC VỤ & SINH VIÊN");
-        btnSinhVien = createNavBtn("  Hồ Sơ Sinh Viên", "SINH_VIEN");
-        btnKetQua   = createNavBtn("  Bảng Điểm & Kết Quả HT", "KET_QUA");
-        btnDiemDanh = createNavBtn("  Điểm Danh & Chuyên Cần", "DIEM_DANH");
-        sideBar.add(btnSinhVien);
-        sideBar.add(btnKetQua);
-        if (!"QUAN_LY".equals(role)) {
-            sideBar.add(btnDiemDanh);
-        }
-
-        addSidebarSection("CỐ VẤN & CẢNH BÁO HỌC VỤ");
-        btnCanhBao  = createNavBtn("  Cảnh Báo Học Vụ", "CANH_BAO");
-        btnNhatKy   = createNavBtn("  Nhật Ký Tư Vấn CVHT", "NHAT_KY");
-        btnThongBao = createNavBtn("  Thông Báo Sinh Viên", "THONG_BAO");
-        sideBar.add(btnCanhBao);
-        sideBar.add(btnNhatKy);
-        sideBar.add(btnThongBao);
-
-        addSidebarSection("BÁO CÁO & THỐNG KÊ");
-        btnThongKe = createNavBtn("  Báo Cáo & Thống Kê", "THONG_KE");
-        sideBar.add(btnThongKe);
-
-        boolean isAdminOrQL = "ADMIN".equals(role) || "QUAN_LY".equals(role);
-        if (isAdminOrQL) {
+        if ("ADMIN".equals(role)) {
+            // ADMIN: Chỉ quản trị người dùng & tài khoản, không can thiệp nghiệp vụ học tập
             addSidebarSection("QUẢN TRỊ HỆ THỐNG");
-            btnLopHoc = createNavBtn("  Quản Lý Lớp & CVHT", "LOP_HOC");
+            btnTaiKhoan = createNavBtn("  Quản Lý Tài Khoản", "TAI_KHOAN");
+            sideBar.add(btnTaiKhoan);
+        } else if ("QUAN_LY".equals(role)) {
+            // QUẢN LÝ (Ban Đào tạo / Trưởng khoa): Giám sát toàn bộ học vụ, lớp học, cảnh báo, thống kê
+            addSidebarSection("TỔNG QUAN & LỊCH TRÌNH");
+            btnDashboard    = createNavBtn("  Tổng Quan (Dashboard)", "DASHBOARD");
+            btnLichGiangDay = createNavBtn("  Lịch Giảng Dạy & Họp", "LICH_GIANG_DAY");
+            sideBar.add(btnDashboard);
+            sideBar.add(btnLichGiangDay);
+
+            addSidebarSection("QUẢN LÝ HỌC VỤ & SINH VIÊN");
+            btnSinhVien = createNavBtn("  Hồ Sơ Toàn Bộ Sinh Viên", "SINH_VIEN");
+            btnKetQua   = createNavBtn("  Bảng Điểm & Kết Quả HT", "KET_QUA");
+            sideBar.add(btnSinhVien);
+            sideBar.add(btnKetQua);
+
+            addSidebarSection("CỐ VẤN & CẢNH BÁO HỌC VỤ");
+            btnCanhBao  = createNavBtn("  Cảnh Báo Học Vụ", "CANH_BAO");
+            btnThongBao = createNavBtn("  Thông Báo Học Vụ", "THONG_BAO");
+            sideBar.add(btnCanhBao);
+            sideBar.add(btnThongBao);
+
+            addSidebarSection("BÁO CÁO & PHÂN CÔNG");
+            btnThongKe = createNavBtn("  Báo Cáo & Thống Kê", "THONG_KE");
+            btnLopHoc  = createNavBtn("  Quản Lý Lớp & CVHT", "LOP_HOC");
+            sideBar.add(btnThongKe);
             sideBar.add(btnLopHoc);
+        } else {
+            // CỐ VẤN HỌC TẬP (CO_VAN): Trực tiếp quản lý sinh viên lớp, tư vấn, điểm danh, cảnh báo
+            addSidebarSection("TỔNG QUAN & LỊCH TRÌNH");
+            btnDashboard    = createNavBtn("  Tổng Quan (Dashboard)", "DASHBOARD");
+            btnLichGiangDay = createNavBtn("  Lịch Giảng Dạy & CVHT", "LICH_GIANG_DAY");
+            sideBar.add(btnDashboard);
+            sideBar.add(btnLichGiangDay);
+
+            addSidebarSection("QUẢN LÝ HỌC VỤ & SINH VIÊN");
+            btnSinhVien = createNavBtn("  Hồ Sơ Sinh Viên Lớp", "SINH_VIEN");
+            btnKetQua   = createNavBtn("  Bảng Điểm & Kết Quả HT", "KET_QUA");
+            btnDiemDanh = createNavBtn("  Điểm Danh & Chuyên Cần", "DIEM_DANH");
+            sideBar.add(btnSinhVien);
+            sideBar.add(btnKetQua);
+            sideBar.add(btnDiemDanh);
+
+            addSidebarSection("CỐ VẤN & CẢNH BÁO HỌC VỤ");
+            btnCanhBao  = createNavBtn("  Cảnh Báo Học Vụ", "CANH_BAO");
+            btnNhatKy   = createNavBtn("  Nhật Ký Tư Vấn CVHT", "NHAT_KY");
+            btnThongBao = createNavBtn("  Thông Báo & Chat Tư Vấn", "THONG_BAO");
+            sideBar.add(btnCanhBao);
+            sideBar.add(btnNhatKy);
+            sideBar.add(btnThongBao);
+
+            addSidebarSection("BÁO CÁO & THỐNG KÊ");
+            btnThongKe = createNavBtn("  Báo Cáo & Thống Kê", "THONG_KE");
+            sideBar.add(btnThongKe);
         }
 
         sideBar.add(Box.createVerticalGlue());
@@ -178,18 +208,30 @@ public class MainFrame extends JFrame {
         cardPanel  = new JPanel(cardLayout);
         cardPanel.setBackground(UITheme.BG_MAIN);
 
-        cardPanel.add(new DashboardPanel(currentUser),          "DASHBOARD");
-        cardPanel.add(new LichGiangDayPanel(currentUser),       "LICH_GIANG_DAY");
-        cardPanel.add(new QuanLySinhVienPanel(currentUser),     "SINH_VIEN");
-        cardPanel.add(new QuanLyKetQuaHocTapPanel(currentUser), "KET_QUA");
-        cardPanel.add(new QuanLyDiemDanhPanel(currentUser),     "DIEM_DANH");
-        cardPanel.add(new QuanLyCanhBaoPanel(currentUser),      "CANH_BAO");
-        cardPanel.add(new NhatKyTuVanPanel(currentUser),        "NHAT_KY");
-        cardPanel.add(new QuanLyThongBaoPanel(currentUser),     "THONG_BAO");
-        cardPanel.add(new BaoCaoThongKePanel(),                 "THONG_KE");
-
-        if ("ADMIN".equals(role) || "QUAN_LY".equals(role)) {
-            cardPanel.add(new QuanLyLopHocPanel(), "LOP_HOC");
+        if ("ADMIN".equals(role)) {
+            // Admin Panels: Chỉ quản lý tài khoản
+            cardPanel.add(new QuanLyTaiKhoanPanel(currentUser), "TAI_KHOAN");
+        } else if ("QUAN_LY".equals(role)) {
+            // Quan Ly Panels
+            cardPanel.add(new DashboardPanel(currentUser),          "DASHBOARD");
+            cardPanel.add(new LichGiangDayPanel(currentUser),       "LICH_GIANG_DAY");
+            cardPanel.add(new QuanLySinhVienPanel(currentUser),     "SINH_VIEN");
+            cardPanel.add(new QuanLyKetQuaHocTapPanel(currentUser), "KET_QUA");
+            cardPanel.add(new QuanLyCanhBaoPanel(currentUser),      "CANH_BAO");
+            cardPanel.add(new QuanLyThongBaoPanel(currentUser),     "THONG_BAO");
+            cardPanel.add(new BaoCaoThongKePanel(),                 "THONG_KE");
+            cardPanel.add(new QuanLyLopHocPanel(),                  "LOP_HOC");
+        } else {
+            // Co Van Panels
+            cardPanel.add(new DashboardPanel(currentUser),          "DASHBOARD");
+            cardPanel.add(new LichGiangDayPanel(currentUser),       "LICH_GIANG_DAY");
+            cardPanel.add(new QuanLySinhVienPanel(currentUser),     "SINH_VIEN");
+            cardPanel.add(new QuanLyKetQuaHocTapPanel(currentUser), "KET_QUA");
+            cardPanel.add(new QuanLyDiemDanhPanel(currentUser),     "DIEM_DANH");
+            cardPanel.add(new QuanLyCanhBaoPanel(currentUser),      "CANH_BAO");
+            cardPanel.add(new NhatKyTuVanPanel(currentUser),        "NHAT_KY");
+            cardPanel.add(new QuanLyThongBaoPanel(currentUser),     "THONG_BAO");
+            cardPanel.add(new BaoCaoThongKePanel(),                 "THONG_KE");
         }
 
         add(cardPanel, BorderLayout.CENTER);
@@ -245,7 +287,7 @@ public class MainFrame extends JFrame {
         sideBar.repaint();
 
         JButton[] allBtns = {
-            btnDashboard, btnLichGiangDay, btnSinhVien, btnKetQua,
+            btnDashboard, btnTaiKhoan, btnLichGiangDay, btnSinhVien, btnKetQua,
             btnDiemDanh, btnCanhBao, btnNhatKy, btnThongBao, btnThongKe, btnLopHoc
         };
         for (JButton b : allBtns) {

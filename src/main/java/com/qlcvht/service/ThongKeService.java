@@ -15,6 +15,42 @@ public class ThongKeService {
         return getThongKeTongQuan("ALL");
     }
 
+    public Map<String, Integer> getThongKeTongQuanByCoVan(String maCvht) {
+        Map<String, Integer> stats = new HashMap<>();
+        if (maCvht == null || maCvht.isBlank()) return getThongKeTongQuan("ALL");
+        
+        String condSv = " WHERE ma_lop IN (SELECT ma_lop FROM lop_hoc WHERE ma_cvht = '" + maCvht.replace("'", "''") + "')";
+        String condCb = " AND ma_sv IN (SELECT ma_sv FROM sinh_vien WHERE ma_lop IN (SELECT ma_lop FROM lop_hoc WHERE ma_cvht = '" + maCvht.replace("'", "''") + "'))";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            query(stmt, stats, "tong_sv",        "SELECT COUNT(*) FROM sinh_vien" + condSv);
+            
+            String whereSv = condSv + " AND ";
+            query(stmt, stats, "sv_binh_thuong", "SELECT COUNT(*) FROM sinh_vien" + whereSv + "trang_thai='DANG_HOC'");
+            
+            String whereCb = " WHERE 1=1 " + condCb + " AND ";
+            query(stmt, stats, "cb_muc_1",       "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "muc_canh_bao='MUC_1'");
+            query(stmt, stats, "cb_muc_2",       "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "muc_canh_bao='MUC_2'");
+            query(stmt, stats, "buoc_thoi_hoc",  "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "muc_canh_bao='BUOC_THOI_HOC'");
+            query(stmt, stats, "da_tu_van",      "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "trang_thai_tu_van='DA_TU_VAN'");
+            query(stmt, stats, "chua_tu_van",    "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "trang_thai_tu_van='CHUA_TU_VAN'");
+            query(stmt, stats, "dang_theo_doi",  "SELECT COUNT(*) FROM canh_bao_hoc_vu" + whereCb + "trang_thai_tu_van='DANG_THEO_DOI'");
+
+            // Thống kê Phân tầng Tier
+            query(stmt, stats, "tier_1", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                condSv + " AND k.gpa_tich_luy >= 3.2");
+            query(stmt, stats, "tier_2", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                condSv + " AND k.gpa_tich_luy >= 2.0 AND k.gpa_tich_luy < 3.2");
+            query(stmt, stats, "tier_3", "SELECT COUNT(DISTINCT s.ma_sv) FROM sinh_vien s JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
+                condSv + " AND (k.gpa_tich_luy < 2.0 OR s.trang_thai LIKE 'CANH_BAO%' OR s.trang_thai = 'BUOC_THOI_HOC')");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
+
     public Map<String, Integer> getThongKeTongQuan(String maLop) {
         Map<String, Integer> stats = new HashMap<>();
         

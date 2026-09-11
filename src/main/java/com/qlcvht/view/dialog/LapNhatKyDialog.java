@@ -63,7 +63,12 @@ public class LapNhatKyDialog extends JDialog {
         // Chọn sinh viên
         addLabel(form, gbc, row, "Sinh viên tư vấn (*):");
         cbSinhVien = new JComboBox<>();
-        listSv = new SinhVienDAO().getAllSinhVien();
+        SinhVienDAO svDao = new SinhVienDAO();
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            listSv = svDao.getSinhVienByCoVan(currentUser.getMaRef());
+        } else {
+            listSv = svDao.getAllSinhVien();
+        }
         for (SinhVien sv : listSv) {
             cbSinhVien.addItem(sv.getMaSv() + " - " + sv.getHoTen() + " (" + (sv.getTenLop() != null ? sv.getTenLop() : sv.getMaLop()) + ")");
         }
@@ -192,10 +197,18 @@ public class LapNhatKyDialog extends JDialog {
             return;
         }
 
-        String maCvht = "CV001";
-        if (currentUser != null && currentUser.getMaRef() != null && !currentUser.getMaRef().isEmpty()) {
-            maCvht = currentUser.getMaRef();
+        String maCvht = (currentUser != null && currentUser.getMaRef() != null && !currentUser.getMaRef().isEmpty())
+                        ? currentUser.getMaRef() : null;
+        if (maCvht == null) {
+            SinhVien svObj = new SinhVienDAO().getSinhVienById(maSv);
+            if (svObj != null && svObj.getMaLop() != null) {
+                com.qlcvht.model.CoVanHocTap cvObj = new com.qlcvht.dao.CoVanDAO().getCoVanByLop(svObj.getMaLop());
+                if (cvObj != null) {
+                    maCvht = cvObj.getMaCvht();
+                }
+            }
         }
+        if (maCvht == null) maCvht = "CV001";
 
         Integer idCanhBao = (canhBao != null) ? canhBao.getId() : null;
 

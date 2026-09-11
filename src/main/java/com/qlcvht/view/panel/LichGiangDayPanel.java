@@ -73,7 +73,12 @@ public class LichGiangDayPanel extends JPanel {
         cbFilterLop = new JComboBox<>();
         cbFilterLop.setPreferredSize(new Dimension(130, 32));
         cbFilterLop.addItem("--- Tất cả ---");
-        List<LopHoc> dsLop = coVanDAO.getAllLopHoc();
+        List<LopHoc> dsLop;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            dsLop = coVanDAO.getLopHocByCoVan(currentUser.getMaRef());
+        } else {
+            dsLop = coVanDAO.getAllLopHoc();
+        }
         for (LopHoc l : dsLop) {
             cbFilterLop.addItem(l.getMaLop());
         }
@@ -182,7 +187,9 @@ public class LichGiangDayPanel extends JPanel {
             denNgay = today.withDayOfMonth(today.lengthOfMonth());
         }
 
-        currentList = lichDAO.getByFilter(maLop, null, tuNgay, denNgay, trangThai);
+        String maCvht = (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank())
+                        ? currentUser.getMaRef() : null;
+        currentList = lichDAO.getByFilter(maLop, maCvht, tuNgay, denNgay, trangThai);
         for (LichGiangDay l : currentList) {
             String loaiHienThi;
             switch (l.getLoaiBuoi() != null ? l.getLoaiBuoi() : "") {
@@ -254,12 +261,27 @@ public class LichGiangDayPanel extends JPanel {
 
         JTextField txtTieuDe = new JTextField();
         JComboBox<String> cbLop = new JComboBox<>();
-        List<LopHoc> dsLop = coVanDAO.getAllLopHoc();
+        List<LopHoc> dsLop;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            dsLop = coVanDAO.getLopHocByCoVan(currentUser.getMaRef());
+        } else {
+            dsLop = coVanDAO.getAllLopHoc();
+        }
         for (LopHoc l : dsLop) cbLop.addItem(l.getMaLop());
 
         JComboBox<String> cbCvht = new JComboBox<>();
         List<CoVanHocTap> dsCv = coVanDAO.getAllCoVan();
-        for (CoVanHocTap cv : dsCv) cbCvht.addItem(cv.getMaCvht() + " - " + cv.getHoTen());
+        for (CoVanHocTap cv : dsCv) {
+            cbCvht.addItem(cv.getMaCvht() + " - " + cv.getHoTen());
+        }
+        if (currentUser != null && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            for (int i = 0; i < cbCvht.getItemCount(); i++) {
+                if (cbCvht.getItemAt(i).startsWith(currentUser.getMaRef())) {
+                    cbCvht.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
 
         JTextField txtNgay = new JTextField(LocalDate.now().toString());
         JTextField txtGioBD = new JTextField("08:00");

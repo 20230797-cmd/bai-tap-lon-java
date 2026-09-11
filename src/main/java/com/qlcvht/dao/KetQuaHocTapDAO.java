@@ -65,6 +65,27 @@ public class KetQuaHocTapDAO {
         return list;
     }
 
+    public List<KetQuaHocTap> getKetQuaByCoVan(String maCvht) {
+        List<KetQuaHocTap> list = new ArrayList<>();
+        String sql = "SELECT kq.*, s.ho_ten AS ho_ten_sv FROM ket_qua_hoc_tap kq " +
+                     "JOIN sinh_vien s ON kq.ma_sv = s.ma_sv " +
+                     "JOIN lop_hoc l ON s.ma_lop = l.ma_lop " +
+                     "WHERE l.ma_cvht = ? " +
+                     "ORDER BY kq.nam_hoc DESC, kq.hoc_ky DESC, kq.ma_sv";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maCvht);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    KetQuaHocTap kq = mapRow(rs);
+                    try { kq.setHoTenSv(rs.getString("ho_ten_sv")); } catch (Exception ignored) {}
+                    list.add(kq);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
     /**
      * Them hoac cap nhat ket qua hoc tap (dung cho ca MySQL va SQLite).
      */

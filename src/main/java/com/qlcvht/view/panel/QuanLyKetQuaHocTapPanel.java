@@ -123,8 +123,8 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
         bar.add(btnSua);
 
         // Nút Xóa
-        boolean isAdmin = "ADMIN".equals(currentUser != null ? currentUser.getVaiTro() : "");
-        if (isAdmin) {
+        boolean isQuanLy = "QUAN_LY".equals(currentUser != null ? currentUser.getVaiTro() : "");
+        if (isQuanLy) {
             JButton btnXoa = UITheme.createButton("Xóa Điểm", UITheme.DANGER, Color.WHITE);
             btnXoa.addActionListener(e -> onXoaGPA());
             bar.add(btnXoa);
@@ -174,7 +174,11 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
     }
 
     public void loadData() {
-        currentList = ketQuaDAO.getAllKetQua();
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            currentList = ketQuaDAO.getKetQuaByCoVan(currentUser.getMaRef());
+        } else {
+            currentList = ketQuaDAO.getAllKetQua();
+        }
         renderTable(currentList);
     }
 
@@ -183,7 +187,12 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
         String selNh = (String) cbNamHoc.getSelectedItem();
         String selHk = (String) cbHocKy.getSelectedItem();
 
-        List<KetQuaHocTap> all = ketQuaDAO.getAllKetQua();
+        List<KetQuaHocTap> all;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            all = ketQuaDAO.getKetQuaByCoVan(currentUser.getMaRef());
+        } else {
+            all = ketQuaDAO.getAllKetQua();
+        }
         List<KetQuaHocTap> filtered = new ArrayList<>();
 
         for (KetQuaHocTap kq : all) {
@@ -243,7 +252,7 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
     }
 
     private void onNhapGPA() {
-        ThemSuaDiemDialog dlg = new ThemSuaDiemDialog((Frame) SwingUtilities.getWindowAncestor(this), null);
+        ThemSuaDiemDialog dlg = new ThemSuaDiemDialog((Frame) SwingUtilities.getWindowAncestor(this), null, currentUser);
         dlg.setVisible(true);
         if (dlg.isSaved()) loadData();
     }
@@ -254,7 +263,7 @@ public class QuanLyKetQuaHocTapPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng kết quả cần sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        ThemSuaDiemDialog dlg = new ThemSuaDiemDialog((Frame) SwingUtilities.getWindowAncestor(this), kq);
+        ThemSuaDiemDialog dlg = new ThemSuaDiemDialog((Frame) SwingUtilities.getWindowAncestor(this), kq, currentUser);
         dlg.setVisible(true);
         if (dlg.isSaved()) loadData();
     }

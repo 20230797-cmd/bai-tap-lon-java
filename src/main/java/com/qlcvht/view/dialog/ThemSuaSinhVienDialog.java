@@ -4,6 +4,7 @@ import com.qlcvht.dao.CoVanDAO;
 import com.qlcvht.dao.SinhVienDAO;
 import com.qlcvht.model.LopHoc;
 import com.qlcvht.model.SinhVien;
+import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
 import javax.swing.*;
@@ -18,6 +19,7 @@ import java.util.List;
 public class ThemSuaSinhVienDialog extends JDialog {
 
     private final SinhVien svEdit; // null = thêm mới
+    private final TaiKhoan currentUser;
     private final SinhVienDAO svDAO = new SinhVienDAO();
     private final CoVanDAO coVanDAO = new CoVanDAO();
 
@@ -29,8 +31,13 @@ public class ThemSuaSinhVienDialog extends JDialog {
     private boolean saved = false;
 
     public ThemSuaSinhVienDialog(Frame parent, SinhVien sv) {
+        this(parent, sv, null);
+    }
+
+    public ThemSuaSinhVienDialog(Frame parent, SinhVien sv, TaiKhoan user) {
         super(parent, sv == null ? "Thêm Sinh viên Mới" : "Chỉnh sửa Thông tin Sinh viên", true);
         this.svEdit = sv;
+        this.currentUser = user;
         initUI();
         pack();
         setLocationRelativeTo(parent);
@@ -106,7 +113,12 @@ public class ThemSuaSinhVienDialog extends JDialog {
         row++;
         addLabel(form, gbc, row, "Lớp quản lý (*):");
         cbLop = new JComboBox<>();
-        List<LopHoc> listLop = coVanDAO.getAllLopHoc();
+        List<LopHoc> listLop;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            listLop = coVanDAO.getLopHocByCoVan(currentUser.getMaRef());
+        } else {
+            listLop = coVanDAO.getAllLopHoc();
+        }
         for (LopHoc l : listLop) cbLop.addItem(l);
         if (svEdit != null) {
             for (int i = 0; i < cbLop.getItemCount(); i++) {
@@ -217,7 +229,7 @@ public class ThemSuaSinhVienDialog extends JDialog {
         }
 
         if (!email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ (VD: sv@huce.edu.vn)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ (VD: sv@eaut.edu.vn)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!sdt.isEmpty() && !sdt.matches("^\\d{9,11}$")) {

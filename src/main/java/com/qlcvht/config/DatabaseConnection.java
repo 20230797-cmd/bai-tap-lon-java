@@ -208,8 +208,52 @@ public class DatabaseConnection {
                 }
                 System.out.println("[INFO] Nạp dữ liệu mẫu " + activeEngineName + " hoàn tất!");
             }
+            ensureDefaultAccounts(conn);
         } catch (Exception e) {
             System.err.println("[WARN] Lỗi khi kiểm tra/khởi tạo bảng " + activeEngineName + ": " + e.getMessage());
+        }
+    }
+
+    private static void ensureDefaultAccounts(Connection conn) {
+        String hash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"; // 123456
+        String[][] defaults = {
+            {"admin", hash, "Quản trị viên Hệ thống EAUT", "admin@eaut.edu.vn", "ADMIN", null},
+            {"quanly", hash, "Trưởng phòng Đào tạo EAUT", "daotao@eaut.edu.vn", "QUAN_LY", null},
+            {"cv_phongdv", hash, "TS. Đinh Văn Phong", "phong.dv@eaut.edu.vn", "CO_VAN", "CV001"},
+            {"cv001", hash, "TS. Đinh Văn Phong", "phong.dv@eaut.edu.vn", "CO_VAN", "CV001"},
+            {"cv_haint", hash, "PGS.TS. Nguyễn Thanh Hải", "hai.nt@eaut.edu.vn", "CO_VAN", "CV002"},
+            {"cv002", hash, "PGS.TS. Nguyễn Thanh Hải", "hai.nt@eaut.edu.vn", "CO_VAN", "CV002"},
+            {"cv_maiht", hash, "ThS. Hoàng Thị Mai", "mai.ht@eaut.edu.vn", "CO_VAN", "CV003"},
+            {"cv003", hash, "ThS. Hoàng Thị Mai", "mai.ht@eaut.edu.vn", "CO_VAN", "CV003"},
+            {"cv_sonvt", hash, "TS. Vũ Trường Sơn", "son.vt@eaut.edu.vn", "CO_VAN", "CV004"},
+            {"cv004", hash, "TS. Vũ Trường Sơn", "son.vt@eaut.edu.vn", "CO_VAN", "CV004"},
+            {"20230001", hash, "Vũ Đình Anh", "sv20230001@eaut.edu.vn", "SINH_VIEN", "20230001"}
+        };
+
+        for (String[] acc : defaults) {
+            try {
+                boolean exists = false;
+                try (java.sql.PreparedStatement psCheck = conn.prepareStatement("SELECT COUNT(*) FROM tai_khoan WHERE LOWER(ten_dang_nhap) = LOWER(?)")) {
+                    psCheck.setString(1, acc[0]);
+                    try (ResultSet rs = psCheck.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            exists = true;
+                        }
+                    }
+                }
+                if (!exists) {
+                    try (java.sql.PreparedStatement psIns = conn.prepareStatement(
+                            "INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, ho_ten, email, vai_tro, ma_ref) VALUES (?, ?, ?, ?, ?, ?)")) {
+                        psIns.setString(1, acc[0]);
+                        psIns.setString(2, acc[1]);
+                        psIns.setString(3, acc[2]);
+                        psIns.setString(4, acc[3]);
+                        psIns.setString(5, acc[4]);
+                        psIns.setString(6, acc[5]);
+                        psIns.executeUpdate();
+                    }
+                }
+            } catch (Exception ignored) {}
         }
     }
 
@@ -294,6 +338,27 @@ public class DatabaseConnection {
             }
         } catch (Exception e) {
             System.err.println("[ERROR] Lỗi khi đọc script SQL: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Khởi tạo lại và nạp toàn bộ 100% dữ liệu mẫu EAUT vào CSDL hiện hành
+     */
+    public static synchronized boolean resetAndSeedDatabase() {
+        try (Connection conn = getConnection()) {
+            if (isSQLiteMode) {
+                executeSqlScript(conn, "sqlite_schema.sql");
+            } else if (isUsingSQLServer()) {
+                executeSqlScript(conn, "sqlserver_schema.sql");
+            } else {
+                executeSqlScript(conn, "database.sql");
+            }
+            ensureDefaultAccounts(conn);
+            return true;
+        } catch (Exception e) {
+            System.err.println("[ERROR] Lỗi khi nạp lại dữ liệu CSDL: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
 

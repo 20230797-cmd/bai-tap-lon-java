@@ -130,7 +130,7 @@ public class StudentMainFrame extends JFrame {
         lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
         leftPanel.add(lblLogo);
 
-        JLabel lblTitle = new JLabel("CỔNG THÔNG TIN SINH VIÊN");
+        JLabel lblTitle = new JLabel("CỔNG THÔNG TIN SINH VIÊN - ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)");
         lblTitle.setFont(UITheme.fontBold(16));
         lblTitle.setForeground(Color.WHITE);
         leftPanel.add(lblTitle);

@@ -4,6 +4,7 @@ import com.qlcvht.dao.CoVanDAO;
 import com.qlcvht.model.LopHoc;
 import com.qlcvht.service.ThongKeService;
 import com.qlcvht.util.ExcelExporter;
+import com.qlcvht.util.ReportExporter;
 import com.qlcvht.util.UITheme;
 import com.qlcvht.util.WrapLayout;
 
@@ -69,14 +70,53 @@ public class BaoCaoThongKePanel extends JPanel {
         btnRefresh.setToolTipText("Tải lại số liệu thống kê mới nhất");
         btnRefresh.addActionListener(e -> loadStats());
 
-        JButton btnExport = UITheme.createButton("Xuất Báo Cáo Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuất Excel (.xlsx)", new Color(46, 125, 50), Color.WHITE);
         btnExport.setToolTipText("Xuất toàn bộ chỉ tiêu thống kê ra file Excel .xlsx");
         btnExport.addActionListener(e -> exportReportToExcel());
+
+        JButton btnExportWord = UITheme.createButton("Xuất Biên Bản (.docx)", new Color(30, 64, 175), Color.WHITE);
+        btnExportWord.setToolTipText("Xuất Biên bản sinh hoạt cố vấn học tập ra file Word .docx");
+        btnExportWord.addActionListener(e -> {
+            String sel = getSelectedMaLop();
+            btnExportWord.setEnabled(false);
+            com.qlcvht.util.AsyncWorker.execute(
+                () -> { ReportExporter.exportBienBanHopLopWord(sel); return null; },
+                res -> btnExportWord.setEnabled(true),
+                err -> { btnExportWord.setEnabled(true); com.qlcvht.util.MessageUtil.showError(this, "Lỗi xuất file Word: " + err.getMessage()); }
+            );
+        });
+
+        JButton btnExportPdf = UITheme.createButton("Xuất Biên Bản (.pdf)", new Color(185, 28, 28), Color.WHITE);
+        btnExportPdf.setToolTipText("Xuất Biên bản sinh hoạt cố vấn học tập ra file PDF");
+        btnExportPdf.addActionListener(e -> {
+            String sel = getSelectedMaLop();
+            btnExportPdf.setEnabled(false);
+            com.qlcvht.util.AsyncWorker.execute(
+                () -> { ReportExporter.exportBienBanHopLopPDF(sel); return null; },
+                res -> btnExportPdf.setEnabled(true),
+                err -> { btnExportPdf.setEnabled(true); com.qlcvht.util.MessageUtil.showError(this, "Lỗi xuất file PDF: " + err.getMessage()); }
+            );
+        });
+
+        JButton btnExportBaoCaoPdf = UITheme.createButton("Báo Cáo Tổng Hợp (.pdf)", new Color(109, 40, 217), Color.WHITE);
+        btnExportBaoCaoPdf.setToolTipText("Xuất Báo cáo tổng hợp tình hình học vụ và tiến độ tư vấn ra file PDF");
+        btnExportBaoCaoPdf.addActionListener(e -> {
+            String sel = getSelectedMaLop();
+            btnExportBaoCaoPdf.setEnabled(false);
+            com.qlcvht.util.AsyncWorker.execute(
+                () -> { ReportExporter.exportBaoCaoTongHopPDF(sel); return null; },
+                res -> btnExportBaoCaoPdf.setEnabled(true),
+                err -> { btnExportBaoCaoPdf.setEnabled(true); com.qlcvht.util.MessageUtil.showError(this, "Lỗi xuất báo cáo PDF: " + err.getMessage()); }
+            );
+        });
         
         pnlAction.add(new JLabel("Phạm vi lớp:"));
         pnlAction.add(cbFilterLop);
         pnlAction.add(btnRefresh);
         pnlAction.add(btnExport);
+        pnlAction.add(btnExportWord);
+        pnlAction.add(btnExportPdf);
+        pnlAction.add(btnExportBaoCaoPdf);
 
         topContainer.add(pnlAction, BorderLayout.SOUTH);
         add(topContainer, BorderLayout.NORTH);
@@ -144,22 +184,34 @@ public class BaoCaoThongKePanel extends JPanel {
         return lVal;
     }
 
-    private void loadStats() {
-        String maLop = "ALL";
+    private String getSelectedMaLop() {
         if (cbFilterLop != null && cbFilterLop.getSelectedIndex() > 0) {
             String selected = (String) cbFilterLop.getSelectedItem();
-            maLop = selected.split(" - ")[0];
+            if (selected != null && selected.contains(" - ")) {
+                return selected.split(" - ")[0].trim();
+            }
         }
-        stats = thongKeService.getThongKeTongQuan(maLop);
-        lblTongSv.setText(String.valueOf(stats.getOrDefault("tong_sv", 0)));
-        lblBinhThuong.setText(String.valueOf(stats.getOrDefault("sv_binh_thuong", 0)));
-        lblMuc1.setText(String.valueOf(stats.getOrDefault("cb_muc_1", 0)));
-        lblMuc2.setText(String.valueOf(stats.getOrDefault("cb_muc_2", 0)));
-        lblBuoc.setText(String.valueOf(stats.getOrDefault("buoc_thoi_hoc", 0)));
-        lblDaTuVan.setText(String.valueOf(stats.getOrDefault("da_tu_van", 0)));
-        lblChuaTuVan.setText(String.valueOf(stats.getOrDefault("chua_tu_van", 0)));
-        lblTier1.setText(String.valueOf(stats.getOrDefault("tier_1", 0)));
-        repaint();
+        return "ALL";
+    }
+
+    private void loadStats() {
+        String maLop = getSelectedMaLop();
+        com.qlcvht.util.AsyncWorker.execute(
+            () -> thongKeService.getThongKeTongQuan(maLop),
+            result -> {
+                stats = result;
+                lblTongSv.setText(String.valueOf(stats.getOrDefault("tong_sv", 0)));
+                lblBinhThuong.setText(String.valueOf(stats.getOrDefault("sv_binh_thuong", 0)));
+                lblMuc1.setText(String.valueOf(stats.getOrDefault("cb_muc_1", 0)));
+                lblMuc2.setText(String.valueOf(stats.getOrDefault("cb_muc_2", 0)));
+                lblBuoc.setText(String.valueOf(stats.getOrDefault("buoc_thoi_hoc", 0)));
+                lblDaTuVan.setText(String.valueOf(stats.getOrDefault("da_tu_van", 0)));
+                lblChuaTuVan.setText(String.valueOf(stats.getOrDefault("chua_tu_van", 0)));
+                lblTier1.setText(String.valueOf(stats.getOrDefault("tier_1", 0)));
+                repaint();
+            },
+            err -> err.printStackTrace()
+        );
     }
 
     private void exportReportToExcel() {

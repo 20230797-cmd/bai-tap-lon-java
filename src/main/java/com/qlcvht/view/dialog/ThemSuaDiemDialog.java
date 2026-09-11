@@ -4,6 +4,7 @@ import com.qlcvht.dao.KetQuaHocTapDAO;
 import com.qlcvht.dao.SinhVienDAO;
 import com.qlcvht.model.KetQuaHocTap;
 import com.qlcvht.model.SinhVien;
+import com.qlcvht.model.TaiKhoan;
 import com.qlcvht.util.UITheme;
 
 import javax.swing.*;
@@ -14,6 +15,7 @@ import java.util.List;
 public class ThemSuaDiemDialog extends JDialog {
 
     private final KetQuaHocTap kqEdit;
+    private final TaiKhoan currentUser;
     private final KetQuaHocTapDAO kqDAO = new KetQuaHocTapDAO();
     private final SinhVienDAO svDAO = new SinhVienDAO();
 
@@ -27,8 +29,13 @@ public class ThemSuaDiemDialog extends JDialog {
     private boolean saved = false;
 
     public ThemSuaDiemDialog(Frame parent, KetQuaHocTap kq) {
+        this(parent, kq, null);
+    }
+
+    public ThemSuaDiemDialog(Frame parent, KetQuaHocTap kq, com.qlcvht.model.TaiKhoan user) {
         super(parent, kq == null ? "Nhập Kết quả Học tập Học kỳ" : "Cập nhật Điểm & Kết quả Học tập", true);
         this.kqEdit = kq;
+        this.currentUser = user;
         initUI();
         pack();
         setLocationRelativeTo(parent);
@@ -59,7 +66,12 @@ public class ThemSuaDiemDialog extends JDialog {
         // Sinh viên
         addLabel(form, gbc, row, "Sinh viên (*):");
         cbSinhVien = new JComboBox<>();
-        List<SinhVien> listSv = svDAO.getAllSinhVien();
+        List<SinhVien> listSv;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            listSv = svDAO.getSinhVienByCoVan(currentUser.getMaRef());
+        } else {
+            listSv = svDAO.getAllSinhVien();
+        }
         for (SinhVien sv : listSv) {
             cbSinhVien.addItem(sv.getMaSv() + " - " + sv.getHoTen() + " (" + (sv.getTenLop() != null ? sv.getTenLop() : sv.getMaLop()) + ")");
         }

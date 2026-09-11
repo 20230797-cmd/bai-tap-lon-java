@@ -48,9 +48,9 @@ public class ReportExporter {
         String currentDateStr = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
         try (XWPFDocument doc = new XWPFDocument()) {
-            addParagraph(doc, "B\u1ED8 GI\u00C1O D\u1EE4C V\u00C0 \u0110\u00C0O T\u1EA0O", 10, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "C\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "BỘ GIÁO DỤC VÀ ĐÀO TẠO", 10, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "------------------------", 10, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
@@ -137,7 +137,7 @@ public class ReportExporter {
             Font fNormal = getPdfFont(10, Font.NORMAL);
             Font fSmall = getPdfFont(9, Font.NORMAL);
 
-            Paragraph pHeader = new Paragraph("TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)\nC\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM\n\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc\n------------------------", fHeader);
+            Paragraph pHeader = new Paragraph("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n------------------------", fHeader);
             pHeader.setAlignment(Element.ALIGN_CENTER);
             document.add(pHeader);
 
@@ -203,9 +203,9 @@ public class ReportExporter {
         String currentDateStr = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
         try (XWPFDocument doc = new XWPFDocument()) {
-            addParagraph(doc, "B\u1ED8 GI\u00C1O D\u1EE4C V\u00C0 \u0110\u00C0O T\u1EA0O", 10, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)", 11, true, ParagraphAlignment.CENTER);
-            addParagraph(doc, "C\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "BỘ GIÁO DỤC VÀ ĐÀO TẠO", 10, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)", 11, true, ParagraphAlignment.CENTER);
+            addParagraph(doc, "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "\u0110\u1ED9c l\u1EADp - T\u1EF1 do - H\u1EA1nh ph\u00FAc", 11, true, ParagraphAlignment.CENTER);
             addParagraph(doc, "------------------------", 10, false, ParagraphAlignment.CENTER);
             addParagraph(doc, "", 10, false, ParagraphAlignment.LEFT);
@@ -282,7 +282,7 @@ public class ReportExporter {
             Font fNormal = getPdfFont(10, Font.NORMAL);
             Font fSmall = getPdfFont(9, Font.NORMAL);
 
-            Paragraph pHeader = new Paragraph("TR\u01AF\u1EDCNG \u0110\u1EA0I H\u1ECCC X\u00C2Y D\u1EF0NG H\u00C0 N\u1ED8I (HUCE)\nC\u1ED8NG H\u00D2A X\u00C3 H\u1ED8I CH\u1EE6 NGH\u0128A VI\u1EC6T NAM\n------------------------", fHeader);
+            Paragraph pHeader = new Paragraph("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n------------------------", fHeader);
             pHeader.setAlignment(Element.ALIGN_CENTER);
             document.add(pHeader);
 
