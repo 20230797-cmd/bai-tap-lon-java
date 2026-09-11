@@ -16,7 +16,7 @@ import java.util.Properties;
  * Lớp quản lý kết nối Cơ sở dữ liệu Đa Nền Tảng (Microsoft SQL Server / MySQL + SQLite Fallback).
  * 
  * - Ưu tiên 1: Kết nối Microsoft SQL Server hoặc MySQL theo cấu hình database.properties.
- *              Tự động khởi tạo bảng và nạp dữ liệu mẫu nếu CSDL chưa có bảng.
+ *              Tự động tạo Database, tạo bảng và nạp dữ liệu mẫu nếu CSDL chưa có.
  * - Ưu tiên 2: Nếu chưa bật hoặc không kết nối được CSDL máy chủ, hệ thống TỰ ĐỘNG chuyển sang
  *              SQLite Engine cục bộ (Zero-Config) với 100% dữ liệu mẫu, đảm bảo ứng dụng luôn chạy mượt mà!
  */
@@ -29,9 +29,10 @@ public class DatabaseConnection {
     private static String dbName = "ql_canhbao_hocvu";
     private static String dbUser = "sa";
     private static String dbPassword = "";
-    private static String dbParams = "encrypt=true;trustServerCertificate=true;characterEncoding=UTF-8;";
+    private static String dbParams = "encrypt=true;trustServerCertificate=true;characterEncoding=UTF-8;loginTimeout=5;";
 
     private static String serverJdbcUrl;
+    private static String masterJdbcUrl;
     private static final String SQLITE_DB_PATH = "data/ql_canhbao_hocvu.db";
     private static final String SQLITE_JDBC_URL = "jdbc:sqlite:" + SQLITE_DB_PATH;
 
@@ -70,23 +71,17 @@ public class DatabaseConnection {
     private static void buildJdbcUrl() {
         if (dbType.contains("sqlserver") || dbDriver.contains("sqlserver")) {
             activeEngineName = "SQL Server";
-            // Cú pháp URL SQL Server
             String params = dbParams;
-            if (!params.isEmpty() && !params.startsWith(";")) {
-                params = ";" + params;
-            }
-            if (!params.endsWith(";")) {
-                params = params + ";";
-            }
+            if (!params.isEmpty() && !params.startsWith(";")) params = ";" + params;
+            if (!params.endsWith(";")) params = params + ";";
             serverJdbcUrl = "jdbc:sqlserver://" + dbHost + ":" + dbPort + ";databaseName=" + dbName + params;
+            masterJdbcUrl = "jdbc:sqlserver://" + dbHost + ":" + dbPort + ";databaseName=master" + params;
         } else {
             activeEngineName = "MySQL";
-            // Cú pháp URL MySQL
             String params = dbParams;
-            if (!params.isEmpty() && !params.startsWith("?")) {
-                params = "?" + params;
-            }
+            if (!params.isEmpty() && !params.startsWith("?")) params = "?" + params;
             serverJdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + params;
+            masterJdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + params;
         }
     }
 
@@ -106,7 +101,29 @@ public class DatabaseConnection {
                 serverSuccess = true;
             }
         } catch (Exception e) {
-            System.err.println("[WARN] Không thể kết nối tới " + activeEngineName + " (" + dbHost + ":" + dbPort + "): " + e.getMessage());
+            String errorMsg = e.getMessage() != null ? e.getMessage() : "";
+            System.err.println("[WARN] Thử kết nối tới " + activeEngineName + " (" + dbHost + ":" + dbPort + ") báo: " + errorMsg);
+
+            // Nếu Database chưa tồn tại trên Server -> Tự động kết nối vào master để tạo Database
+            if (errorMsg.contains("Cannot open database") || errorMsg.contains("Unknown database")) {
+                try {
+                    System.out.println("[INFO] Database '" + dbName + "' chưa có trên " + activeEngineName + ". Đang tự động tạo Database mới...");
+                    try (Connection masterConn = DriverManager.getConnection(masterJdbcUrl, dbUser, dbPassword);
+                         Statement st = masterConn.createStatement()) {
+                        st.executeUpdate("CREATE DATABASE " + dbName);
+                        System.out.println("[INFO] Tạo Database '" + dbName + "' thành công!");
+                    }
+                    // Kết nối lại vào Database vừa tạo
+                    try (Connection newConn = DriverManager.getConnection(serverJdbcUrl, dbUser, dbPassword)) {
+                        ensureServerSchema(newConn);
+                        isSQLiteMode = false;
+                        serverSuccess = true;
+                        System.out.println("[INFO] Sẵn sàng sử dụng CSDL " + activeEngineName + " (" + dbName + ")");
+                    }
+                } catch (Exception ex) {
+                    System.err.println("[WARN] Không thể tự động tạo database trên server: " + ex.getMessage());
+                }
+            }
         }
 
         // 2. Nếu CSDL Server không khả dụng -> Chuyển sang SQLite
