@@ -13,29 +13,30 @@ import java.sql.Statement;
 import java.util.Properties;
 
 /**
- * Lớp quản lý kết nối Cơ sở dữ liệu Dual-Engine (MySQL + SQLite Fallback).
+ * Lớp quản lý kết nối Cơ sở dữ liệu Đa Nền Tảng (Microsoft SQL Server / MySQL + SQLite Fallback).
  * 
- * - Ưu tiên 1: Kết nối MySQL Server theo cấu hình database.properties.
- *              Tự động khởi tạo bảng và nạp dữ liệu mẫu nếu MySQL chưa có database/bảng.
- * - Ưu tiên 2: Nếu máy chưa cài hoặc chưa bật MySQL, hệ thống TỰ ĐỘNG chuyển sang
- *              SQLite Engine cục bộ (Zero-Config) với 100% dữ liệu mẫu và tài khoản,
- *              đảm bảo bất kỳ ai kéo code về từ GitHub cũng chạy được ngay lập tức!
+ * - Ưu tiên 1: Kết nối Microsoft SQL Server hoặc MySQL theo cấu hình database.properties.
+ *              Tự động khởi tạo bảng và nạp dữ liệu mẫu nếu CSDL chưa có bảng.
+ * - Ưu tiên 2: Nếu chưa bật hoặc không kết nối được CSDL máy chủ, hệ thống TỰ ĐỘNG chuyển sang
+ *              SQLite Engine cục bộ (Zero-Config) với 100% dữ liệu mẫu, đảm bảo ứng dụng luôn chạy mượt mà!
  */
 public class DatabaseConnection {
 
-    private static String dbDriver = "com.mysql.cj.jdbc.Driver";
+    private static String dbType = "sqlserver";
+    private static String dbDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
     private static String dbHost = "localhost";
-    private static String dbPort = "3306";
+    private static String dbPort = "1433";
     private static String dbName = "ql_canhbao_hocvu";
-    private static String dbUser = "root";
+    private static String dbUser = "sa";
     private static String dbPassword = "";
-    private static String dbParams = "useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&useSSL=false";
+    private static String dbParams = "encrypt=true;trustServerCertificate=true;characterEncoding=UTF-8;";
 
-    private static String mysqlJdbcUrl;
+    private static String serverJdbcUrl;
     private static final String SQLITE_DB_PATH = "data/ql_canhbao_hocvu.db";
     private static final String SQLITE_JDBC_URL = "jdbc:sqlite:" + SQLITE_DB_PATH;
 
     private static boolean isSQLiteMode = false;
+    private static String activeEngineName = "SQL Server";
     private static boolean initialized = false;
 
     static {
@@ -50,45 +51,68 @@ public class DatabaseConnection {
             if (is != null) {
                 Properties prop = new Properties();
                 prop.load(new InputStreamReader(is, StandardCharsets.UTF_8));
-                dbDriver = prop.getProperty("db.driver", dbDriver);
-                dbHost = prop.getProperty("db.host", dbHost);
-                dbPort = prop.getProperty("db.port", dbPort);
-                dbName = prop.getProperty("db.name", dbName);
-                dbUser = prop.getProperty("db.user", dbUser);
-                dbPassword = prop.getProperty("db.password", dbPassword);
-                dbParams = prop.getProperty("db.params", dbParams);
+                dbType = prop.getProperty("db.type", dbType).trim().toLowerCase();
+                dbDriver = prop.getProperty("db.driver", dbDriver).trim();
+                dbHost = prop.getProperty("db.host", dbHost).trim();
+                dbPort = prop.getProperty("db.port", dbPort).trim();
+                dbName = prop.getProperty("db.name", dbName).trim();
+                dbUser = prop.getProperty("db.user", dbUser).trim();
+                dbPassword = prop.getProperty("db.password", dbPassword != null ? dbPassword : "").trim();
+                dbParams = prop.getProperty("db.params", dbParams).trim();
             }
         } catch (Exception e) {
             System.err.println("[WARN] Không thể đọc database.properties, sử dụng cấu hình mặc định: " + e.getMessage());
         }
 
-        mysqlJdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?" + dbParams;
+        buildJdbcUrl();
+    }
+
+    private static void buildJdbcUrl() {
+        if (dbType.contains("sqlserver") || dbDriver.contains("sqlserver")) {
+            activeEngineName = "SQL Server";
+            // Cú pháp URL SQL Server
+            String params = dbParams;
+            if (!params.isEmpty() && !params.startsWith(";")) {
+                params = ";" + params;
+            }
+            if (!params.endsWith(";")) {
+                params = params + ";";
+            }
+            serverJdbcUrl = "jdbc:sqlserver://" + dbHost + ":" + dbPort + ";databaseName=" + dbName + params;
+        } else {
+            activeEngineName = "MySQL";
+            // Cú pháp URL MySQL
+            String params = dbParams;
+            if (!params.isEmpty() && !params.startsWith("?")) {
+                params = "?" + params;
+            }
+            serverJdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + params;
+        }
     }
 
     /**
-     * Khởi tạo và kiểm tra kết nối (Tự động chọn MySQL hoặc SQLite Fallback)
+     * Khởi tạo và kiểm tra kết nối (Tự động chọn SQL Server/MySQL hoặc SQLite Fallback)
      */
     public static synchronized void initDatabase() {
         if (initialized) return;
 
-        // 1. Thử kết nối MySQL
-        boolean mysqlSuccess = false;
+        boolean serverSuccess = false;
         try {
             Class.forName(dbDriver);
-            try (Connection conn = DriverManager.getConnection(mysqlJdbcUrl, dbUser, dbPassword)) {
-                System.out.println("[INFO] Kết nối thành công tới MySQL Server: " + dbName + " (" + dbHost + ":" + dbPort + ")");
-                ensureMySQLSchema(conn);
+            try (Connection conn = DriverManager.getConnection(serverJdbcUrl, dbUser, dbPassword)) {
+                System.out.println("[INFO] Kết nối thành công tới " + activeEngineName + " Server: " + dbName + " (" + dbHost + ":" + dbPort + ")");
+                ensureServerSchema(conn);
                 isSQLiteMode = false;
-                mysqlSuccess = true;
+                serverSuccess = true;
             }
         } catch (Exception e) {
-            System.err.println("[WARN] Không thể kết nối tới MySQL Server (" + dbHost + ":" + dbPort + "): " + e.getMessage());
+            System.err.println("[WARN] Không thể kết nối tới " + activeEngineName + " (" + dbHost + ":" + dbPort + "): " + e.getMessage());
         }
 
-        // 2. Nếu MySQL không khả dụng -> Chuyển sang SQLite
-        if (!mysqlSuccess) {
+        // 2. Nếu CSDL Server không khả dụng -> Chuyển sang SQLite
+        if (!serverSuccess) {
             System.out.println("[INFO] ------------------------------------------------------------");
-            System.out.println("[INFO] [DUAL-ENGINE] Tự động kích hoạt CSDL Tích Hợp SQLite (Zero-Config)");
+            System.out.println("[INFO] [MULTI-ENGINE] Tự động kích hoạt CSDL Tích Hợp SQLite (Zero-Config)");
             System.out.println("[INFO] Hệ thống sẽ tự tạo file database và nạp sẵn 100% dữ liệu mẫu.");
             System.out.println("[INFO] ------------------------------------------------------------");
             try {
@@ -101,6 +125,7 @@ public class DatabaseConnection {
                     ensureSQLiteSchema(conn);
                 }
                 isSQLiteMode = true;
+                activeEngineName = "SQLite";
                 System.out.println("[INFO] Sẵn sàng sử dụng CSDL SQLite: " + SQLITE_DB_PATH);
             } catch (Exception e) {
                 System.err.println("[ERROR] Lỗi nghiêm trọng khi khởi tạo SQLite Fallback: " + e.getMessage());
@@ -112,7 +137,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Lấy kết nối CSDL hiện tại (MySQL hoặc SQLite)
+     * Lấy kết nối CSDL hiện tại (SQL Server / MySQL hoặc SQLite)
      */
     public static Connection getConnection() throws SQLException {
         if (!initialized) {
@@ -121,7 +146,7 @@ public class DatabaseConnection {
         if (isSQLiteMode) {
             return DriverManager.getConnection(SQLITE_JDBC_URL);
         } else {
-            return DriverManager.getConnection(mysqlJdbcUrl, dbUser, dbPassword);
+            return DriverManager.getConnection(serverJdbcUrl, dbUser, dbPassword);
         }
     }
 
@@ -143,9 +168,9 @@ public class DatabaseConnection {
     }
 
     /**
-     * Tự động tạo bảng & dữ liệu mẫu cho MySQL nếu chưa có
+     * Tự động tạo bảng & dữ liệu mẫu cho SQL Server / MySQL nếu chưa có
      */
-    private static void ensureMySQLSchema(Connection conn) {
+    private static void ensureServerSchema(Connection conn) {
         try {
             boolean hasAccounts = false;
             try (Statement st = conn.createStatement();
@@ -158,12 +183,16 @@ public class DatabaseConnection {
             }
 
             if (!hasAccounts) {
-                System.out.println("[INFO] Đang tự động nạp cấu trúc bảng và dữ liệu mẫu cho MySQL...");
-                executeSqlScript(conn, "database.sql");
-                System.out.println("[INFO] Nạp dữ liệu mẫu MySQL hoàn tất!");
+                System.out.println("[INFO] Đang tự động nạp cấu trúc bảng và dữ liệu mẫu cho " + activeEngineName + "...");
+                if (activeEngineName.equalsIgnoreCase("SQL Server")) {
+                    executeSqlScript(conn, "sqlserver_schema.sql");
+                } else {
+                    executeSqlScript(conn, "database.sql");
+                }
+                System.out.println("[INFO] Nạp dữ liệu mẫu " + activeEngineName + " hoàn tất!");
             }
         } catch (Exception e) {
-            System.err.println("[WARN] Lỗi khi kiểm tra/khởi tạo bảng MySQL: " + e.getMessage());
+            System.err.println("[WARN] Lỗi khi kiểm tra/khởi tạo bảng " + activeEngineName + ": " + e.getMessage());
         }
     }
 
@@ -214,6 +243,19 @@ public class DatabaseConnection {
                     if (trimmed.isEmpty() || trimmed.startsWith("--") || trimmed.startsWith("#") || trimmed.startsWith("/*")) {
                         continue;
                     }
+                    if (trimmed.equalsIgnoreCase("GO")) {
+                        String sql = sb.toString().trim();
+                        if (!sql.isEmpty()) {
+                            try {
+                                st.execute(sql);
+                            } catch (SQLException e) {
+                                // Bỏ qua lỗi DROP hoặc CREATE DATABASE
+                            }
+                        }
+                        sb.setLength(0);
+                        continue;
+                    }
+
                     sb.append(line).append("\n");
                     if (trimmed.endsWith(";")) {
                         String sql = sb.toString().trim();
@@ -224,7 +266,6 @@ public class DatabaseConnection {
                             try {
                                 st.execute(sql);
                             } catch (SQLException e) {
-                                // Bỏ qua lỗi DROP TABLE IF EXISTS hoặc CREATE DATABASE nếu không đủ quyền
                                 if (!sql.toUpperCase().startsWith("DROP") && !sql.toUpperCase().startsWith("CREATE DATABASE") && !sql.toUpperCase().startsWith("USE")) {
                                     System.err.println("[WARN] Lỗi thực thi câu lệnh SQL: " + e.getMessage() + " | SQL: " + sql.substring(0, Math.min(80, sql.length())));
                                 }
@@ -243,12 +284,31 @@ public class DatabaseConnection {
         return isSQLiteMode;
     }
 
+    public static boolean isUsingSQLServer() {
+        return !isSQLiteMode && "SQL Server".equalsIgnoreCase(activeEngineName);
+    }
+
+    public static boolean isUsingMySQL() {
+        return !isSQLiteMode && "MySQL".equalsIgnoreCase(activeEngineName);
+    }
+
+    public static String getDatabaseEngineName() {
+        return isSQLiteMode ? "SQLite" : activeEngineName;
+    }
+
+    public static String getDatabaseDisplayStatus() {
+        if (isSQLiteMode) {
+            return "● SQLite (Offline)";
+        }
+        return "● " + activeEngineName + " (Online)";
+    }
+
     public static String getDatabaseType() {
-        return isSQLiteMode ? "SQLite (Tích hợp cục bộ)" : "MySQL (" + dbName + ")";
+        return isSQLiteMode ? "SQLite (Tích hợp cục bộ)" : activeEngineName + " (" + dbName + ")";
     }
 
     public static String getJdbcUrl() {
-        return isSQLiteMode ? SQLITE_JDBC_URL : mysqlJdbcUrl;
+        return isSQLiteMode ? SQLITE_JDBC_URL : serverJdbcUrl;
     }
 
     public static String getDbUser() {

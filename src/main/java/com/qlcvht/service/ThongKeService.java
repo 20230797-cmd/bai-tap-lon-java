@@ -175,8 +175,9 @@ public class ThongKeService {
 
     private double getGpaSauTuVan(Connection conn, String maSv, Date ngayTuVan) {
         // Query GPA hoc ky moi nhat
-        String sql = "SELECT gpa_hoc_ky FROM ket_qua_hoc_tap WHERE ma_sv = ? ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1";
+        String sql = "SELECT gpa_hoc_ky FROM ket_qua_hoc_tap WHERE ma_sv = ? ORDER BY nam_hoc DESC, hoc_ky DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setMaxRows(1);
             ps.setString(1, maSv);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

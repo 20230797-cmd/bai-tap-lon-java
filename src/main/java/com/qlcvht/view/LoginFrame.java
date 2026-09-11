@@ -180,7 +180,7 @@ public class LoginFrame extends JFrame {
 
         gbc.gridy = 9;
         gbc.insets = new Insets(4, 0, 0, 0);
-        String dbInfo = DatabaseConnection.isUsingSQLite() ? "● Đang dùng CSDL SQLite Offline" : "● Đang dùng CSDL MySQL Online";
+        String dbInfo = "● CSDL: " + DatabaseConnection.getDatabaseEngineName() + (DatabaseConnection.isUsingSQLite() ? " (Offline)" : " (Online)");
         JLabel hint = new JLabel(dbInfo, SwingConstants.CENTER);
         hint.setFont(UITheme.fontPlain(11));
         hint.setForeground(new Color(100, 116, 139));

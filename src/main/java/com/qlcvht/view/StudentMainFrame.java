@@ -140,7 +140,7 @@ public class StudentMainFrame extends JFrame {
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         userPanel.setOpaque(false);
 
-        String dbType = DatabaseConnection.isUsingSQLite() ? "● SQLite (Offline)" : "● MySQL (Online)";
+        String dbType = DatabaseConnection.getDatabaseDisplayStatus();
         Color dbColor = DatabaseConnection.isUsingSQLite() ? new Color(251, 191, 36) : new Color(52, 211, 153);
         JLabel lblDb = new JLabel(dbType);
         lblDb.setFont(UITheme.fontBold(11));

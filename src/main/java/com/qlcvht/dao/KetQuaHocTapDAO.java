@@ -23,9 +23,10 @@ public class KetQuaHocTapDAO {
     }
 
     public KetQuaHocTap getKetQuaHocKyMoiNhat(String maSv) {
-        String sql = "SELECT * FROM ket_qua_hoc_tap WHERE ma_sv = ? ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1";
+        String sql = "SELECT * FROM ket_qua_hoc_tap WHERE ma_sv = ? ORDER BY nam_hoc DESC, hoc_ky DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setMaxRows(1);
             ps.setString(1, maSv);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapRow(rs);

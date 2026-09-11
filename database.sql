@@ -34,7 +34,7 @@ CREATE TABLE `lop_hoc` (
   CONSTRAINT `fk_lop_covan` FOREIGN KEY (`ma_cvht`) REFERENCES `co_van_hoc_tap` (`ma_cvht`) ON DELETE SET NULL
 );
 
--- 3. B?NG SINH VI?N
+
 CREATE TABLE `sinh_vien` (
   `ma_sv` VARCHAR(20) PRIMARY KEY,
   `ho_ten` VARCHAR(100) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE `sinh_vien` (
   CONSTRAINT `fk_sinhvien_lop` FOREIGN KEY (`ma_lop`) REFERENCES `lop_hoc` (`ma_lop`) ON DELETE CASCADE
 );
 
--- 4. B?NG K?T QU? H?C T?P
+
 CREATE TABLE `ket_qua_hoc_tap` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,
   `ma_sv` VARCHAR(20) NOT NULL,

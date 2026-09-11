@@ -179,7 +179,7 @@ public class SinhVienDAO {
     public List<SinhVien> filterSinhVienMulti(String maLop, String trangThai, String gpaFilter, String keyword, String maCvht) {
         List<SinhVien> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT s.*, l.ten_lop FROM sinh_vien s " +
+                "SELECT DISTINCT s.*, l.ten_lop FROM sinh_vien s " +
                 "LEFT JOIN lop_hoc l ON s.ma_lop = l.ma_lop " +
                 "LEFT JOIN ket_qua_hoc_tap k ON s.ma_sv = k.ma_sv " +
                 "WHERE 1=1 ");
@@ -188,15 +188,18 @@ public class SinhVienDAO {
         if (trangThai != null && !trangThai.isBlank() && !trangThai.equals("ALL")) sql.append("AND s.trang_thai = ? ");
         if (keyword != null && !keyword.isBlank()) sql.append("AND (s.ma_sv LIKE ? OR s.ho_ten LIKE ? OR s.email LIKE ?) ");
         if (gpaFilter != null && !gpaFilter.isBlank()) {
+            String latestGpaSubquery = DatabaseConnection.isUsingSQLServer()
+                    ? "(SELECT TOP 1 gpa_hoc_ky FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC)"
+                    : "(SELECT gpa_hoc_ky FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1)";
             switch (gpaFilter) {
-                case "<1.0"       -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) < 1.0 ");
-                case "1.0-1.5"    -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) BETWEEN 1.0 AND 1.499 ");
-                case "1.5-2.0"    -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) BETWEEN 1.5 AND 1.999 ");
-                case ">=2.0"      -> sql.append("AND (SELECT gpa FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv ORDER BY nam_hoc DESC, hoc_ky DESC LIMIT 1) >= 2.0 ");
+                case "<1.0"       -> sql.append("AND ").append(latestGpaSubquery).append(" < 1.0 ");
+                case "1.0-1.5"    -> sql.append("AND ").append(latestGpaSubquery).append(" BETWEEN 1.0 AND 1.499 ");
+                case "1.5-2.0"    -> sql.append("AND ").append(latestGpaSubquery).append(" BETWEEN 1.5 AND 1.999 ");
+                case ">=2.0"      -> sql.append("AND ").append(latestGpaSubquery).append(" >= 2.0 ");
                 case "NO_TC_GE_8" -> sql.append("AND (SELECT COALESCE(SUM(so_tin_chi_no), 0) FROM ket_qua_hoc_tap WHERE ma_sv = s.ma_sv) >= 8 ");
             }
         }
-        sql.append("GROUP BY s.ma_sv ORDER BY s.ma_sv");
+        sql.append("ORDER BY s.ma_sv");
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int idx = 1;
