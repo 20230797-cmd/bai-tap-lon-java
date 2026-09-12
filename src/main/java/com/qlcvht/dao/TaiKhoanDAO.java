@@ -42,16 +42,7 @@ public class TaiKhoanDAO {
                 return new TaiKhoan(1, "admin", hash, "Quản trị viên Hệ thống EAUT", "admin@eaut.edu.vn", "ADMIN", null, new Timestamp(System.currentTimeMillis()));
             }
 
-            // 3. Fallback Quản lý Đào tạo nếu đăng nhập bằng 123456 hoặc quanly
-            if ("quanly".equalsIgnoreCase(trimmedUser) && ("123456".equals(trimmedPass) || "quanly".equalsIgnoreCase(trimmedPass))) {
-                String hash = PasswordUtil.hashPassword("123456");
-                try (PreparedStatement psIns = conn.prepareStatement(
-                        "INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, ho_ten, email, vai_tro) VALUES ('quanly', ?, N'Trưởng phòng Đào tạo EAUT', 'daotao@eaut.edu.vn', 'QUAN_LY')")) {
-                    psIns.setString(1, hash);
-                    psIns.executeUpdate();
-                } catch (SQLException ignored) {}
-                return new TaiKhoan(2, "quanly", hash, "Trưởng phòng Đào tạo EAUT", "daotao@eaut.edu.vn", "QUAN_LY", null, new Timestamp(System.currentTimeMillis()));
-            }
+
 
             // 4. Fallback: Nếu là Cố vấn học tập trong bảng co_van_hoc_tap
             String cvSql = "SELECT * FROM co_van_hoc_tap WHERE LOWER(ma_cvht) = LOWER(?) OR LOWER(email) LIKE ? OR LOWER(?) LIKE '%' + LOWER(ma_cvht) + '%'";

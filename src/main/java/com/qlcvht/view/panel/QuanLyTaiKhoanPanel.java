@@ -59,22 +59,27 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         titlePanel.add(lblTotalUsers, BorderLayout.EAST);
         topContainer.add(titlePanel, BorderLayout.NORTH);
 
-        // Control & Filter Bar
-        JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
-        filterBar.setBackground(Color.WHITE);
-        filterBar.setBorder(BorderFactory.createCompoundBorder(
+        // Control & Filter Bar (2 organized rows to prevent any button clipping)
+        JPanel controlContainer = new JPanel();
+        controlContainer.setLayout(new BoxLayout(controlContainer, BoxLayout.Y_AXIS));
+        controlContainer.setBackground(Color.WHITE);
+        controlContainer.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(UITheme.BORDER_LIGHT, 1, true),
-            new EmptyBorder(4, 10, 4, 10)
+            new EmptyBorder(8, 12, 8, 12)
         ));
 
-        filterBar.add(new JLabel("Tìm kiếm:"));
-        txtSearch = new JTextField(16);
-        txtSearch.setFont(UITheme.fontPlain(13));
-        txtSearch.setToolTipText("Tìm theo tên đăng nhập, họ tên, email, mã ref...");
-        txtSearch.addActionListener(e -> loadData());
-        filterBar.add(txtSearch);
+        // Row 1: Search and Filters
+        JPanel rowFilter = new JPanel(new com.qlcvht.util.WrapLayout(FlowLayout.LEFT, 8, 4));
+        rowFilter.setOpaque(false);
 
-        filterBar.add(new JLabel("Vai trò:"));
+        rowFilter.add(new JLabel("Tìm kiếm:"));
+        txtSearch = new JTextField(15);
+        txtSearch.setFont(UITheme.fontPlain(13));
+        txtSearch.putClientProperty("JTextField.placeholderText", "Tên đăng nhập, họ tên, email...");
+        txtSearch.addActionListener(e -> loadData());
+        rowFilter.add(txtSearch);
+
+        rowFilter.add(new JLabel("Vai trò:"));
         cbFilterRole = new JComboBox<>(new String[]{
             "TẤT CẢ VAI TRÒ",
             "ADMIN",
@@ -84,11 +89,11 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         });
         cbFilterRole.setFont(UITheme.fontPlain(13));
         cbFilterRole.addActionListener(e -> loadData());
-        filterBar.add(cbFilterRole);
+        rowFilter.add(cbFilterRole);
 
         JButton btnSearch = UITheme.createButton("Tìm Kiếm", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> loadData());
-        filterBar.add(btnSearch);
+        rowFilter.add(btnSearch);
 
         JButton btnRefresh = UITheme.createButton("Làm Mới", new Color(100, 116, 139), Color.WHITE);
         btnRefresh.addActionListener(e -> {
@@ -96,24 +101,27 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             cbFilterRole.setSelectedIndex(0);
             loadData();
         });
-        filterBar.add(btnRefresh);
+        rowFilter.add(btnRefresh);
 
-        // Action buttons
+        // Row 2: Action CRUD Buttons
+        JPanel rowActions = new JPanel(new com.qlcvht.util.WrapLayout(FlowLayout.LEFT, 8, 4));
+        rowActions.setOpaque(false);
+
         JButton btnAdd = UITheme.createButton("+ Thêm Tài Khoản", new Color(16, 185, 129), Color.WHITE);
         btnAdd.addActionListener(e -> showAddDialog());
-        filterBar.add(btnAdd);
+        rowActions.add(btnAdd);
 
         JButton btnEdit = UITheme.createButton("Sửa Thông Tin", new Color(59, 130, 246), Color.WHITE);
         btnEdit.addActionListener(e -> showEditDialog());
-        filterBar.add(btnEdit);
+        rowActions.add(btnEdit);
 
         JButton btnResetPass = UITheme.createButton("Reset Mật Khẩu", new Color(245, 158, 11), Color.WHITE);
         btnResetPass.addActionListener(e -> showResetPassDialog());
-        filterBar.add(btnResetPass);
+        rowActions.add(btnResetPass);
 
-        JButton btnDelete = UITheme.createButton("Xóa", new Color(239, 68, 68), Color.WHITE);
+        JButton btnDelete = UITheme.createButton("Xóa Tài Khoản", new Color(239, 68, 68), Color.WHITE);
         btnDelete.addActionListener(e -> onDeleteUser());
-        filterBar.add(btnDelete);
+        rowActions.add(btnDelete);
 
         JButton btnSeed = UITheme.createButton("🔄 Nạp Lại Dữ Liệu Mẫu EAUT", new Color(139, 92, 246), Color.WHITE);
         btnSeed.setToolTipText("Khởi tạo và nạp lại toàn bộ 100% dữ liệu mẫu EAUT vào CSDL");
@@ -145,9 +153,15 @@ public class QuanLyTaiKhoanPanel extends JPanel {
                 );
             }
         });
-        filterBar.add(btnSeed);
+        rowActions.add(btnSeed);
 
-        topContainer.add(filterBar, BorderLayout.CENTER);
+        controlContainer.add(rowFilter);
+        controlContainer.add(Box.createVerticalStrut(4));
+        controlContainer.add(new JSeparator(SwingConstants.HORIZONTAL));
+        controlContainer.add(Box.createVerticalStrut(4));
+        controlContainer.add(rowActions);
+
+        topContainer.add(controlContainer, BorderLayout.CENTER);
         add(topContainer, BorderLayout.NORTH);
 
         // 2. TABLE CENTER

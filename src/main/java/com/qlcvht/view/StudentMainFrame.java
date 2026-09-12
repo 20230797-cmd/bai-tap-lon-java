@@ -15,6 +15,7 @@ import com.qlcvht.websocket.WebSocketService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -34,6 +35,7 @@ public class StudentMainFrame extends JFrame {
     private final ThongBaoDAO thongBaoDAO = new ThongBaoDAO();
     private final CoVanDAO coVanDAO = new CoVanDAO();
     private final LichGiangDayDAO lichDAO = new LichGiangDayDAO();
+    private final ChuyenCanDAO chuyenCanDAO = new ChuyenCanDAO();
 
     private JPanel sideBar;
     private JPanel cardPanel;
@@ -62,6 +64,8 @@ public class StudentMainFrame extends JFrame {
     private DefaultTableModel modelCanhBao;
     private JTable tblNhatKy;
     private DefaultTableModel modelNhatKy;
+    private JTable tblChuyenCanMonHoc;
+    private DefaultTableModel modelChuyenCanMonHoc;
 
     // Components - Thong Bao & Chat
     private JTable tblThongBao;
@@ -118,26 +122,38 @@ public class StudentMainFrame extends JFrame {
     }
 
     private void buildTopBar() {
-        JPanel topBar = new JPanel(new BorderLayout());
+        JPanel topBar = new JPanel(new BorderLayout(15, 0));
         topBar.setBackground(UITheme.BG_HEADER);
         topBar.setPreferredSize(new Dimension(0, 58));
-        topBar.setBorder(new EmptyBorder(0, 20, 0, 16));
+        topBar.setBorder(new EmptyBorder(0, 18, 0, 16));
 
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 14));
+        // Left Brand
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         leftPanel.setOpaque(false);
 
         JLabel lblLogo = new JLabel("🎓");
-        lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
+        lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
         leftPanel.add(lblLogo);
 
-        JLabel lblTitle = new JLabel("CỔNG THÔNG TIN SINH VIÊN - ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)");
-        lblTitle.setFont(UITheme.fontBold(16));
-        lblTitle.setForeground(Color.WHITE);
-        leftPanel.add(lblTitle);
+        JPanel brandText = new JPanel(new GridLayout(2, 1, 0, 1));
+        brandText.setOpaque(false);
+
+        JLabel lblUniv = new JLabel("ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)");
+        lblUniv.setFont(UITheme.fontBold(14));
+        lblUniv.setForeground(Color.WHITE);
+
+        JLabel lblSystem = new JLabel("CỔNG THÔNG TIN SINH VIÊN & CỐ VẤN HỌC VỤ");
+        lblSystem.setFont(UITheme.fontPlain(11));
+        lblSystem.setForeground(new Color(147, 197, 253));
+
+        brandText.add(lblUniv);
+        brandText.add(lblSystem);
+        leftPanel.add(brandText);
 
         topBar.add(leftPanel, BorderLayout.WEST);
 
-        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
+        // Right User Controls
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 11));
         userPanel.setOpaque(false);
 
         String dbType = DatabaseConnection.getDatabaseDisplayStatus();
@@ -151,22 +167,24 @@ public class StudentMainFrame extends JFrame {
         ));
         userPanel.add(lblDb);
 
-        String svInfo = (currentStudent != null) 
-            ? "SV: " + currentStudent.getHoTen() + " (" + currentStudent.getMaSv() + " - Lớp: " + currentStudent.getMaLop() + ")"
-            : "Sinh viên: " + (currentUser != null ? currentUser.getHoTen() : "N/A");
+        String svShort = (currentStudent != null) 
+            ? "🎓 " + currentStudent.getHoTen() + " (" + currentStudent.getMaSv() + " - " + currentStudent.getMaLop() + ")"
+            : "🎓 Sinh viên: " + (currentUser != null ? currentUser.getHoTen() : "N/A");
 
-        JLabel lblUser = new JLabel(svInfo);
-        lblUser.setFont(UITheme.fontBold(13));
-        lblUser.setForeground(new Color(226, 232, 240));
+        JLabel lblUser = new JLabel(svShort);
+        lblUser.setFont(UITheme.fontBold(12));
+        lblUser.setForeground(new Color(241, 245, 249));
         userPanel.add(lblUser);
 
         JButton btnDoiPass = UITheme.createButton("Đổi MK", new Color(30, 58, 138), Color.WHITE);
         btnDoiPass.setFont(UITheme.fontBold(11));
+        btnDoiPass.setToolTipText("Thay đổi mật khẩu tài khoản");
         btnDoiPass.addActionListener(e -> new DoiMatKhauDialog(this, currentUser).setVisible(true));
         userPanel.add(btnDoiPass);
 
         JButton btnLogout = UITheme.createButton("Đăng Xuất", new Color(185, 28, 28), Color.WHITE);
         btnLogout.setFont(UITheme.fontBold(11));
+        btnLogout.setToolTipText("Đăng xuất khỏi hệ thống");
         btnLogout.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                 this,
@@ -420,7 +438,13 @@ public class StudentMainFrame extends JFrame {
         middleSplit.add(schedulePanel);
         centerPanel.add(middleSplit);
 
-        panel.add(centerPanel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(centerPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
     }
 
@@ -595,6 +619,84 @@ public class StudentMainFrame extends JFrame {
 
         tabbedPane.addTab("📝 Biên Bản / Nhật Ký Tư Vấn Của CVHT", pnlNhatKy);
 
+        // Tab 2.4: Chuyên cần & Điều kiện dự thi (Quy định Tín chỉ)
+        JPanel pnlChuyenCan = new JPanel(new BorderLayout(10, 10));
+        pnlChuyenCan.setBackground(Color.WHITE);
+        pnlChuyenCan.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        // Quy chế banner
+        JPanel pnlRuleBanner = new JPanel(new GridLayout(2, 1, 0, 2));
+        pnlRuleBanner.setBackground(new Color(254, 242, 242));
+        pnlRuleBanner.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(252, 165, 165), 1, true),
+            new EmptyBorder(8, 12, 8, 12)
+        ));
+        JLabel lblRuleTitle = new JLabel("📌 QUY CHẾ ĐÀO TẠO TÍN CHỈ VỀ ĐIỀU KIỆN DỰ THI (VẮNG > 20% CẤM THI)");
+        lblRuleTitle.setFont(UITheme.fontBold(12));
+        lblRuleTitle.setForeground(new Color(185, 28, 28));
+
+        JLabel lblRuleDesc = new JLabel("• Môn 2 TC (10 buổi): Vắng tối đa 2 buổi (vắng >= 3 cấm thi) | Môn 3 TC (15 buổi): Vắng tối đa 3 buổi (vắng >= 4 cấm thi) | Môn 4 TC (20 buổi): Vắng tối đa 4 buổi (vắng >= 5 cấm thi)");
+        lblRuleDesc.setFont(UITheme.fontPlain(11));
+        lblRuleDesc.setForeground(new Color(127, 29, 29));
+        pnlRuleBanner.add(lblRuleTitle);
+        pnlRuleBanner.add(lblRuleDesc);
+        pnlChuyenCan.add(pnlRuleBanner, BorderLayout.NORTH);
+
+        String[] ccCols = {"STT", "Mã Môn", "Tên Môn Học", "Số TC", "Tổng Buổi", "Vắng TĐ (20%)", "Đã Vắng Nghỉ", "Đi Muộn", "Điểm CC", "Điều Kiện Dự Thi", "Lý Do / Căn Cứ"};
+        modelChuyenCanMonHoc = new DefaultTableModel(ccCols, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tblChuyenCanMonHoc = new JTable(modelChuyenCanMonHoc);
+        UITheme.styleTable(tblChuyenCanMonHoc);
+        tblChuyenCanMonHoc.setRowHeight(32);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(0).setMaxWidth(45);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(1).setPreferredWidth(75);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(2).setPreferredWidth(180);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(3).setPreferredWidth(55);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(4).setPreferredWidth(70);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(6).setPreferredWidth(100);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(7).setPreferredWidth(65);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(8).setPreferredWidth(70);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(9).setPreferredWidth(140);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(10).setPreferredWidth(220);
+
+        DefaultTableCellRenderer centerRender = new DefaultTableCellRenderer();
+        centerRender.setHorizontalAlignment(SwingConstants.CENTER);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(0).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(1).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(3).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(4).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(5).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(6).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(7).setCellRenderer(centerRender);
+        tblChuyenCanMonHoc.getColumnModel().getColumn(8).setCellRenderer(centerRender);
+
+        tblChuyenCanMonHoc.getColumnModel().getColumn(9).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                lbl.setFont(UITheme.fontBold(12));
+                String v = value != null ? value.toString() : "";
+                if (v.contains("CẤM THI") || v.contains("CAM_THI")) {
+                    lbl.setForeground(new Color(185, 28, 28));
+                    lbl.setText("⛔ CẤM THI");
+                } else if (v.contains("NGUY CƠ") || v.contains("CANH_BAO")) {
+                    lbl.setForeground(new Color(217, 119, 6));
+                    lbl.setText("⚠️ NGUY CƠ");
+                } else {
+                    lbl.setForeground(new Color(22, 101, 52));
+                    lbl.setText("✔ ĐỦ ĐIỀU KIỆN");
+                }
+                return lbl;
+            }
+        });
+
+        pnlChuyenCan.add(new JScrollPane(tblChuyenCanMonHoc), BorderLayout.CENTER);
+        tabbedPane.addTab("🎯 Chuyên Cần & Điều Kiện Dự Thi Từng Môn", pnlChuyenCan);
+
         panel.add(tabbedPane, BorderLayout.CENTER);
         return panel;
     }
@@ -658,6 +760,28 @@ public class StudentMainFrame extends JFrame {
                 nk.getNguyenNhan() != null ? nk.getNguyenNhan() : "",
                 nk.getGiaiPhap() != null ? nk.getGiaiPhap() : "",
                 nk.getCamKetSinhVien() != null ? nk.getCamKetSinhVien() : ""
+            });
+        }
+
+        // 4. Load Chuyen Can Mon Hoc
+        modelChuyenCanMonHoc.setRowCount(0);
+        List<ChuyenCanMonHoc> listCC = chuyenCanDAO.getByMaSv(maSv);
+        int sttCC = 1;
+        for (ChuyenCanMonHoc cc : listCC) {
+            int maxVang = (int) Math.floor(cc.getTongSoBuoi() * 0.20);
+            int vangNghi = cc.getSoBuoiVangKhongPhep() + cc.getSoBuoiVangCoPhep();
+            modelChuyenCanMonHoc.addRow(new Object[]{
+                sttCC++,
+                cc.getMaMon(),
+                cc.getTenMon() != null ? cc.getTenMon() : cc.getMaMon(),
+                cc.getSoTinChi(),
+                cc.getTongSoBuoi(),
+                maxVang + " buổi",
+                vangNghi + " buổi",
+                cc.getSoBuoiMuon(),
+                String.format("%.1f", cc.getDiemChuyenCan()),
+                cc.getTrangThaiDuThiHienThi(),
+                cc.getLyDoCamThi() != null && !cc.getLyDoCamThi().isBlank() ? cc.getLyDoCamThi() : "Đủ điều kiện dự thi kết thúc học phần"
             });
         }
     }
@@ -1088,7 +1212,14 @@ public class StudentMainFrame extends JFrame {
         pnlAdv.add(advGrid, BorderLayout.CENTER);
 
         centerPanel.add(pnlAdv);
-        panel.add(centerPanel, BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(centerPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
     }
 

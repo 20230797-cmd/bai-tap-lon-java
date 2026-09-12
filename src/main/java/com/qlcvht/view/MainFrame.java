@@ -64,17 +64,38 @@ public class MainFrame extends JFrame {
     }
 
     private void buildTopBar() {
-        JPanel topBar = new JPanel(new BorderLayout());
+        JPanel topBar = new JPanel(new BorderLayout(15, 0));
         topBar.setBackground(UITheme.BG_HEADER);
-        topBar.setPreferredSize(new Dimension(0, 56));
-        topBar.setBorder(new EmptyBorder(0, 20, 0, 16));
+        topBar.setPreferredSize(new Dimension(0, 58));
+        topBar.setBorder(new EmptyBorder(0, 18, 0, 16));
 
-        JLabel lblTitle = new JLabel("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT) - HỆ THỐNG CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
-        lblTitle.setFont(UITheme.fontBold(15));
-        lblTitle.setForeground(Color.WHITE);
-        topBar.add(lblTitle, BorderLayout.WEST);
+        // Brand on Left
+        JPanel brandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        brandPanel.setOpaque(false);
 
-        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 11));
+        JLabel lblLogo = new JLabel("🏛️");
+        lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
+        brandPanel.add(lblLogo);
+
+        JPanel brandText = new JPanel(new GridLayout(2, 1, 0, 1));
+        brandText.setOpaque(false);
+
+        JLabel lblUniv = new JLabel("ĐẠI HỌC CÔNG NGHỆ ĐÔNG Á (EAUT)");
+        lblUniv.setFont(UITheme.fontBold(14));
+        lblUniv.setForeground(Color.WHITE);
+
+        JLabel lblSystem = new JLabel("HỆ THỐNG CỐ VẤN HỌC TẬP & CẢNH BÁO HỌC VỤ");
+        lblSystem.setFont(UITheme.fontPlain(11));
+        lblSystem.setForeground(new Color(147, 197, 253));
+
+        brandText.add(lblUniv);
+        brandText.add(lblSystem);
+        brandPanel.add(brandText);
+
+        topBar.add(brandPanel, BorderLayout.WEST);
+
+        // User Controls on Right
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 11));
         userPanel.setOpaque(false);
 
         String dbType = DatabaseConnection.getDatabaseDisplayStatus();
@@ -89,15 +110,15 @@ public class MainFrame extends JFrame {
         userPanel.add(lblDb);
 
         String roleTitle = switch (role) {
-            case "ADMIN"   -> "Quản trị viên Hệ thống";
-            case "QUAN_LY" -> "Quản lý Đào tạo / Khoa";
+            case "ADMIN"   -> "Quản trị viên";
+            case "QUAN_LY" -> "Quản lý Đào tạo";
             case "CO_VAN"  -> "Cố vấn Học tập";
             default        -> role;
         };
 
-        JLabel lblUser = new JLabel(roleTitle + " – " + (currentUser != null ? currentUser.getHoTen() : "User"));
-        lblUser.setFont(UITheme.fontPlain(13));
-        lblUser.setForeground(new Color(226, 232, 240));
+        JLabel lblUser = new JLabel("👤 " + roleTitle + ": " + (currentUser != null ? currentUser.getHoTen() : "User"));
+        lblUser.setFont(UITheme.fontBold(12));
+        lblUser.setForeground(new Color(241, 245, 249));
         userPanel.add(lblUser);
 
         JButton btnDoiPass = UITheme.createButton("Đổi MK", new Color(30, 58, 138), Color.WHITE);

@@ -102,27 +102,29 @@ public class LoginFrame extends JFrame {
         gbc.insets = new Insets(0, 0, 10, 0);
         cbQuickLogin = new JComboBox<>(new String[]{
             "admin (Quản trị viên Hệ thống EAUT)",
-            "quanly (Trưởng phòng Đào tạo EAUT)",
-            "cv_phongdv (TS. Đinh Văn Phong - Khoa CNTT)",
-            "cv_haint (PGS.TS. Nguyễn Thanh Hải - Khoa Ô tô)",
-            "cv_maiht (ThS. Hoàng Thị Mai - Khoa QTKD)",
-            "cv_sonvt (TS. Vũ Trường Sơn - Khoa Điện tử)",
-            "20230001 (Sinh viên: Nguyễn Văn Nam - Lớp DCCTPM14A)",
-            "20230009 (Sinh viên: Phạm Minh Tuấn - Cảnh báo 1)",
-            "20230010 (Sinh viên: Vũ Đức Hải - Cảnh báo 2)"
+            "cv_phongdv (TS. Đinh Văn Phong - Cố vấn Khoa CNTT)",
+            "cv_haint (PGS.TS. Nguyễn Thanh Hải - Cố vấn Khoa Ô tô)",
+            "cv_maiht (ThS. Hoàng Thị Mai - Cố vấn Khoa QTKD)",
+            "cv_sonvt (TS. Vũ Trường Sơn - Cố vấn Khoa Điện tử)",
+            "20230001 (SV Xuất sắc: Vũ Đình Anh - Đủ điều kiện thi)",
+            "20230008 (SV Khá: Võ Quang Phúc - Điểm danh đúng giờ)",
+            "20230022 (SV Cảnh báo 1: Bùi Hoàng Duy - Nguy cơ vắng)",
+            "20230026 (SV Cấm thi: Phan Gia Nam - Vắng quá 20%)",
+            "20230029 (SV Cấm thi: Đỗ Đức Kiệt - Vắng 5/15 buổi)"
         });
         cbQuickLogin.setFont(UITheme.fontPlain(13));
         cbQuickLogin.addActionListener(e -> {
             int idx = cbQuickLogin.getSelectedIndex();
             if (idx == 0) txtUsername.setText("admin");
-            else if (idx == 1) txtUsername.setText("quanly");
-            else if (idx == 2) txtUsername.setText("cv_phongdv");
-            else if (idx == 3) txtUsername.setText("cv_haint");
-            else if (idx == 4) txtUsername.setText("cv_maiht");
-            else if (idx == 5) txtUsername.setText("cv_sonvt");
-            else if (idx == 6) txtUsername.setText("20230001");
-            else if (idx == 7) txtUsername.setText("20230009");
-            else if (idx == 8) txtUsername.setText("20230010");
+            else if (idx == 1) txtUsername.setText("cv_phongdv");
+            else if (idx == 2) txtUsername.setText("cv_haint");
+            else if (idx == 3) txtUsername.setText("cv_maiht");
+            else if (idx == 4) txtUsername.setText("cv_sonvt");
+            else if (idx == 5) txtUsername.setText("20230001");
+            else if (idx == 6) txtUsername.setText("20230008");
+            else if (idx == 7) txtUsername.setText("20230022");
+            else if (idx == 8) txtUsername.setText("20230026");
+            else if (idx == 9) txtUsername.setText("20230029");
             txtPassword.setText("123456");
         });
         card.add(cbQuickLogin, gbc);

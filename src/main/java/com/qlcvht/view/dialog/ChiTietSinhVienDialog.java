@@ -1,10 +1,12 @@
 package com.qlcvht.view.dialog;
 
 import com.qlcvht.dao.CanhBaoDAO;
+import com.qlcvht.dao.ChuyenCanDAO;
 import com.qlcvht.dao.DiemDanhDAO;
 import com.qlcvht.dao.KetQuaHocTapDAO;
 import com.qlcvht.dao.NhatKyTuVanDAO;
 import com.qlcvht.model.CanhBaoHocVu;
+import com.qlcvht.model.ChuyenCanMonHoc;
 import com.qlcvht.model.DiemDanh;
 import com.qlcvht.model.KetQuaHocTap;
 import com.qlcvht.model.NhatKyTuVan;
@@ -36,6 +38,7 @@ public class ChiTietSinhVienDialog extends JDialog {
     private final CanhBaoDAO canhBaoDAO = new CanhBaoDAO();
     private final NhatKyTuVanDAO nhatKyDAO = new NhatKyTuVanDAO();
     private final DiemDanhDAO diemDanhDAO = new DiemDanhDAO();
+    private final ChuyenCanDAO chuyenCanDAO = new ChuyenCanDAO();
     
     public ChiTietSinhVienDialog(Frame parent, SinhVien sv) {
         super(parent, "Hồ sơ Học vụ 360°: " + sv.getHoTen() + " (" + sv.getMaSv() + ")", true);
@@ -332,9 +335,86 @@ public class ChiTietSinhVienDialog extends JDialog {
     }
 
     private JPanel createDiemDanhPanel() {
-        JPanel p = new JPanel(new BorderLayout(0, 8));
+        JPanel p = new JPanel(new BorderLayout(0, 10));
         p.setBorder(new EmptyBorder(12, 14, 12, 14));
         p.setBackground(Color.WHITE);
+
+        // Top: Chuyên cần từng môn học & Xét cấm thi
+        JPanel pnlMonHoc = new JPanel(new BorderLayout(0, 6));
+        pnlMonHoc.setOpaque(false);
+
+        JLabel lblTitleCC = new JLabel("🎯 TÌNH HÌNH CHUYÊN CẦN TỪNG MÔN & ĐIỀU KIỆN DỰ THI (QUY CHẾ VẮNG > 20% CẤM THI)");
+        lblTitleCC.setFont(UITheme.fontBold(12));
+        lblTitleCC.setForeground(new Color(185, 28, 28));
+        pnlMonHoc.add(lblTitleCC, BorderLayout.NORTH);
+
+        String[] colsCC = {"Mã Môn", "Tên Môn Học", "Số TC", "Tổng Buổi", "Vắng TĐ", "Đã Vắng", "Đi Muộn", "Điểm CC", "Điều Kiện Dự Thi", "Lý Do"};
+        DefaultTableModel modelCC = new DefaultTableModel(colsCC, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        List<ChuyenCanMonHoc> listCC = chuyenCanDAO.getByMaSv(sinhVien.getMaSv());
+        for (ChuyenCanMonHoc cc : listCC) {
+            int maxVang = (int) Math.floor(cc.getTongSoBuoi() * 0.20);
+            int vangNghi = cc.getSoBuoiVangKhongPhep() + cc.getSoBuoiVangCoPhep();
+            modelCC.addRow(new Object[]{
+                cc.getMaMon(),
+                cc.getTenMon() != null ? cc.getTenMon() : cc.getMaMon(),
+                cc.getSoTinChi(),
+                cc.getTongSoBuoi(),
+                maxVang + "b",
+                vangNghi + "b",
+                cc.getSoBuoiMuon(),
+                String.format("%.1f", cc.getDiemChuyenCan()),
+                cc.getTrangThaiDuThiHienThi(),
+                cc.getLyDoCamThi() != null && !cc.getLyDoCamThi().isBlank() ? cc.getLyDoCamThi() : "Đủ điều kiện dự thi"
+            });
+        }
+
+        JTable tblCC = new JTable(modelCC);
+        UITheme.styleTable(tblCC);
+        tblCC.setRowHeight(28);
+
+        DefaultTableCellRenderer centerRender = new DefaultTableCellRenderer();
+        centerRender.setHorizontalAlignment(SwingConstants.CENTER);
+        tblCC.getColumnModel().getColumn(0).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(2).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(3).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(4).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(5).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(6).setCellRenderer(centerRender);
+        tblCC.getColumnModel().getColumn(7).setCellRenderer(centerRender);
+
+        tblCC.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                lbl.setFont(UITheme.fontBold(11));
+                String v = value != null ? value.toString() : "";
+                if (v.contains("CẤM THI") || v.contains("CAM_THI")) {
+                    lbl.setForeground(new Color(185, 28, 28));
+                    lbl.setText("⛔ CẤM THI");
+                } else if (v.contains("NGUY CƠ") || v.contains("CANH_BAO")) {
+                    lbl.setForeground(new Color(217, 119, 6));
+                    lbl.setText("⚠️ NGUY CƠ");
+                } else {
+                    lbl.setForeground(new Color(22, 101, 52));
+                    lbl.setText("✔ ĐỦ ĐIỀU KIỆN");
+                }
+                return lbl;
+            }
+        });
+
+        pnlMonHoc.add(new JScrollPane(tblCC), BorderLayout.CENTER);
+
+        // Bottom: Chi tiết buổi
+        JPanel pnlBuoi = new JPanel(new BorderLayout(0, 6));
+        pnlBuoi.setOpaque(false);
+        JLabel lblTitleBuoi = new JLabel("📅 LỊCH SỬ CHI TIẾT TỪNG BUỔI ĐIỂM DANH THEO LỊCH HỌC");
+        lblTitleBuoi.setFont(UITheme.fontBold(12));
+        lblTitleBuoi.setForeground(UITheme.PRIMARY_DARK);
+        pnlBuoi.add(lblTitleBuoi, BorderLayout.NORTH);
 
         String[] cols = {"ID Buổi", "Ngày Điểm Danh", "Trạng Thái", "Ghi Chú Đánh Giá"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -354,7 +434,13 @@ public class ChiTietSinhVienDialog extends JDialog {
 
         JTable tbl = new JTable(model);
         UITheme.styleTable(tbl);
-        p.add(new JScrollPane(tbl), BorderLayout.CENTER);
+        pnlBuoi.add(new JScrollPane(tbl), BorderLayout.CENTER);
+
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pnlMonHoc, pnlBuoi);
+        split.setResizeWeight(0.55);
+        split.setBorder(null);
+
+        p.add(split, BorderLayout.CENTER);
         return p;
     }
 
