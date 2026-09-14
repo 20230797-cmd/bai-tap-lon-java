@@ -45,13 +45,17 @@ public class StudentMainFrame extends JFrame {
     private JButton btnDashboard;
     private JButton btnKetQua;
     private JButton btnThongBao;
+    private JButton btnChat;
     private JButton btnHoSo;
 
-    // Components - Dashboard
+    // Components - Dashboard & 150 Tin Chi Progress
     private JLabel lblGpaTichLuy;
     private JLabel lblGpaHocKy;
     private JLabel lblTinChiNo;
     private JLabel lblTrangThaiHocVu;
+    private JLabel lblTienDo150TinText;
+    private JProgressBar progressBar150Tin;
+    private JLabel lblCanhBaoTienDoBanner;
     private JLabel lblAdvisorName;
     private JLabel lblAdvisorEmail;
     private JLabel lblAdvisorPhone;
@@ -67,10 +71,12 @@ public class StudentMainFrame extends JFrame {
     private JTable tblChuyenCanMonHoc;
     private DefaultTableModel modelChuyenCanMonHoc;
 
-    // Components - Thong Bao & Chat
+    // Components - Thong Bao
     private JTable tblThongBao;
     private DefaultTableModel modelThongBao;
     private JTextArea txtNotificationDetail;
+
+    // Components - Chat Truc Tuyen Realtime
     private JTextPane chatTextPane;
     private JTextField txtChatMessage;
     private JLabel lblChatWsStatus;
@@ -94,6 +100,14 @@ public class StudentMainFrame extends JFrame {
         setMinimumSize(new Dimension(1040, 660));
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        // Lắng nghe sự kiện đóng cửa sổ để ghi nhận đăng xuất
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                com.qlcvht.service.AuditService.getInstance().logLogout(currentUser);
+            }
+        });
 
         buildTopBar();
         buildSidebar();
@@ -193,6 +207,7 @@ public class StudentMainFrame extends JFrame {
                 JOptionPane.YES_NO_OPTION
             );
             if (confirm == JOptionPane.YES_OPTION) {
+                com.qlcvht.service.AuditService.getInstance().logLogout(currentUser);
                 dispose();
                 new LoginFrame().setVisible(true);
             }
@@ -212,12 +227,14 @@ public class StudentMainFrame extends JFrame {
         addSidebarSection("DANH MỤC SINH VIÊN");
         btnDashboard = createNavBtn("  Tổng Quan Học Tập", "DASHBOARD");
         btnKetQua    = createNavBtn("  Bảng Điểm Cá Nhân", "KET_QUA");
-        btnThongBao  = createNavBtn("  Thông Báo & Trao Đổi CVHT", "THONG_BAO");
-        btnHoSo      = createNavBtn("  Hồ Sơ & Cố Vấn Phụ Trách", "HO_SO");
+        btnThongBao  = createNavBtn("  Hộp Thư Thông Báo", "THONG_BAO");
+        btnChat      = createNavBtn("  Chat Trực Tuyến CVHT", "CHAT_TRUC_TUYEN");
+        btnHoSo      = createNavBtn("  Hồ Sơ & Cố Vấn", "HO_SO");
 
         sideBar.add(btnDashboard);
         sideBar.add(btnKetQua);
         sideBar.add(btnThongBao);
+        sideBar.add(btnChat);
         sideBar.add(btnHoSo);
 
         sideBar.add(Box.createVerticalGlue());
@@ -280,7 +297,7 @@ public class StudentMainFrame extends JFrame {
         cardLayout.show(cardPanel, cardName);
         sideBar.repaint();
 
-        JButton[] allBtns = { btnDashboard, btnKetQua, btnThongBao, btnHoSo };
+        JButton[] allBtns = { btnDashboard, btnKetQua, btnThongBao, btnChat, btnHoSo };
         for (JButton b : allBtns) {
             if (b != null) {
                 b.setForeground(b == btn ? Color.WHITE : UITheme.TEXT_SIDEBAR);
@@ -299,6 +316,7 @@ public class StudentMainFrame extends JFrame {
                 updateUnreadBadgeForStudent();
             }
             refreshThongBaoData();
+        } else if ("CHAT_TRUC_TUYEN".equals(cardName)) {
             loadChatConversation();
         }
     }
@@ -311,6 +329,7 @@ public class StudentMainFrame extends JFrame {
         cardPanel.add(buildDashboardPanel(), "DASHBOARD");
         cardPanel.add(buildKetQuaPanel(),    "KET_QUA");
         cardPanel.add(buildThongBaoPanel(),  "THONG_BAO");
+        cardPanel.add(buildChatPanel(),      "CHAT_TRUC_TUYEN");
         cardPanel.add(buildHoSoPanel(),      "HO_SO");
 
         add(cardPanel, BorderLayout.CENTER);
@@ -331,7 +350,7 @@ public class StudentMainFrame extends JFrame {
         lblHeader.setFont(UITheme.fontBold(18));
         lblHeader.setForeground(UITheme.PRIMARY_DARK);
 
-        JLabel lblSub = new JLabel("Theo dõi kết quả học tập, cảnh báo học vụ và thông tin Cố vấn học tập trực tiếp");
+        JLabel lblSub = new JLabel("Theo dõi kết quả học tập, lộ trình 150 tín chỉ 5 năm và thông tin Cố vấn học tập trực tiếp");
         lblSub.setFont(UITheme.fontPlain(12));
         lblSub.setForeground(UITheme.TEXT_SECONDARY);
 
@@ -347,6 +366,45 @@ public class StudentMainFrame extends JFrame {
         JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+
+        // 150 Credits Progress Card
+        JPanel progressCard = new JPanel(new BorderLayout(10, 8));
+        progressCard.setBackground(Color.WHITE);
+        progressCard.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+            new EmptyBorder(14, 16, 14, 16)
+        ));
+        progressCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+
+        JPanel progHeader = new JPanel(new BorderLayout());
+        progHeader.setOpaque(false);
+        JLabel lblProgTitle = new JLabel("🎓 TIẾN ĐỘ ĐÀO TẠO TOÀN KHÓA (CHUẨN 150 TÍN CHỈ - 5 NĂM)");
+        lblProgTitle.setFont(UITheme.fontBold(13));
+        lblProgTitle.setForeground(UITheme.PRIMARY_DARK);
+
+        lblTienDo150TinText = new JLabel("Đã tích lũy: 0 / 150 Tín chỉ (0.0%) - Sinh viên Năm 1");
+        lblTienDo150TinText.setFont(UITheme.fontBold(12));
+        lblTienDo150TinText.setForeground(new Color(30, 64, 175));
+
+        progHeader.add(lblProgTitle, BorderLayout.WEST);
+        progHeader.add(lblTienDo150TinText, BorderLayout.EAST);
+        progressCard.add(progHeader, BorderLayout.NORTH);
+
+        progressBar150Tin = new JProgressBar(0, 150);
+        progressBar150Tin.setValue(0);
+        progressBar150Tin.setStringPainted(true);
+        progressBar150Tin.setFont(UITheme.fontBold(12));
+        progressBar150Tin.setPreferredSize(new Dimension(300, 24));
+        progressBar150Tin.setForeground(new Color(37, 99, 235));
+        progressCard.add(progressBar150Tin, BorderLayout.CENTER);
+
+        lblCanhBaoTienDoBanner = new JLabel(" ");
+        lblCanhBaoTienDoBanner.setFont(UITheme.fontBold(11));
+        lblCanhBaoTienDoBanner.setForeground(new Color(220, 38, 38));
+        progressCard.add(lblCanhBaoTienDoBanner, BorderLayout.SOUTH);
+
+        centerPanel.add(progressCard);
+        centerPanel.add(Box.createVerticalStrut(12));
 
         // 4 KPI Cards
         JPanel kpiGrid = new JPanel(new GridLayout(1, 4, 15, 0));
@@ -793,9 +851,9 @@ public class StudentMainFrame extends JFrame {
         if (currentStudent == null || btnThongBao == null) return;
         int unread = thongBaoDAO.getUnreadCountForStudent(currentStudent.getMaSv());
         if (unread > 0) {
-            btnThongBao.setText("<html>💬 Thông Báo & Chat <span style='color:#ef4444; font-weight:bold;'>(" + unread + " mới)</span></html>");
+            btnThongBao.setText("<html>📢 Hộp Thư Thông Báo <span style='color:#ef4444; font-weight:bold;'>(" + unread + " mới)</span></html>");
         } else {
-            btnThongBao.setText("💬 Thông Báo & Trao Đổi CVHT");
+            btnThongBao.setText("  Hộp Thư Thông Báo");
         }
     }
 
@@ -811,18 +869,27 @@ public class StudentMainFrame extends JFrame {
                         refreshThongBaoData();
                         loadChatConversation();
 
+                        boolean isChat = "CHAT".equalsIgnoreCase(message.getType()) || (message.getContent() != null && !message.getContent().startsWith("📢") && !message.getContent().startsWith("⚠️"));
+                        String popupTitle = isChat ? ("💬 Tin nhắn từ " + message.getFromName()) : ("📢 Thông báo: " + message.getTitle());
+
                         NotificationPopup.showPopup(
                             StudentMainFrame.this,
-                            "Tin Nhắn Mới Từ " + message.getFromName(),
+                            popupTitle,
                             message.getContent(),
-                            () -> switchCard("THONG_BAO", btnThongBao)
+                            () -> {
+                                if (isChat) {
+                                    switchCard("CHAT_TRUC_TUYEN", btnChat);
+                                } else {
+                                    switchCard("THONG_BAO", btnThongBao);
+                                }
+                            }
                         );
                     }
 
                     @Override
                     public void onStatusChanged(boolean connected, String statusText) {
                         if (lblChatWsStatus != null) {
-                            lblChatWsStatus.setText(statusText);
+                            lblChatWsStatus.setText(connected ? "🟢 WebSocket Online (Real-time)" : "🔴 WebSocket Offline");
                             lblChatWsStatus.setForeground(connected ? new Color(16, 185, 129) : new Color(239, 68, 68));
                         }
                     }
@@ -842,11 +909,11 @@ public class StudentMainFrame extends JFrame {
         JPanel topBox = new JPanel(new BorderLayout());
         topBox.setOpaque(false);
 
-        JLabel lblTitle = new JLabel("HỘP THƯ THÔNG BÁO & CHAT TRỰC TIẾP VỚI CỐ VẤN HỌC TẬP");
+        JLabel lblTitle = new JLabel("HỘP THƯ THÔNG BÁO HỌC VỤ & QUYẾT ĐỊNH CẢNH BÁO");
         lblTitle.setFont(UITheme.fontBold(18));
         lblTitle.setForeground(UITheme.PRIMARY_DARK);
 
-        JLabel lblSub = new JLabel("Nhận thông báo riêng từ Cố vấn học tập và nhắn tin trao đổi trực tiếp qua WebSocket Real-time");
+        JLabel lblSub = new JLabel("Xem toàn bộ thông báo chung của Nhà trường, thông báo của Khoa và các quyết định cảnh báo học vụ riêng cho bạn");
         lblSub.setFont(UITheme.fontPlain(12));
         lblSub.setForeground(UITheme.TEXT_SECONDARY);
 
@@ -856,26 +923,16 @@ public class StudentMainFrame extends JFrame {
         headerBox.add(lblSub);
         topBox.add(headerBox, BorderLayout.WEST);
 
+        JButton btnReloadTb = UITheme.createButton("Làm Mới Hộp Thư", UITheme.PRIMARY, Color.WHITE);
+        btnReloadTb.setFont(UITheme.fontBold(12));
+        btnReloadTb.addActionListener(e -> refreshThongBaoData());
+        topBox.add(btnReloadTb, BorderLayout.EAST);
+
         panel.add(topBox, BorderLayout.NORTH);
 
-        // Center Split: Left is Notification List & Content, Right is Live Chat Window
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setResizeWeight(0.5);
-        splitPane.setDividerLocation(580);
-        splitPane.setBorder(null);
-
-        // --- Left Panel: Notification List + Preview ---
-        JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
-        leftPanel.setBackground(Color.WHITE);
-        leftPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-            new EmptyBorder(12, 12, 12, 12)
-        ));
-
-        JLabel lblListTitle = new JLabel("📬 THÔNG BÁO TỪ CVHT & NHÀ TRƯỜNG");
-        lblListTitle.setFont(UITheme.fontBold(13));
-        lblListTitle.setForeground(UITheme.PRIMARY_DARK);
-        leftPanel.add(lblListTitle, BorderLayout.NORTH);
+        // Center Split: Left is Notification List, Right is Detail Viewer
+        JPanel centerPanel = new JPanel(new BorderLayout(12, 12));
+        centerPanel.setOpaque(false);
 
         String[] tbCols = {"Mã TB", "Phân Loại", "Tiêu Đề", "Người Gửi", "Ngày Gửi"};
         modelThongBao = new DefaultTableModel(tbCols, 0) {
@@ -892,59 +949,64 @@ public class StudentMainFrame extends JFrame {
         });
 
         JScrollPane tbScroll = new JScrollPane(tblThongBao);
-        tbScroll.setPreferredSize(new Dimension(450, 220));
+        tbScroll.setPreferredSize(new Dimension(500, 240));
 
         txtNotificationDetail = new JTextArea();
         txtNotificationDetail.setFont(UITheme.fontPlain(13));
         txtNotificationDetail.setEditable(false);
         txtNotificationDetail.setLineWrap(true);
         txtNotificationDetail.setWrapStyleWord(true);
-        txtNotificationDetail.setBorder(new EmptyBorder(8, 8, 8, 8));
+        txtNotificationDetail.setBorder(new EmptyBorder(10, 10, 10, 10));
         txtNotificationDetail.setText("Chọn một thông báo ở danh sách trên để xem chi tiết nội dung...");
 
         JScrollPane detailScroll = new JScrollPane(txtNotificationDetail);
         detailScroll.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(new Color(203, 213, 225)),
-            "Chi tiết nội dung thông báo",
+            "Nội dung chi tiết thông báo",
             TitledBorder.LEFT,
             TitledBorder.TOP,
             UITheme.fontBold(12),
             UITheme.PRIMARY_DARK
         ));
-        detailScroll.setPreferredSize(new Dimension(450, 220));
 
-        JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tbScroll, detailScroll);
-        leftSplit.setResizeWeight(0.5);
-        leftSplit.setBorder(null);
-        leftPanel.add(leftSplit, BorderLayout.CENTER);
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tbScroll, detailScroll);
+        split.setResizeWeight(0.45);
+        split.setBorder(null);
+        centerPanel.add(split, BorderLayout.CENTER);
 
-        splitPane.setLeftComponent(leftPanel);
+        panel.add(centerPanel, BorderLayout.CENTER);
+        return panel;
+    }
 
-        // --- Right Panel: Live 2-Way Chat with Advisor ---
-        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
-        rightPanel.setBackground(Color.WHITE);
-        rightPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-            new EmptyBorder(12, 12, 12, 12)
-        ));
+    private JPanel buildChatPanel() {
+        JPanel panel = new JPanel(new BorderLayout(15, 12));
+        panel.setBackground(UITheme.BG_MAIN);
+        panel.setBorder(new EmptyBorder(18, 20, 20, 20));
 
-        // Right Header
-        JPanel rightHeader = new JPanel(new BorderLayout());
-        rightHeader.setOpaque(false);
-        rightHeader.setBorder(new EmptyBorder(0, 0, 8, 0));
+        // Header
+        JPanel chatHeader = new JPanel(new BorderLayout());
+        chatHeader.setOpaque(false);
 
         String advName = (currentAdvisor != null) ? currentAdvisor.getHoTen() : "Cố vấn học tập";
-        JLabel lblChatTitle = new JLabel("💬 TRAO ĐỔI VỚI " + advName.toUpperCase());
-        lblChatTitle.setFont(UITheme.fontBold(13));
+        JLabel lblChatTitle = new JLabel("💬 TRAO ĐỔI TRỰC TUYẾN VỚI CỐ VẤN HỌC TẬP: " + advName.toUpperCase());
+        lblChatTitle.setFont(UITheme.fontBold(16));
         lblChatTitle.setForeground(UITheme.PRIMARY_DARK);
 
         lblChatWsStatus = new JLabel("🟢 WebSocket Online (Real-time)");
-        lblChatWsStatus.setFont(UITheme.fontBold(11));
+        lblChatWsStatus.setFont(UITheme.fontBold(12));
         lblChatWsStatus.setForeground(new Color(16, 185, 129));
 
-        rightHeader.add(lblChatTitle, BorderLayout.WEST);
-        rightHeader.add(lblChatWsStatus, BorderLayout.EAST);
-        rightPanel.add(rightHeader, BorderLayout.NORTH);
+        chatHeader.add(lblChatTitle, BorderLayout.WEST);
+        chatHeader.add(lblChatWsStatus, BorderLayout.EAST);
+        panel.add(chatHeader, BorderLayout.NORTH);
+
+        // Chat Container
+        JPanel chatContainer = new JPanel(new BorderLayout(0, 10));
+        chatContainer.setBackground(Color.WHITE);
+        chatContainer.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+            new EmptyBorder(14, 16, 14, 16)
+        ));
 
         // Chat Stream Text Pane
         chatTextPane = new JTextPane();
@@ -953,7 +1015,7 @@ public class StudentMainFrame extends JFrame {
         chatTextPane.setFont(UITheme.fontPlain(13));
         JScrollPane chatScroll = new JScrollPane(chatTextPane);
         chatScroll.setBorder(BorderFactory.createLineBorder(UITheme.BORDER_LIGHT));
-        rightPanel.add(chatScroll, BorderLayout.CENTER);
+        chatContainer.add(chatScroll, BorderLayout.CENTER);
 
         // Bottom Input Box
         JPanel chatInputBox = new JPanel(new BorderLayout(8, 0));
@@ -962,20 +1024,20 @@ public class StudentMainFrame extends JFrame {
 
         txtChatMessage = new JTextField();
         txtChatMessage.setFont(UITheme.fontPlain(13));
-        txtChatMessage.setPreferredSize(new Dimension(300, 38));
+        txtChatMessage.setPreferredSize(new Dimension(300, 40));
+        txtChatMessage.putClientProperty("JTextField.placeholderText", "Nhập nội dung tin nhắn gửi Cố vấn học tập...");
         txtChatMessage.addActionListener(e -> onSendChatMessage());
 
-        btnSendChat = UITheme.createButton("🚀 Gửi (Realtime)", UITheme.PRIMARY, Color.WHITE);
+        btnSendChat = UITheme.createButton("  🚀 Gửi Tin Nhắn (Realtime)  ", UITheme.PRIMARY, Color.WHITE);
         btnSendChat.setFont(UITheme.fontBold(12));
-        btnSendChat.setPreferredSize(new Dimension(160, 38));
+        btnSendChat.setPreferredSize(new Dimension(200, 40));
         btnSendChat.addActionListener(e -> onSendChatMessage());
 
         chatInputBox.add(txtChatMessage, BorderLayout.CENTER);
         chatInputBox.add(btnSendChat, BorderLayout.EAST);
-        rightPanel.add(chatInputBox, BorderLayout.SOUTH);
+        chatContainer.add(chatInputBox, BorderLayout.SOUTH);
 
-        splitPane.setRightComponent(rightPanel);
-        panel.add(splitPane, BorderLayout.CENTER);
+        panel.add(chatContainer, BorderLayout.CENTER);
 
         // Load conversation
         SwingUtilities.invokeLater(this::loadChatConversation);

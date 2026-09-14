@@ -12,6 +12,8 @@ public class SinhVien {
     private String maLop;
     private String tenLop; // Transient for GUI
     private String trangThai; // DANG_HOC, CANH_BAO_1, CANH_BAO_2, BUOC_THOI_HOC, DA_TOT_NGHIEP
+    private int tongTinChiTichLuy = 0; // Tiến độ tích lũy trên tổng số 150 tín chỉ
+    private int namThu = 1;            // Năm thứ mấy (1 -> 5)
 
     public SinhVien() {}
 
@@ -20,6 +22,16 @@ public class SinhVien {
         this.maSv = maSv; this.hoTen = hoTen; this.ngaySinh = ngaySinh;
         this.gioiTinh = gioiTinh; this.email = email;
         this.soDienThoai = soDienThoai; this.maLop = maLop; this.trangThai = trangThai;
+    }
+
+    public SinhVien(String maSv, String hoTen, Date ngaySinh, String gioiTinh,
+                    String email, String soDienThoai, String maLop, String trangThai,
+                    int tongTinChiTichLuy, int namThu) {
+        this.maSv = maSv; this.hoTen = hoTen; this.ngaySinh = ngaySinh;
+        this.gioiTinh = gioiTinh; this.email = email;
+        this.soDienThoai = soDienThoai; this.maLop = maLop; this.trangThai = trangThai;
+        this.tongTinChiTichLuy = tongTinChiTichLuy;
+        this.namThu = namThu;
     }
 
     public String getMaSv()                    { return maSv; }
@@ -40,16 +52,24 @@ public class SinhVien {
     public void   setTenLop(String tenLop)     { this.tenLop = tenLop; }
     public String getTrangThai()               { return trangThai; }
     public void   setTrangThai(String t)       { this.trangThai = t; }
+    public int    getTongTinChiTichLuy()       { return tongTinChiTichLuy; }
+    public void   setTongTinChiTichLuy(int tc) { this.tongTinChiTichLuy = tc; }
+    public int    getNamThu()                  { return namThu; }
+    public void   setNamThu(int n)             { this.namThu = n; }
+
+    public double getTiLeTichLuy150Tin() {
+        return Math.min(100.0, (tongTinChiTichLuy * 100.0) / 150.0);
+    }
 
     public String getTrangThaiHienThi() {
-        if (trangThai == null) return "Binh thuong";
+        if (trangThai == null) return "Bình thường";
         switch (trangThai) {
-            case "CANH_BAO_1":    return "Canh bao Muc 1";
-            case "CANH_BAO_2":    return "Canh bao Muc 2";
-            case "BUOC_THOI_HOC": return "Buoc thoi hoc";
-            case "DA_TOT_NGHIEP": return "Da tot nghiep";
+            case "CANH_BAO_1":    return "Cảnh báo Mức 1";
+            case "CANH_BAO_2":    return "Cảnh báo Mức 2";
+            case "BUOC_THOI_HOC": return "Buộc thôi học";
+            case "DA_TOT_NGHIEP": return "Đã tốt nghiệp";
             case "DANG_HOC":
-            default:              return "Dang hoc (Binh thuong)";
+            default:              return "Đang học (Bình thường)";
         }
     }
 }

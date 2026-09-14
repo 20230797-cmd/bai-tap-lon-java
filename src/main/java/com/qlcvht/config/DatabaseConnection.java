@@ -210,28 +210,43 @@ public class DatabaseConnection {
     }
 
     /**
-     * Tự động tạo bảng & dữ liệu mẫu cho SQL Server / MySQL nếu chưa có
+     * Tự động tạo bảng & nạp đầy đủ dữ liệu mẫu 5 năm cho SQL Server / MySQL nếu chưa có hoặc còn thiếu
      */
     private static void ensureServerSchema(Connection conn) {
         try {
-            boolean hasChuyenCan = false;
-            try (Statement st = conn.createStatement();
-                 ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM chuyen_can_mon_hoc")) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    hasChuyenCan = true;
+            boolean needsSeeding = false;
+            try (Statement st = conn.createStatement()) {
+                // Kiểm tra xem bảng nhat_ky_he_thong có tồn tại không
+                boolean hasAuditTable = false;
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM nhat_ky_he_thong")) {
+                    if (rs.next()) hasAuditTable = true;
+                } catch (Exception ignored) {}
+
+                // Kiểm tra xem bảng phien_dang_nhap có tồn tại không
+                boolean hasSessionTable = false;
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM phien_dang_nhap")) {
+                    if (rs.next()) hasSessionTable = true;
+                } catch (Exception ignored) {}
+
+                // Kiểm tra số lượng sinh viên đã đủ mô phỏng 5 năm quy mô lớn (>= 350 SV) chưa
+                int svCount = 0;
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM sinh_vien")) {
+                    if (rs.next()) svCount = rs.getInt(1);
+                } catch (Exception ignored) {}
+
+                if (!hasAuditTable || !hasSessionTable || svCount < 350) {
+                    needsSeeding = true;
                 }
-            } catch (SQLException ignored) {
-                // Bảng chưa tồn tại hoặc chưa có dữ liệu môn học chuyên cần
             }
 
-            if (!hasChuyenCan) {
-                System.out.println("[INFO] Đang tự động nạp cấu trúc bảng và 100% dữ liệu mẫu (môn học + cấm thi) cho " + activeEngineName + "...");
+            if (needsSeeding) {
+                System.out.println("[INFO] CSDL " + activeEngineName + " chưa có đủ dữ liệu mô phỏng 5 năm quy mô lớn (400+ SV, 1700+ Kết quả, 120+ Cảnh báo). Đang tự động nạp...");
                 if (activeEngineName.equalsIgnoreCase("SQL Server")) {
                     executeSqlScript(conn, "sqlserver_schema.sql");
                 } else {
                     executeSqlScript(conn, "database.sql");
                 }
-                System.out.println("[INFO] Nạp dữ liệu mẫu " + activeEngineName + " hoàn tất!");
+                System.out.println("[INFO] Nạp dữ liệu mô phỏng 5 năm quy mô lớn cho " + activeEngineName + " hoàn tất!");
             }
             ensureDefaultAccounts(conn);
         } catch (Exception e) {
@@ -243,6 +258,7 @@ public class DatabaseConnection {
         String hash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"; // 123456
         String[][] defaults = {
             {"admin", hash, "Quản trị viên Hệ thống EAUT", "admin@eaut.edu.vn", "ADMIN", null},
+            {"quanly", hash, "Trưởng phòng Đào tạo EAUT", "daotao@eaut.edu.vn", "QUAN_LY", null},
             {"cv_phongdv", hash, "TS. Đinh Văn Phong", "phong.dv@eaut.edu.vn", "CO_VAN", "CV001"},
             {"cv001", hash, "TS. Đinh Văn Phong", "phong.dv@eaut.edu.vn", "CO_VAN", "CV001"},
             {"cv_haint", hash, "PGS.TS. Nguyễn Thanh Hải", "hai.nt@eaut.edu.vn", "CO_VAN", "CV002"},
@@ -250,8 +266,7 @@ public class DatabaseConnection {
             {"cv_maiht", hash, "ThS. Hoàng Thị Mai", "mai.ht@eaut.edu.vn", "CO_VAN", "CV003"},
             {"cv003", hash, "ThS. Hoàng Thị Mai", "mai.ht@eaut.edu.vn", "CO_VAN", "CV003"},
             {"cv_sonvt", hash, "TS. Vũ Trường Sơn", "son.vt@eaut.edu.vn", "CO_VAN", "CV004"},
-            {"cv004", hash, "TS. Vũ Trường Sơn", "son.vt@eaut.edu.vn", "CO_VAN", "CV004"},
-            {"20230001", hash, "Vũ Đình Anh", "sv20230001@eaut.edu.vn", "SINH_VIEN", "20230001"}
+            {"cv004", hash, "TS. Vũ Trường Sơn", "son.vt@eaut.edu.vn", "CO_VAN", "CV004"}
         };
 
         for (String[] acc : defaults) {
@@ -286,21 +301,24 @@ public class DatabaseConnection {
      */
     private static void ensureSQLiteSchema(Connection conn) {
         try {
-            boolean hasChuyenCan = false;
+            boolean needsSeeding = false;
             try (Statement st = conn.createStatement();
-                 ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='chuyen_can_mon_hoc'")) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    try (ResultSet rCount = st.executeQuery("SELECT COUNT(*) FROM chuyen_can_mon_hoc")) {
-                        if (rCount.next() && rCount.getInt(1) > 0) {
-                            hasChuyenCan = true;
+                 ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nhat_ky_he_thong'")) {
+                if (!rs.next() || rs.getInt(1) == 0) {
+                    needsSeeding = true;
+                } else {
+                    try (ResultSet rCount = st.executeQuery("SELECT COUNT(*) FROM sinh_vien")) {
+                        if (!rCount.next() || rCount.getInt(1) < 350) {
+                            needsSeeding = true;
                         }
                     }
                 }
             } catch (SQLException ignored) {
+                needsSeeding = true;
             }
 
-            if (!hasChuyenCan) {
-                System.out.println("[INFO] Đang tạo bảng và nạp 100% dữ liệu mẫu (16 Môn học + 480 Bản ghi Cấm thi) vào SQLite...");
+            if (needsSeeding) {
+                System.out.println("[INFO] Đang tạo bảng và nạp 100% dữ liệu mẫu 5 năm quy mô lớn vào SQLite...");
                 executeSqlScript(conn, "sqlite_schema.sql");
                 System.out.println("[INFO] Tạo dữ liệu SQLite thành công!");
             }
@@ -310,7 +328,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Đọc và thực thi file SQL từ resources
+     * Đọc và thực thi file SQL hỗ trợ cả SQL Server (Batch GO) và MySQL / SQLite
      */
     private static void executeSqlScript(Connection conn, String resourceName) {
         InputStream is = null;
@@ -332,50 +350,55 @@ public class DatabaseConnection {
                 System.err.println("[WARN] Không tìm thấy resource file SQL: " + resourceName);
                 return;
             }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                 Statement st = conn.createStatement()) {
-                
-                StringBuilder sb = new StringBuilder();
+
+            StringBuilder fullContent = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String trimmed = line.trim();
-                    if (trimmed.isEmpty() || trimmed.startsWith("--") || trimmed.startsWith("#") || trimmed.startsWith("/*")) {
-                        continue;
-                    }
-                    if (trimmed.equalsIgnoreCase("GO")) {
-                        String sql = sb.toString().trim();
-                        if (!sql.isEmpty()) {
-                            try {
-                                st.execute(sql);
-                            } catch (SQLException e) {
-                                // Bỏ qua lỗi DROP hoặc CREATE DATABASE
-                            }
-                        }
-                        sb.setLength(0);
-                        continue;
-                    }
+                    fullContent.append(line).append("\n");
+                }
+            }
 
-                    sb.append(line).append("\n");
-                    if (trimmed.endsWith(";")) {
-                        String sql = sb.toString().trim();
-                        if (sql.endsWith(";")) {
-                            sql = sql.substring(0, sql.length() - 1).trim();
-                        }
-                        if (!sql.isEmpty()) {
+            try (Statement st = conn.createStatement()) {
+                if (resourceName.toLowerCase().contains("sqlserver") || isUsingSQLServer()) {
+                    // SQL Server: Tách theo lệnh GO
+                    String[] batches = fullContent.toString().split("(?i)(?m)^\\s*GO\\s*$");
+                    for (String batch : batches) {
+                        String trimmed = batch.trim();
+                        if (trimmed.isEmpty()) continue;
+                        if (trimmed.toUpperCase().startsWith("CREATE DATABASE") || trimmed.toUpperCase().startsWith("USE ")) {
+                            // Khi đã kết nối tới CSDL ql_canhbao_hocvu, có thể bỏ qua lệnh CREATE DATABASE / USE
                             try {
-                                st.execute(sql);
-                            } catch (SQLException e) {
-                                if (!sql.toUpperCase().startsWith("DROP") && !sql.toUpperCase().startsWith("CREATE DATABASE") && !sql.toUpperCase().startsWith("USE")) {
-                                    System.err.println("[WARN] Lỗi thực thi câu lệnh SQL: " + e.getMessage() + " | SQL: " + sql.substring(0, Math.min(80, sql.length())));
-                                }
+                                st.execute(trimmed);
+                            } catch (Exception ignored) {}
+                            continue;
+                        }
+                        try {
+                            st.execute(trimmed);
+                        } catch (SQLException e) {
+                            if (!trimmed.toUpperCase().startsWith("IF OBJECT_ID") && !trimmed.toUpperCase().startsWith("DROP")) {
+                                System.err.println("[WARN SQL Server Execute] " + e.getMessage() + " | Đoạn lệnh: " + trimmed.substring(0, Math.min(100, trimmed.length())));
                             }
                         }
-                        sb.setLength(0);
+                    }
+                } else {
+                    // SQLite / MySQL: Thực thi từng câu lệnh phân tách bởi dấu chấm phẩy
+                    String[] statements = fullContent.toString().split(";");
+                    for (String sql : statements) {
+                        String trimmed = sql.trim();
+                        if (trimmed.isEmpty()) continue;
+                        try {
+                            st.execute(trimmed);
+                        } catch (SQLException e) {
+                            if (!trimmed.toUpperCase().startsWith("DROP") && !trimmed.toUpperCase().startsWith("CREATE DATABASE")) {
+                                System.err.println("[WARN SQL Execute] " + e.getMessage() + " | SQL: " + trimmed.substring(0, Math.min(80, trimmed.length())));
+                            }
+                        }
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println("[ERROR] Lỗi khi đọc script SQL: " + e.getMessage());
+            System.err.println("[ERROR] Lỗi khi đọc và thực thi script SQL " + resourceName + ": " + e.getMessage());
         }
     }
 

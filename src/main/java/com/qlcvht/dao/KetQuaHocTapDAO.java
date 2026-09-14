@@ -101,17 +101,28 @@ public class KetQuaHocTapDAO {
                 if (rs.next()) {
                     // UPDATE
                     int existId = rs.getInt("id");
-                    String upd = "UPDATE ket_qua_hoc_tap SET gpa_hoc_ky=?, gpa_tich_luy=?, so_tin_chi_no=? WHERE id=?";
-                    try (PreparedStatement upStmt = conn.prepareStatement(upd)) {
+                    String up = "UPDATE ket_qua_hoc_tap SET gpa_hoc_ky=?, gpa_tich_luy=?, so_tin_chi_no=?, tong_tin_chi_tich_luy=?, nam_thu=? WHERE id=?";
+                    try (PreparedStatement upStmt = conn.prepareStatement(up)) {
                         upStmt.setDouble(1, kq.getGpaHocKy());
                         upStmt.setDouble(2, kq.getGpaTichLuy());
                         upStmt.setInt(3, kq.getSoTinChiNo());
-                        upStmt.setInt(4, existId);
+                        upStmt.setInt(4, kq.getTongTinChiTichLuy());
+                        upStmt.setInt(5, kq.getNamThu());
+                        upStmt.setInt(6, existId);
                         return upStmt.executeUpdate() > 0;
+                    } catch (SQLException ex) {
+                        String upFallback = "UPDATE ket_qua_hoc_tap SET gpa_hoc_ky=?, gpa_tich_luy=?, so_tin_chi_no=? WHERE id=?";
+                        try (PreparedStatement upStmt = conn.prepareStatement(upFallback)) {
+                            upStmt.setDouble(1, kq.getGpaHocKy());
+                            upStmt.setDouble(2, kq.getGpaTichLuy());
+                            upStmt.setInt(3, kq.getSoTinChiNo());
+                            upStmt.setInt(4, existId);
+                            return upStmt.executeUpdate() > 0;
+                        }
                     }
                 } else {
                     // INSERT
-                    String ins = "INSERT INTO ket_qua_hoc_tap (ma_sv,hoc_ky,nam_hoc,gpa_hoc_ky,gpa_tich_luy,so_tin_chi_no) VALUES (?,?,?,?,?,?)";
+                    String ins = "INSERT INTO ket_qua_hoc_tap (ma_sv,hoc_ky,nam_hoc,gpa_hoc_ky,gpa_tich_luy,so_tin_chi_no,tong_tin_chi_tich_luy,nam_thu) VALUES (?,?,?,?,?,?,?,?)";
                     try (PreparedStatement inStmt = conn.prepareStatement(ins)) {
                         inStmt.setString(1, kq.getMaSv());
                         inStmt.setInt(2, kq.getHocKy());
@@ -119,7 +130,20 @@ public class KetQuaHocTapDAO {
                         inStmt.setDouble(4, kq.getGpaHocKy());
                         inStmt.setDouble(5, kq.getGpaTichLuy());
                         inStmt.setInt(6, kq.getSoTinChiNo());
+                        inStmt.setInt(7, kq.getTongTinChiTichLuy());
+                        inStmt.setInt(8, kq.getNamThu());
                         return inStmt.executeUpdate() > 0;
+                    } catch (SQLException ex) {
+                        String insFallback = "INSERT INTO ket_qua_hoc_tap (ma_sv,hoc_ky,nam_hoc,gpa_hoc_ky,gpa_tich_luy,so_tin_chi_no) VALUES (?,?,?,?,?,?)";
+                        try (PreparedStatement inStmt = conn.prepareStatement(insFallback)) {
+                            inStmt.setString(1, kq.getMaSv());
+                            inStmt.setInt(2, kq.getHocKy());
+                            inStmt.setString(3, kq.getNamHoc());
+                            inStmt.setDouble(4, kq.getGpaHocKy());
+                            inStmt.setDouble(5, kq.getGpaTichLuy());
+                            inStmt.setInt(6, kq.getSoTinChiNo());
+                            return inStmt.executeUpdate() > 0;
+                        }
                     }
                 }
             }
@@ -145,6 +169,11 @@ public class KetQuaHocTapDAO {
             rs.getDouble("gpa_hoc_ky"), rs.getDouble("gpa_tich_luy"),
             rs.getInt("so_tin_chi_no")
         );
+        try {
+            kq.setTongTinChiTichLuy(rs.getInt("tong_tin_chi_tich_luy"));
+            int n = rs.getInt("nam_thu");
+            kq.setNamThu(n > 0 ? n : 1);
+        } catch (SQLException ignored) {}
         return kq;
     }
 }

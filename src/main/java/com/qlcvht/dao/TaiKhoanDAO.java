@@ -209,6 +209,29 @@ public class TaiKhoanDAO {
         return doiMatKhau(id, matKhauMoi != null ? matKhauMoi : "123456");
     }
 
+    public List<com.qlcvht.model.VaiTro> getAllVaiTro() {
+        List<com.qlcvht.model.VaiTro> list = new ArrayList<>();
+        String sql = "SELECT * FROM vai_tro ORDER BY ma_vai_tro";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new com.qlcvht.model.VaiTro(
+                    rs.getString("ma_vai_tro"),
+                    rs.getString("ten_vai_tro"),
+                    rs.getString("mo_ta")
+                ));
+            }
+        } catch (SQLException e) {
+            // Fallback nếu bảng vai_tro chưa có trong database cũ
+            list.add(new com.qlcvht.model.VaiTro("ADMIN", "Quản trị viên Hệ thống", "Toàn quyền quản trị tài khoản"));
+            list.add(new com.qlcvht.model.VaiTro("CO_VAN", "Cố vấn Học tập", "Quản lý học vụ, tư vấn sinh viên"));
+            list.add(new com.qlcvht.model.VaiTro("SINH_VIEN", "Sinh viên", "Xem kết quả học tập, thông báo"));
+            list.add(new com.qlcvht.model.VaiTro("QUAN_LY", "Quản lý Khoa / Đào tạo", "Xem báo cáo tổng thể"));
+        }
+        return list;
+    }
+
     private TaiKhoan mapResultSet(ResultSet rs) throws SQLException {
         return new TaiKhoan(
             rs.getInt("id"),

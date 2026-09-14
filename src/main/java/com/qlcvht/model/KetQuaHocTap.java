@@ -9,6 +9,8 @@ public class KetQuaHocTap {
     private double gpaHocKy;
     private double gpaTichLuy;
     private int soTinChiNo;
+    private int tongTinChiTichLuy;
+    private int namThu = 1;
 
     public KetQuaHocTap() {}
 
@@ -20,6 +22,18 @@ public class KetQuaHocTap {
         this.gpaHocKy = gpaHocKy;
         this.gpaTichLuy = gpaTichLuy;
         this.soTinChiNo = soTinChiNo;
+    }
+
+    public KetQuaHocTap(int id, String maSv, int hocKy, String namHoc, double gpaHocKy, double gpaTichLuy, int soTinChiNo, int tongTinChiTichLuy, int namThu) {
+        this.id = id;
+        this.maSv = maSv;
+        this.hocKy = hocKy;
+        this.namHoc = namHoc;
+        this.gpaHocKy = gpaHocKy;
+        this.gpaTichLuy = gpaTichLuy;
+        this.soTinChiNo = soTinChiNo;
+        this.tongTinChiTichLuy = tongTinChiTichLuy;
+        this.namThu = namThu;
     }
 
     public int getId() { return id; }
@@ -45,4 +59,10 @@ public class KetQuaHocTap {
 
     public int getSoTinChiNo() { return soTinChiNo; }
     public void setSoTinChiNo(int soTinChiNo) { this.soTinChiNo = soTinChiNo; }
+
+    public int getTongTinChiTichLuy() { return tongTinChiTichLuy; }
+    public void setTongTinChiTichLuy(int tongTinChiTichLuy) { this.tongTinChiTichLuy = tongTinChiTichLuy; }
+
+    public int getNamThu() { return namThu; }
+    public void setNamThu(int namThu) { this.namThu = namThu; }
 }

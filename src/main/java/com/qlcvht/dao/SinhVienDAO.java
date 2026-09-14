@@ -114,7 +114,7 @@ public class SinhVienDAO {
     }
 
     public boolean addSinhVien(SinhVien sv) {
-        String sql = "INSERT INTO sinh_vien (ma_sv, ho_ten, ngay_sinh, gioi_tinh, email, so_dien_thoai, ma_lop, trang_thai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO sinh_vien (ma_sv, ho_ten, ngay_sinh, gioi_tinh, email, so_dien_thoai, ma_lop, trang_thai, tong_tin_chi_tich_luy, nam_thu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sv.getMaSv());
@@ -125,15 +125,32 @@ public class SinhVienDAO {
             ps.setString(6, sv.getSoDienThoai());
             ps.setString(7, sv.getMaLop());
             ps.setString(8, sv.getTrangThai());
+            ps.setInt(9, sv.getTongTinChiTichLuy());
+            ps.setInt(10, sv.getNamThu());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            // Fallback nếu schema cũ chưa có cột mới
+            String fallbackSql = "INSERT INTO sinh_vien (ma_sv, ho_ten, ngay_sinh, gioi_tinh, email, so_dien_thoai, ma_lop, trang_thai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(fallbackSql)) {
+                ps.setString(1, sv.getMaSv());
+                ps.setString(2, sv.getHoTen());
+                ps.setDate(3, sv.getNgaySinh());
+                ps.setString(4, sv.getGioiTinh());
+                ps.setString(5, sv.getEmail());
+                ps.setString(6, sv.getSoDienThoai());
+                ps.setString(7, sv.getMaLop());
+                ps.setString(8, sv.getTrangThai());
+                return ps.executeUpdate() > 0;
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                return false;
+            }
         }
     }
 
     public boolean updateSinhVien(SinhVien sv) {
-        String sql = "UPDATE sinh_vien SET ho_ten = ?, ngay_sinh = ?, gioi_tinh = ?, email = ?, so_dien_thoai = ?, ma_lop = ?, trang_thai = ? WHERE ma_sv = ?";
+        String sql = "UPDATE sinh_vien SET ho_ten = ?, ngay_sinh = ?, gioi_tinh = ?, email = ?, so_dien_thoai = ?, ma_lop = ?, trang_thai = ?, tong_tin_chi_tich_luy = ?, nam_thu = ? WHERE ma_sv = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sv.getHoTen());
@@ -143,11 +160,27 @@ public class SinhVienDAO {
             ps.setString(5, sv.getSoDienThoai());
             ps.setString(6, sv.getMaLop());
             ps.setString(7, sv.getTrangThai());
-            ps.setString(8, sv.getMaSv());
+            ps.setInt(8, sv.getTongTinChiTichLuy());
+            ps.setInt(9, sv.getNamThu());
+            ps.setString(10, sv.getMaSv());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            String fallbackSql = "UPDATE sinh_vien SET ho_ten = ?, ngay_sinh = ?, gioi_tinh = ?, email = ?, so_dien_thoai = ?, ma_lop = ?, trang_thai = ? WHERE ma_sv = ?";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(fallbackSql)) {
+                ps.setString(1, sv.getHoTen());
+                ps.setDate(2, sv.getNgaySinh());
+                ps.setString(3, sv.getGioiTinh());
+                ps.setString(4, sv.getEmail());
+                ps.setString(5, sv.getSoDienThoai());
+                ps.setString(6, sv.getMaLop());
+                ps.setString(7, sv.getTrangThai());
+                ps.setString(8, sv.getMaSv());
+                return ps.executeUpdate() > 0;
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                return false;
+            }
         }
     }
 
@@ -160,6 +193,19 @@ public class SinhVienDAO {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateTongTinChiTichLuy(String maSv, int tongTinChi, int namThu) {
+        String sql = "UPDATE sinh_vien SET tong_tin_chi_tich_luy = ?, nam_thu = ? WHERE ma_sv = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tongTinChi);
+            ps.setInt(2, namThu);
+            ps.setString(3, maSv);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
             return false;
         }
     }

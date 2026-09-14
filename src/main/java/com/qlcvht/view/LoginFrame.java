@@ -220,6 +220,7 @@ public class LoginFrame extends JFrame {
         SwingUtilities.invokeLater(() -> {
             TaiKhoan user = new TaiKhoanDAO().login(username, password);
             if (user != null) {
+                com.qlcvht.service.AuditService.getInstance().logLogin(user);
                 dispose();
                 if ("SINH_VIEN".equalsIgnoreCase(user.getVaiTro())) {
                     new StudentMainFrame(user).setVisible(true);
