@@ -39,7 +39,7 @@ public class QuanLyCanhBaoPanel extends JPanel {
     private List<CanhBaoHocVu> currentList = new ArrayList<>();
 
     private static final String[] COLUMNS = {
-        "STT", "Mã Quyết Định", "Mã SV", "Họ và Tên", "Lớp", "Học Kỳ", "Năm Học", "Mức Cảnh Báo", "GPA Xét", "Trạng Thái Tư Vấn", "Ngày Quyết Định"
+        "STT", "MÃ£ Quyáº¿t Äá»‹nh", "MÃ£ SV", "Há» vÃ  TÃªn", "Lá»›p", "Há»c Ká»³", "NÄƒm Há»c", "Má»©c Cáº£nh BÃ¡o", "GPA XÃ©t", "Tráº¡ng ThÃ¡i TÆ° Váº¥n", "NgÃ y Quyáº¿t Äá»‹nh"
     };
 
     public QuanLyCanhBaoPanel(TaiKhoan user) {
@@ -60,11 +60,11 @@ public class QuanLyCanhBaoPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("QUẢN LÝ QUYẾT ĐỊNH & CẢNH BÁO HỌC VỤ");
+        JLabel title = new JLabel("QUáº¢N LÃ QUYáº¾T Äá»ŠNH & Cáº¢NH BÃO Há»ŒC Vá»¤");
         title.setFont(UITheme.FONT_HEADER);
         title.setForeground(UITheme.TEXT_PRIMARY);
 
-        lblTotal = new JLabel("Tổng số: 0 quyết định cảnh báo");
+        lblTotal = new JLabel("Tá»•ng sá»‘: 0 quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o");
         lblTotal.setFont(UITheme.fontBold(13));
         lblTotal.setForeground(UITheme.DANGER);
         lblTotal.setBorder(BorderFactory.createCompoundBorder(
@@ -84,49 +84,49 @@ public class QuanLyCanhBaoPanel extends JPanel {
             new EmptyBorder(6, 10, 6, 10)
         ));
 
-        // Nút Quét tự động
-        JButton btnScan = UITheme.createButton("Quét Tự Động", UITheme.DANGER, Color.WHITE);
-        btnScan.setToolTipText("Quét hệ thống và tự động phát hiện sinh viên đạt điều kiện cảnh báo học vụ");
+        // NÃºt QuÃ©t tá»± Ä‘á»™ng
+        JButton btnScan = UITheme.createButton("QuÃ©t Tá»± Äá»™ng", UITheme.DANGER, Color.WHITE);
+        btnScan.setToolTipText("QuÃ©t há»‡ thá»‘ng vÃ  tá»± Ä‘á»™ng phÃ¡t hiá»‡n sinh viÃªn Ä‘áº¡t Ä‘iá»u kiá»‡n cáº£nh bÃ¡o há»c vá»¥");
         btnScan.addActionListener(e -> onScanCanhBao());
         bar.add(btnScan);
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        // Bộ lọc Mức cảnh báo
-        bar.add(new JLabel("Mức:"));
+        // Bá»™ lá»c Má»©c cáº£nh bÃ¡o
+        bar.add(new JLabel("Má»©c:"));
         cbFilterMuc = new JComboBox<>(new String[]{
-            "--- Tất cả mức ---", 
-            "Mức 1 (GPA < 2.0)", 
-            "Mức 2 (GPA < 1.5)", 
-            "Buộc thôi học (GPA < 1.0)"
+            "--- Táº¥t cáº£ má»©c ---", 
+            "Má»©c 1 (GPA < 2.0)", 
+            "Má»©c 2 (GPA < 1.5)", 
+            "Buá»™c thÃ´i há»c (GPA < 1.0)"
         });
         cbFilterMuc.addActionListener(e -> filterData());
         bar.add(cbFilterMuc);
 
-        // Bộ lọc Trạng thái tư vấn
-        bar.add(new JLabel("Tư vấn:"));
+        // Bá»™ lá»c Tráº¡ng thÃ¡i tÆ° váº¥n
+        bar.add(new JLabel("TÆ° váº¥n:"));
         cbFilterTuVan = new JComboBox<>(new String[]{
-            "--- Tất cả trạng thái ---", 
-            "Chưa tư vấn", 
-            "Đang theo dõi", 
-            "Đã tư vấn"
+            "--- Táº¥t cáº£ tráº¡ng thÃ¡i ---", 
+            "ChÆ°a tÆ° váº¥n", 
+            "Äang theo dÃµi", 
+            "ÄÃ£ tÆ° váº¥n"
         });
         cbFilterTuVan.addActionListener(e -> filterData());
         bar.add(cbFilterTuVan);
 
-        // Tìm kiếm
-        bar.add(new JLabel("Tìm:"));
+        // TÃ¬m kiáº¿m
+        bar.add(new JLabel("TÃ¬m:"));
         txtSearch = new JTextField(11);
         txtSearch.setFont(UITheme.FONT_BODY);
-        txtSearch.putClientProperty("JTextField.placeholderText", "MSSV, họ tên, mã QĐ...");
+        txtSearch.putClientProperty("JTextField.placeholderText", "MSSV, há» tÃªn, mÃ£ QÄ...");
         txtSearch.addActionListener(e -> filterData());
         bar.add(txtSearch);
 
-        JButton btnSearch = UITheme.createButton("Tìm Kiếm", UITheme.PRIMARY, Color.WHITE);
+        JButton btnSearch = UITheme.createButton("TÃ¬m Kiáº¿m", UITheme.PRIMARY, Color.WHITE);
         btnSearch.addActionListener(e -> filterData());
         bar.add(btnSearch);
 
-        JButton btnReset = UITheme.createButton("Làm Mới", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
+        JButton btnReset = UITheme.createButton("LÃ m Má»›i", new Color(220, 225, 235), UITheme.TEXT_PRIMARY);
         btnReset.addActionListener(e -> { 
             cbFilterMuc.setSelectedIndex(0); 
             cbFilterTuVan.setSelectedIndex(0); 
@@ -137,17 +137,17 @@ public class QuanLyCanhBaoPanel extends JPanel {
 
         bar.add(new JSeparator(SwingConstants.VERTICAL));
 
-        JButton btnNhatKy = UITheme.createButton("Lập Nhật Ký", UITheme.INFO, Color.WHITE);
-        btnNhatKy.setToolTipText("Lập biên bản tư vấn CVHT cho sinh viên được chọn");
+        JButton btnNhatKy = UITheme.createButton("Láº­p Nháº­t KÃ½", UITheme.INFO, Color.WHITE);
+        btnNhatKy.setToolTipText("Láº­p biÃªn báº£n tÆ° váº¥n CVHT cho sinh viÃªn Ä‘Æ°á»£c chá»n");
         btnNhatKy.addActionListener(e -> onLapNhatKy());
         bar.add(btnNhatKy);
 
-        JButton btnDelete = UITheme.createButton("Gỡ QĐ", new Color(170, 70, 70), Color.WHITE);
-        btnDelete.setToolTipText("Hủy bỏ/Gỡ quyết định cảnh báo học vụ đã chọn");
+        JButton btnDelete = UITheme.createButton("Gá»¡ QÄ", new Color(170, 70, 70), Color.WHITE);
+        btnDelete.setToolTipText("Há»§y bá»/Gá»¡ quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o há»c vá»¥ Ä‘Ã£ chá»n");
         btnDelete.addActionListener(e -> onDeleteCanhBao());
         bar.add(btnDelete);
 
-        JButton btnExport = UITheme.createButton("Xuất Excel", new Color(46, 125, 50), Color.WHITE);
+        JButton btnExport = UITheme.createButton("Xuáº¥t Excel", new Color(46, 125, 50), Color.WHITE);
         btnExport.addActionListener(e -> ExcelExporter.exportJTableToExcel(tableCanhBao, "Danh_Sach_Canh_Bao_Hoc_Vu"));
         bar.add(btnExport);
 
@@ -178,20 +178,24 @@ public class QuanLyCanhBaoPanel extends JPanel {
         tableCanhBao.getColumnModel().getColumn(8).setCellRenderer(center);
         tableCanhBao.getColumnModel().getColumn(10).setCellRenderer(center);
 
-        // Mức cảnh báo renderer
+        // Má»©c cáº£nh bÃ¡o renderer
         tableCanhBao.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
                 Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
                 setHorizontalAlignment(SwingConstants.CENTER);
                 if (v != null && !sel) {
                     String s = v.toString();
-                    if (s.contains("Mức 1")) {
+                    if (s.contains("Má»©c 1")) {
                         comp.setForeground(new Color(210, 100, 0));
                         setFont(UITheme.FONT_BODY_BOLD);
-                    } else if (s.contains("Mức 2")) {
+                    } else if (s.contains("Má»©c 2")) {
                         comp.setForeground(new Color(200, 30, 30));
                         setFont(UITheme.FONT_BODY_BOLD);
-                    } else if (s.contains("Buộc thôi học")) {
+                    } else if (s.contains("Muc 3")) {
+                        comp.setForeground(new Color(160, 0, 0));
+                        comp.setBackground(new Color(255, 230, 230));
+                        setFont(UITheme.FONT_BODY_BOLD);
+                    } else if (s.contains("Buá»™c thÃ´i há»c")) {
                         comp.setForeground(new Color(140, 0, 0));
                         setFont(UITheme.FONT_BODY_BOLD);
                     }
@@ -200,17 +204,17 @@ public class QuanLyCanhBaoPanel extends JPanel {
             }
         });
 
-        // Trạng thái tư vấn renderer
+        // Tráº¡ng thÃ¡i tÆ° váº¥n renderer
         tableCanhBao.getColumnModel().getColumn(9).setCellRenderer(new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
                 Component comp = super.getTableCellRendererComponent(t, v, sel, foc, r, c);
                 setHorizontalAlignment(SwingConstants.CENTER);
                 if (v != null && !sel) {
                     String s = v.toString();
-                    if (s.contains("Đã tư vấn")) {
+                    if (s.contains("ÄÃ£ tÆ° váº¥n")) {
                         comp.setForeground(new Color(40, 130, 50));
                         setFont(UITheme.FONT_BODY_BOLD);
-                    } else if (s.contains("Đang theo dõi")) {
+                    } else if (s.contains("Äang theo dÃµi")) {
                         comp.setForeground(new Color(25, 118, 210));
                         setFont(UITheme.FONT_BODY);
                     } else {
@@ -300,7 +304,7 @@ public class QuanLyCanhBaoPanel extends JPanel {
                 cb.getMaSv(),
                 cb.getHoTenSv() != null ? cb.getHoTenSv() : cb.getMaSv(),
                 cb.getMaLop() != null ? cb.getMaLop() : "---",
-                "Học kỳ " + cb.getHocKy(),
+                "Há»c ká»³ " + cb.getHocKy(),
                 cb.getNamHoc(),
                 UITheme.formatMucCanhBao(cb.getMucCanhBao()),
                 String.format("%.2f", cb.getGpaXetDuyet()),
@@ -308,7 +312,7 @@ public class QuanLyCanhBaoPanel extends JPanel {
                 cb.getNgayQuyetDinh() != null ? cb.getNgayQuyetDinh().toString() : "---"
             });
         }
-        lblTotal.setText("Tổng số: " + list.size() + " quyết định cảnh báo");
+        lblTotal.setText("Tá»•ng sá»‘: " + list.size() + " quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o");
     }
 
     private CanhBaoHocVu getSelectedCanhBao() {
@@ -324,12 +328,12 @@ public class QuanLyCanhBaoPanel extends JPanel {
         JComboBox<String> cbNh = new JComboBox<>(new String[]{"2022-2023", "2023-2024", "2024-2025", "2025-2026"});
         cbNh.setSelectedItem("2023-2024");
 
-        scanPanel.add(new JLabel("Học kỳ xét duyệt cảnh báo:"));
+        scanPanel.add(new JLabel("Há»c ká»³ xÃ©t duyá»‡t cáº£nh bÃ¡o:"));
         scanPanel.add(cbHk);
-        scanPanel.add(new JLabel("Năm học xét duyệt:"));
+        scanPanel.add(new JLabel("NÄƒm há»c xÃ©t duyá»‡t:"));
         scanPanel.add(cbNh);
 
-        int opt = JOptionPane.showConfirmDialog(this, scanPanel, "Cấu hình Quét Cảnh báo Học vụ Tự động", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int opt = JOptionPane.showConfirmDialog(this, scanPanel, "Cáº¥u hÃ¬nh QuÃ©t Cáº£nh bÃ¡o Há»c vá»¥ Tá»± Ä‘á»™ng", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (opt == JOptionPane.OK_OPTION) {
             int hk = (Integer) cbHk.getSelectedItem();
             String nh = (String) cbNh.getSelectedItem();
@@ -337,12 +341,12 @@ public class QuanLyCanhBaoPanel extends JPanel {
             int newCount = canhBaoService.quetCanhBaoHocVu(hk, nh);
             if (newCount > 0) {
                 JOptionPane.showMessageDialog(this,
-                    "Quét hoàn tất thành công!\nPhát hiện và lập mới: " + newCount + " quyết định cảnh báo học vụ cho Học kỳ " + hk + " (" + nh + ").",
-                    "Kết quả quét cảnh báo", JOptionPane.INFORMATION_MESSAGE);
+                    "QuÃ©t hoÃ n táº¥t thÃ nh cÃ´ng!\nPhÃ¡t hiá»‡n vÃ  láº­p má»›i: " + newCount + " quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o há»c vá»¥ cho Há»c ká»³ " + hk + " (" + nh + ").",
+                    "Káº¿t quáº£ quÃ©t cáº£nh bÃ¡o", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                    "Không phát sinh cảnh báo học vụ mới cho Học kỳ " + hk + " (" + nh + ").",
-                    "Kết quả quét cảnh báo", JOptionPane.INFORMATION_MESSAGE);
+                    "KhÃ´ng phÃ¡t sinh cáº£nh bÃ¡o há»c vá»¥ má»›i cho Há»c ká»³ " + hk + " (" + nh + ").",
+                    "Káº¿t quáº£ quÃ©t cáº£nh bÃ¡o", JOptionPane.INFORMATION_MESSAGE);
             }
             loadData();
         }
@@ -352,27 +356,31 @@ public class QuanLyCanhBaoPanel extends JPanel {
         CanhBaoHocVu cb = getSelectedCanhBao();
         LapNhatKyDialog dlg = new LapNhatKyDialog((Frame) SwingUtilities.getWindowAncestor(this), cb, currentUser);
         dlg.setVisible(true);
-        if (dlg.isSavedSuccess()) loadData();
+        if (dlg.isSavedSuccess()) {
+            com.qlcvht.service.AuditService.getInstance().logAction(currentUser, "LAP_NHAT_KY", "Lap bien ban tu van canh bao: " + cb.getMaCanhBao());
+            loadData();
+        }
     }
 
     private void onDeleteCanhBao() {
         CanhBaoHocVu cb = getSelectedCanhBao();
         if (cb == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn một quyết định cảnh báo cần gỡ bỏ!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lÃ²ng chá»n má»™t quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o cáº§n gá»¡ bá»!", "ThÃ´ng bÃ¡o", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Bạn có chắc muốn gỡ quyết định cảnh báo " + cb.getMaCanhBao() + " của sinh viên " + cb.getHoTenSv() + "?",
-            "Xác nhận gỡ quyết định", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            "Báº¡n cÃ³ cháº¯c muá»‘n gá»¡ quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o " + cb.getMaCanhBao() + " cá»§a sinh viÃªn " + cb.getHoTenSv() + "?",
+            "XÃ¡c nháº­n gá»¡ quyáº¿t Ä‘á»‹nh", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             boolean ok = canhBaoDAO.deleteCanhBao(cb.getId());
             if (ok) {
-                JOptionPane.showMessageDialog(this, "Đã gỡ quyết định cảnh báo học vụ thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                com.qlcvht.service.AuditService.getInstance().logAction(currentUser, "GO_CANH_BAO", "Go quyet dinh canh bao: " + cb.getMaCanhBao() + " cua sinh vien " + cb.getHoTenSv());
+                JOptionPane.showMessageDialog(this, "ÄÃ£ gá»¡ quyáº¿t Ä‘á»‹nh cáº£nh bÃ¡o há»c vá»¥ thÃ nh cÃ´ng!", "ThÃ´ng bÃ¡o", JOptionPane.INFORMATION_MESSAGE);
                 loadData();
             } else {
-                JOptionPane.showMessageDialog(this, "Gỡ quyết định thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Gá»¡ quyáº¿t Ä‘á»‹nh tháº¥t báº¡i!", "Lá»—i", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

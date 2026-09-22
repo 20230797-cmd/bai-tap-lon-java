@@ -57,6 +57,7 @@ public class CanhBaoHocVu {
         switch (mucCanhBao) {
             case "MUC_1":         return "Canh bao Muc 1";
             case "MUC_2":         return "Canh bao Muc 2";
+            case "MUC_3":         return "Canh bao Muc 3 - Nghiem trong";
             case "BUOC_THOI_HOC": return "Buoc thoi hoc";
             default: return mucCanhBao;
         }
