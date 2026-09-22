@@ -25,8 +25,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Panel Quản lý Điểm danh, Theo dõi Chuyên cần & Xét Điều kiện Dự thi (Cấm thi theo tín chỉ).
@@ -265,13 +267,16 @@ public class QuanLyDiemDanhPanel extends JPanel {
         cbFilterLopCC = new JComboBox<>();
         cbFilterLopCC.setPreferredSize(new Dimension(130, 30));
         loadLopFilter();
-        cbFilterLopCC.addActionListener(e -> filterChuyenCanTable());
+        cbFilterLopCC.addActionListener(e -> {
+            updateMonHocFilterForSelectedLop();
+            filterChuyenCanTable();
+        });
         toolbar.add(cbFilterLopCC);
 
         // Lọc Môn
         toolbar.add(new JLabel("Môn học:"));
         cbFilterMonHoc = new JComboBox<>();
-        cbFilterMonHoc.setPreferredSize(new Dimension(180, 30));
+        cbFilterMonHoc.setPreferredSize(new Dimension(200, 30));
         loadMonHocFilter();
         cbFilterMonHoc.addActionListener(e -> filterChuyenCanTable());
         toolbar.add(cbFilterMonHoc);
@@ -559,7 +564,12 @@ public class QuanLyDiemDanhPanel extends JPanel {
     private void loadLopFilter() {
         cbFilterLopCC.removeAllItems();
         cbFilterLopCC.addItem("--- Tất cả Lớp ---");
-        List<LopHoc> lops = coVanDAO.getAllLopHoc();
+        List<LopHoc> lops;
+        if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
+            lops = coVanDAO.getLopHocByCoVan(currentUser.getMaRef());
+        } else {
+            lops = coVanDAO.getAllLopHoc();
+        }
         for (LopHoc l : lops) {
             cbFilterLopCC.addItem(l.getMaLop());
         }
@@ -574,12 +584,46 @@ public class QuanLyDiemDanhPanel extends JPanel {
         }
     }
 
+    private boolean isUpdatingMonFilter = false;
+
+    private void updateMonHocFilterForSelectedLop() {
+        if (cbFilterMonHoc == null || isUpdatingMonFilter) return;
+        isUpdatingMonFilter = true;
+        try {
+            String selLop = (String) cbFilterLopCC.getSelectedItem();
+            cbFilterMonHoc.removeAllItems();
+            cbFilterMonHoc.addItem("--- Tất cả Môn ---");
+
+            Set<String> added = new LinkedHashSet<>();
+            if (dsChuyenCan != null) {
+                for (ChuyenCanMonHoc cc : dsChuyenCan) {
+                    if (selLop == null || selLop.contains("Tất cả") || selLop.equalsIgnoreCase(cc.getMaLop())) {
+                        String item = cc.getMaMon() + " - " + (cc.getTenMon() != null ? cc.getTenMon() : cc.getMaMon());
+                        if (added.add(item)) {
+                            cbFilterMonHoc.addItem(item);
+                        }
+                    }
+                }
+            }
+            if (cbFilterMonHoc.getItemCount() == 1) {
+                List<MonHoc> mons = monHocDAO.getAll();
+                for (MonHoc m : mons) {
+                    cbFilterMonHoc.addItem(m.getMaMon() + " - " + m.getTenMon());
+                }
+            }
+            cbFilterMonHoc.setSelectedIndex(0);
+        } finally {
+            isUpdatingMonFilter = false;
+        }
+    }
+
     public void loadChuyenCanMonHocData() {
         if (currentUser != null && "CO_VAN".equals(currentUser.getVaiTro()) && currentUser.getMaRef() != null && !currentUser.getMaRef().isBlank()) {
             dsChuyenCan = chuyenCanDAO.getByAdvisor(currentUser.getMaRef());
         } else {
             dsChuyenCan = chuyenCanDAO.getAll();
         }
+        updateMonHocFilterForSelectedLop();
         filterChuyenCanTable();
     }
 

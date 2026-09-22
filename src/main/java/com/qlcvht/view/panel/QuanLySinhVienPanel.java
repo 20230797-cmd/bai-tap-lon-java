@@ -285,7 +285,10 @@ public class QuanLySinhVienPanel extends JPanel {
     private void onThemSinhVien() {
         ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), null, currentUser);
         dlg.setVisible(true);
-        if (dlg.isSaved()) loadData();
+        if (dlg.isSaved()) {
+            com.qlcvht.service.AuditService.getInstance().logAction(currentUser, "THEM_SINH_VIEN", "Them moi ho so sinh vien thanh cong");
+            loadData();
+        }
     }
 
     private void onSuaSinhVien() {
@@ -296,7 +299,10 @@ public class QuanLySinhVienPanel extends JPanel {
         }
         ThemSuaSinhVienDialog dlg = new ThemSuaSinhVienDialog((Frame) SwingUtilities.getWindowAncestor(this), sv, currentUser);
         dlg.setVisible(true);
-        if (dlg.isSaved()) loadData();
+        if (dlg.isSaved()) {
+            com.qlcvht.service.AuditService.getInstance().logAction(currentUser, "SUA_SINH_VIEN", "Cap nhat ho so sinh vien: " + sv.getHoTen() + " (" + sv.getMaSv() + ")");
+            loadData();
+        }
     }
 
     private void onXoaSinhVien() {
@@ -313,6 +319,7 @@ public class QuanLySinhVienPanel extends JPanel {
         if (confirm == JOptionPane.YES_OPTION) {
             boolean ok = sinhVienDAO.deleteSinhVien(sv.getMaSv());
             if (ok) {
+                com.qlcvht.service.AuditService.getInstance().logAction(currentUser, "XOA_SINH_VIEN", "Xoa sinh vien: " + sv.getHoTen() + " (" + sv.getMaSv() + ")");
                 JOptionPane.showMessageDialog(this, "\u0110\u00E3 x\u00F3a sinh vi\u00EAn th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", JOptionPane.INFORMATION_MESSAGE);
                 loadData();
             } else {
